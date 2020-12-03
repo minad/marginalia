@@ -104,7 +104,6 @@ Annotations are only shown if `marginalia-mode' is enabled."
 
 ;;;; Pre-declarations for external packages
 
-(defvar selectrum-highlight-candidates-function)
 (defvar package--builtins)
 (defvar package-alist)
 (defvar package-archive-contents)
@@ -215,9 +214,8 @@ PROP is the property which is looked up."
   ;; TODO add more category classifiers from Embark
   (pcase prop
     ('annotation-function
-     (or (and (not (bound-and-true-p selectrum-mode)) ;; TODO Still using the selectrum-highlighting function
-              (when-let (cat (marginalia--category-type))
-                (alist-get cat marginalia-annotate-alist)))
+     (or (when-let (cat (marginalia--category-type))
+           (alist-get cat marginalia-annotate-alist))
          (funcall fun metadata prop)))
     ('category
      (or (and marginalia--this-command
@@ -227,19 +225,8 @@ PROP is the property which is looked up."
 
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
-Remember `this-command' for annotation and replace highlighting function."
-  (setq-local marginalia--this-command this-command)
-  ;; TODO we use selectrum-highlight-candidates-function here because annotation faces
-  ;; are overwritten if we use the Emacs annotation-function with selectrum is used.
-  ;; While this is consistent with the behavior of the Completions buffer, it is not
-  ;; what I want e.g. for marginalia-annotate-face!
-  ;; How to proceed?
-  ;; See https://github.com/raxod502/selectrum/pull/249
-  (when (boundp 'selectrum-highlight-candidates-function)
-    (let ((orig selectrum-highlight-candidates-function))
-      (setq-local selectrum-highlight-candidates-function
-                  (lambda (input candidates)
-                    (marginalia--annotate-candidates (funcall orig input candidates)))))))
+Remember `this-command' for annotation."
+  (setq-local marginalia--this-command this-command))
 
 (defun marginalia--metadata ()
   "Return current minibuffer completion metadata."
