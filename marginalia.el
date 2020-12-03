@@ -229,6 +229,12 @@ PROP is the property which is looked up."
   "Setup minibuffer for `marginalia-mode'.
 Remember `this-command' for annotation and replace highlighting function."
   (setq-local marginalia--this-command this-command)
+  ;; TODO we use selectrum-highlight-candidates-function here because annotation faces
+  ;; are overwritten if we use the Emacs annotation-function with selectrum is used.
+  ;; While this is consistent with the behavior of the Completions buffer, it is not
+  ;; what I want e.g. for marginalia-annotate-face!
+  ;; How to proceed?
+  ;; See https://github.com/raxod502/selectrum/pull/249
   (when (boundp 'selectrum-highlight-candidates-function)
     (let ((orig selectrum-highlight-candidates-function))
       (setq-local selectrum-highlight-candidates-function
@@ -265,6 +271,7 @@ Remember `this-command' for annotation and replace highlighting function."
     ;; https://github.com/oantolin/icomplete-vertical/issues/16
     (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)))
 
+;; TODO better name? there is also the name clash problem with marginalia-annotate-command
 ;;;###autoload
 (defun marginalia-command-annotate (cmd ann)
   "Modify marginalia configuration such that annotation function ANN is used for command CMD."
