@@ -73,7 +73,7 @@ Annotations are only shown if `marginalia-mode' is enabled."
   :type '(alist :key-type symbol :value-type function)
   :group 'marginalia)
 
-(defcustom marginalia-category-alist
+(defcustom marginalia-command-category-alist
   '((execute-extended-command . command)
     (customize-face . face)
     (customize-face-other-window . face)
@@ -221,7 +221,7 @@ PROP is the property which is looked up."
          (funcall fun metadata prop)))
     ('category
      (or (and marginalia--this-command
-              (alist-get marginalia--this-command marginalia-category-alist))
+              (alist-get marginalia--this-command marginalia-command-category-alist))
          (funcall fun metadata prop)))
     (_ (funcall fun metadata prop))))
 
@@ -264,6 +264,16 @@ Remember `this-command' for annotation and replace highlighting function."
     ;; TODO unfortunately annotations are not shown in the icomplete-vertical minibuffer it seem
     ;; https://github.com/oantolin/icomplete-vertical/issues/16
     (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)))
+
+;;;###autoload
+(defun marginalia-command-annotate (cmd ann)
+  "Modify marginalia configuration such that annotation function ANN is used for command CMD."
+  (setq marginalia-command-category-alist
+        (cons (cons cmd cmd)
+              (assq-delete-all cmd marginalia-command-category-alist)))
+  (setq marginalia-command-category-alist
+        (cons (cons cmd ann)
+              (assq-delete-all cmd marginalia-annotate-alist))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
