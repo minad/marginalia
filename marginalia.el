@@ -255,13 +255,6 @@ PROP is the property which is looked up."
 Remember `this-command' for annotation."
   (setq-local marginalia--this-command this-command))
 
-(defun marginalia--metadata ()
-  "Return current minibuffer completion metadata."
-  (completion-metadata
-   (buffer-substring-no-properties (field-beginning) (point))
-   minibuffer-completion-table
-   minibuffer-completion-predicate))
-
 ;;;###autoload
 (define-minor-mode marginalia-mode
   "Annotate completion candidates with richer information."
