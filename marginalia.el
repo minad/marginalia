@@ -209,13 +209,6 @@ determine it."
   (when-let (doc (documentation-property (intern cand) 'group-documentation))
     (marginalia--annotation doc)))
 
-(defun marginalia--annotate-candidates (candidates)
-  "Annotate CANDIDATES with richer information."
-  (if-let* ((cat (marginalia--category-type))
-            (annotate (alist-get cat marginalia-annotator-alist)))
-      (mapcar (lambda (cand) (concat cand (funcall annotate cand))) candidates)
-    candidates))
-
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
   (and marginalia--this-command
