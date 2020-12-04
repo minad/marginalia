@@ -87,12 +87,13 @@ determine it."
   :group 'marginalia)
 
 (defcustom marginalia-prompt-categories
-  '((group . customize-group) (M-x . command) package face variable)
-  "Words whose presence in a minibuffer prompt determins the category.
-The words should be given either as a symbol which if found in
-the prompt is the category name, or as a dotted pair of symbols,
-the presence of the first indicating the second is the category."
-  :type '(repeat (choice symbol (cons symbol symbol)))
+  '(("\\<group\\>" . customize-group)
+    ("\\<M-x\\>" . command)
+    ("\\<package\\>" . package)
+    ("\\<face\\>" . face)
+    ("\\<variable\\>" . variable))
+  "Associates regexps to match against minibuffer prompts with categories."
+  :type '(alist :key-type regexp :value-type symbol)
   :group 'marginalia)
 
 (defcustom marginalia-command-category-alist nil
@@ -224,11 +225,12 @@ the presence of the first indicating the second is the category."
       'symbol)))
 
 (defun marginalia-classify-by-prompt ()
-  "Determine category by a special word in prompt."
+  "Determine category by matching regexps against the minibuffer prompt.
+This runs through the `marginalia-prompt-categories' alist
+looking for a regexp that matches the prompt."
   (when-let ((prompt (minibuffer-prompt)))
-    (cl-loop for spec in marginalia-prompt-categories
-             for (word . category) = (if (consp spec) spec (cons spec spec))
-             when (string-match-p (format "\\<%s\\>" word) prompt)
+    (cl-loop for (regexp . category) in marginalia-prompt-categories
+             when (string-match-p regexp prompt)
              return category)))
 
 (defun marginalia--completion-metadata-get (metadata prop)
