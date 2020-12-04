@@ -1,8 +1,14 @@
-# marginalia.el - Marginalia for completions
+# marginalia.el - Marginalia in the minibuffer
 
-This package provides `marginalia-mode` which adds marginalia (annotations) to the minibuffer completions.
-The annotations are added based on the completion category.
-Furthermore the package allows to associate completion categories to commands.
+This package provides `marginalia-mode` which adds marginalia to the minibuffer
+completions. [Marginalia](https://en.wikipedia.org/wiki/Marginalia) are marks or
+annotations placed at the margin of the page of a book or in this case helpful
+colorful annotations placed at the margin of the minibuffer for your completion
+candidates. The annotations are added based on the completion category. For
+example `find-file` reports the `file` category and `M-x` reports the `command`
+category. Furthermore the package allows to associate completion categories to
+commands, since many commands (in contrast to `find-file` and `M-x`) do not
+specify a completion category themselves.
 
 ![marginalia-mode with Selectrum](https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true)
 
