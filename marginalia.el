@@ -258,9 +258,8 @@ Remember `this-command' for annotation."
     ;; Replace the metadata function.
     (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)))
 
-;; TODO better name? there is also the name clash problem with marginalia-annotate-command
 ;;;###autoload
-(defun marginalia-command-annotate (cmd ann)
+(defun marginalia-set-command-annotation (cmd ann)
   "Modify marginalia configuration such that annotation function ANN is used for command CMD."
   (setq marginalia-command-category-alist
         (cons (cons cmd cmd)
