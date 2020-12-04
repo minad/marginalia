@@ -58,7 +58,7 @@
   :type 'integer
   :group 'marginalia)
 
-(defcustom marginalia-annotate-alist
+(defcustom marginalia-annotator-alist
   '((command . marginalia-annotate-command-binding)
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
@@ -203,11 +203,11 @@ Annotations are only shown if `marginalia-mode' is enabled."
 (defun marginalia--annotate-candidates (candidates)
   "Annotate CANDIDATES with richer information."
   (if-let* ((cat (marginalia--category-type))
-            (annotate (alist-get cat marginalia-annotate-alist)))
+            (annotate (alist-get cat marginalia-annotator-alist)))
       (mapcar (lambda (cand) (concat cand (funcall annotate cand))) candidates)
     candidates))
 
-(defun marginalia--completion-metadata-get (metadata prop)
+(defun marginalia--completion-metadata-get (_metadata prop)
   "Advice for `completion-metadata-get'.
 Replaces the category and annotation function.
 FUN is the original function.
@@ -217,7 +217,7 @@ PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
      (when-let (cat (marginalia--category-type))
-       (alist-get cat marginalia-annotate-alist)))
+       (alist-get cat marginalia-annotator-alist)))
     ('category
      (and marginalia--this-command
           (alist-get marginalia--this-command marginalia-command-category-alist)))))
@@ -256,14 +256,14 @@ Remember `this-command' for annotation."
     (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
 
 ;;;###autoload
-(defun marginalia-set-command-annotation (cmd ann)
-  "Modify marginalia configuration such that annotation function ANN is used for command CMD."
+(defun marginalia-set-command-annotator (cmd ann)
+  "Configure marginalia so that annotator ANN is used for command CMD."
   (setq marginalia-command-category-alist
         (cons (cons cmd cmd)
               (assq-delete-all cmd marginalia-command-category-alist)))
   (setq marginalia-command-category-alist
         (cons (cons cmd ann)
-              (assq-delete-all cmd marginalia-annotate-alist))))
+              (assq-delete-all cmd marginalia-annotator-alist))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here

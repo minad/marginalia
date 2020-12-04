@@ -29,6 +29,6 @@ specify a completion category themselves.
   ;; * marginalia-annotate-symbol: Annotate with the documentation string
   ;; * marginalia-annotate-command-binding (default): Annotate only with the keybinding
   ;; * marginalia-annotate-command-full: Annotate with the keybinding and the documentation string
-  ;; (setf (alist-get 'command marginalia-annotate-alist) #'marginalia-annotate-command-full)
+  ;; (setf (alist-get 'command marginalia-annotator-alist) #'marginalia-annotate-command-full)
 )
 ~~~
