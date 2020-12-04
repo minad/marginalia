@@ -256,8 +256,6 @@ Remember `this-command' for annotation."
     (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
 
     ;; Replace the metadata function.
-    ;; TODO unfortunately annotations are not shown in the icomplete-vertical minibuffer it seem
-    ;; https://github.com/oantolin/icomplete-vertical/issues/16
     (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)))
 
 ;; TODO better name? there is also the name clash problem with marginalia-annotate-command
