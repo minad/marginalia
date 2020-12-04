@@ -234,8 +234,7 @@ looking for a regexp that matches the prompt."
              return category)))
 
 (defun marginalia--completion-metadata-get (metadata prop)
-  "Advice for `completion-metadata-get'.
-Replaces the category and annotation function.
+  "Meant as :before-until advice for `completion-metadata-get'.
 METADATA is the metadata.
 PROP is the property which is looked up."
   (pcase prop
