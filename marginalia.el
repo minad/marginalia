@@ -73,6 +73,15 @@ Annotations are only shown if `marginalia-mode' is enabled."
   :type '(alist :key-type symbol :value-type function)
   :group 'marginalia)
 
+(defcustom marginalia-classifiers
+  '(marginalia-classify-by-command-name)
+  "List of functions to determine current completion category.
+Each function should take no arguments and return a symbol
+indicating the category, or nil to indicate it could not
+determine it."
+  :type 'hook
+  :group 'marginalia)
+
 (defcustom marginalia-command-category-alist
   '((execute-extended-command . command)
     (customize-face . face)
@@ -207,6 +216,11 @@ Annotations are only shown if `marginalia-mode' is enabled."
       (mapcar (lambda (cand) (concat cand (funcall annotate cand))) candidates)
     candidates))
 
+(defun marginalia-classify-by-command-name ()
+  "Lookup category for current command."
+  (and marginalia--this-command
+       (alist-get marginalia--this-command marginalia-command-category-alist)))
+
 (defun marginalia--completion-metadata-get (_metadata prop)
   "Advice for `completion-metadata-get'.
 Replaces the category and annotation function.
@@ -219,8 +233,7 @@ PROP is the property which is looked up."
      (when-let (cat (marginalia--category-type))
        (alist-get cat marginalia-annotator-alist)))
     ('category
-     (and marginalia--this-command
-          (alist-get marginalia--this-command marginalia-command-category-alist)))))
+     (run-hook-with-args-until-success 'marginalia-classifiers))))
 
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
