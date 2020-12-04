@@ -207,7 +207,7 @@ Annotations are only shown if `marginalia-mode' is enabled."
       (mapcar (lambda (cand) (concat cand (funcall annotate cand))) candidates)
     candidates))
 
-(defun marginalia--completion-metadata-get (fun metadata prop)
+(defun marginalia--completion-metadata-get (metadata prop)
   "Advice for `completion-metadata-get'.
 Replaces the category and annotation function.
 FUN is the original function.
@@ -216,14 +216,11 @@ PROP is the property which is looked up."
   ;; TODO add more category classifiers from Embark
   (pcase prop
     ('annotation-function
-     (or (when-let (cat (marginalia--category-type))
-           (alist-get cat marginalia-annotate-alist))
-         (funcall fun metadata prop)))
+     (when-let (cat (marginalia--category-type))
+       (alist-get cat marginalia-annotate-alist)))
     ('category
-     (or (and marginalia--this-command
-              (alist-get marginalia--this-command marginalia-command-category-alist))
-         (funcall fun metadata prop)))
-    (_ (funcall fun metadata prop))))
+     (and marginalia--this-command
+          (alist-get marginalia--this-command marginalia-command-category-alist)))))
 
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
@@ -256,7 +253,7 @@ Remember `this-command' for annotation."
     (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
 
     ;; Replace the metadata function.
-    (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)))
+    (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
 
 ;;;###autoload
 (defun marginalia-set-command-annotation (cmd ann)
