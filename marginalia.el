@@ -123,7 +123,7 @@ Annotations are only shown if `marginalia-mode' is enabled."
   "Annotate command CAND with keybinding."
   ;; Taken from Emacs 28, read-extended-command--annotation
   (when-let* ((binding
-               (with-current-buffer (window-buffer (next-window))
+               (with-current-buffer (window-buffer (minibuffer-selected-window))
                  (where-is-internal (intern cand) overriding-local-map t)))
               (desc (and (not (stringp binding)) (key-description binding))))
     (propertize (format " (%s)" desc) 'face 'marginalia-key)))
