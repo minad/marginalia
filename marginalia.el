@@ -66,8 +66,8 @@
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
     (package . marginalia-annotate-package))
-  "Associating categories with annotation functions for minibuffer completion.
-The annotation function must return a string,
+  "Associate categories with annotators for minibuffer completion.
+Each annotation function must return a string,
 which is appended to the completion candidate.
 Annotations are only shown if `marginalia-mode' is enabled."
   :type '(alist :key-type symbol :value-type function)
