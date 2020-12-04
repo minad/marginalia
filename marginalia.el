@@ -30,6 +30,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(eval-when-compile (require 'cl-lib))
 
 ;;;; Customization
 
@@ -74,7 +75,10 @@ Annotations are only shown if `marginalia-mode' is enabled."
   :group 'marginalia)
 
 (defcustom marginalia-classifiers
-  '(marginalia-classify-by-command-name)
+  '(marginalia-classify-by-command-name
+    marginalia-classify-original-category
+    marginalia-classify-by-prompt
+    marginalia-classify-symbol)
   "List of functions to determine current completion category.
 Each function should take no arguments and return a symbol
 indicating the category, or nil to indicate it could not
@@ -82,31 +86,16 @@ determine it."
   :type 'hook
   :group 'marginalia)
 
-(defcustom marginalia-command-category-alist
-  '((execute-extended-command . command)
-    (customize-face . face)
-    (customize-face-other-window . face)
-    (customize-group . customize-group)
-    (customize-group-other-window . customize-group)
-    (customize-option . variable)
-    (customize-option-other-window . variable)
-    (customize-set-variable . variable)
-    (customize-variable . variable)
-    (customize-variable-other-window . variable)
-    (describe-function . symbol)
-    (describe-variable . variable)
-    (describe-face . face)
-    (describe-symbol . symbol)
-    (helpful-callable . symbol)
-    (helpful-command . symbol)
-    (helpful-function . symbol)
-    (helpful-macro . symbol)
-    (helpful-symbol . symbol)
-    (helpful-variable . variable)
-    (describe-package . package)
-    (package-install . package)
-    (package-delete . package)
-    (package-reinstall . package))
+(defcustom marginalia-prompt-categories
+  '((group . customize-group) (M-x . command) package face variable)
+  "Words whose presence in a minibuffer prompt determins the category.
+The words should be given either as a symbol which if found in
+the prompt is the category name, or as a dotted pair of symbols,
+the presence of the first indicating the second is the category."
+  :type '(repeat (choice symbol (cons symbol symbol)))
+  :group 'marginalia)
+
+(defcustom marginalia-command-category-alist nil
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'marginalia)
@@ -123,6 +112,9 @@ determine it."
 
 (defvar marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
+
+(defvar marginalia--original-category nil
+  "Original category reported by completion metadata.")
 
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
@@ -214,19 +206,47 @@ determine it."
   (and marginalia--this-command
        (alist-get marginalia--this-command marginalia-command-category-alist)))
 
-(defun marginalia--completion-metadata-get (_metadata prop)
+(defun marginalia-classify-original-category ()
+  "Return original category reported by completion metadata."
+  marginalia--original-category)
+
+(defun marginalia-classify-symbol ()
+  "Determine if currently completing symbols."
+  (when-let ((mct minibuffer-completion-table))
+    (when (or (eq mct 'help--symbol-completion-table)
+              (obarrayp mct)
+              (and (consp mct) (symbolp (car mct))) ; assume list of symbols
+              ;; imenu from an Emacs Lisp buffer produces symbols
+              (and (eq marginalia--this-command 'imenu)
+                   (with-current-buffer
+                       (window-buffer (minibuffer-selected-window))
+                     (derived-mode-p 'emacs-lisp-mode))))
+      'symbol)))
+
+(defun marginalia-classify-by-prompt ()
+  "Determine category by a special word in prompt."
+  (when-let ((prompt (minibuffer-prompt)))
+    (cl-loop for spec in marginalia-prompt-categories
+             for (word . category) = (if (consp spec) spec (cons spec spec))
+             when (string-match-p (format "\\<%s\\>" word) prompt)
+             return category)))
+
+(defun marginalia--completion-metadata-get (metadata prop)
   "Advice for `completion-metadata-get'.
 Replaces the category and annotation function.
-FUN is the original function.
 METADATA is the metadata.
 PROP is the property which is looked up."
   ;; TODO add more category classifiers from Embark
   (pcase prop
     ('annotation-function
-     (when-let (cat (marginalia--category-type))
+     (when-let (cat (completion-metadata-get metadata 'category))
+       ;; we do want the advice triggered for completion-metadata-get
        (alist-get cat marginalia-annotator-alist)))
     ('category
-     (run-hook-with-args-until-success 'marginalia-classifiers))))
+     (let ((marginalia--original-category (alist-get 'category metadata)))
+       ;; using alist-get in the line above bypasses any advice on
+       ;; completion-metadata-get to avoid infinite recursion
+       (run-hook-with-args-until-success 'marginalia-classifiers)))))
 
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
@@ -239,10 +259,6 @@ Remember `this-command' for annotation."
    (buffer-substring-no-properties (field-beginning) (point))
    minibuffer-completion-table
    minibuffer-completion-predicate))
-
-(defun marginalia--category-type ()
-  "Return minibuffer completion category per metadata."
-  (completion-metadata-get (marginalia--metadata) 'category))
 
 ;;;###autoload
 (define-minor-mode marginalia-mode
