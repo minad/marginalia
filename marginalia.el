@@ -238,7 +238,6 @@ looking for a regexp that matches the prompt."
 Replaces the category and annotation function.
 METADATA is the metadata.
 PROP is the property which is looked up."
-  ;; TODO add more category classifiers from Embark
   (pcase prop
     ('annotation-function
      (when-let (cat (completion-metadata-get metadata 'category))
