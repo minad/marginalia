@@ -244,16 +244,14 @@ determine it."
   "Annotate buffer CAND with modification status, file name and major mode."
   (when-let (buffer (get-buffer cand))
     (concat
-     (marginalia--align 30
-                        marginalia-separator-width
-                        1
+     (marginalia--align 2 ;; modification
+                        30 ;; mode
                         marginalia-separator-width
                         marginalia-file-name-width)
+     (if (buffer-modified-p buffer) "* " "  ")
      (propertize
-      (format "%30s" (buffer-local-value 'major-mode buffer))
+      (format "%-30s" (buffer-local-value 'major-mode buffer))
       'face 'marginalia-mode)
-     (marginalia--separator)
-     (if (buffer-modified-p buffer) "*" " ")
      (marginalia--separator)
      (marginalia--truncate
       (if-let (file (buffer-file-name buffer))
