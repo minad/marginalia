@@ -44,18 +44,53 @@
   "Face used to highlight keys in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-documentation
+  '((t :inherit completions-annotations :weight normal))
+  "Face used to highlight documentation string in `marginalia-mode'."
+  :group 'marginalia)
+
 (defface marginalia-variable
   '((t :inherit marginalia-key))
   "Face used to highlight variable values in `marginalia-mode'."
   :group 'marginalia)
 
-(defface marginalia-annotation
-  '((t :inherit completions-annotations :weight normal))
-  "Face used to highlight documentation string in `marginalia-mode'."
+(defface marginalia-mode
+  '((t :inherit marginalia-key))
+  "Face used to highlight major modes in `marginalia-mode'."
   :group 'marginalia)
 
-(defcustom marginalia-annotation-width 80
-  "Width of annotation string."
+(defface marginalia-date
+  '((t :inherit marginalia-key))
+  "Face used to highlight dates in `marginalia-mode'."
+  :group 'marginalia)
+
+(defface marginalia-size
+  '((t :inherit font-lock-constant-face :weight normal))
+  "Face used to highlight sizes in `marginalia-mode'."
+  :group 'marginalia)
+
+(defface marginalia-file-name
+  '((t :inherit marginalia-documentation))
+  "Face used to highlight file names in `marginalia-mode'."
+  :group 'marginalia)
+
+(defcustom marginalia-documentation-width 80
+  "Width of documentation string."
+  :type 'integer
+  :group 'marginalia)
+
+(defcustom marginalia-file-name-width 80
+  "Width of file name."
+  :type 'integer
+  :group 'marginalia)
+
+(defcustom marginalia-separator-width 4
+  "Field separator width."
+  :type 'string
+  :group 'marginalia)
+
+(defcustom marginalia-variable-width 30
+  "Width of variable value annotation string."
   :type 'integer
   :group 'marginalia)
 
@@ -117,6 +152,25 @@ determine it."
 (defvar marginalia--original-category nil
   "Original category reported by completion metadata.")
 
+(defmacro marginalia--align (&rest align)
+  "Align annotations to ALIGN."
+  (concat " "
+          (propertize
+           " "
+           'display
+           `(space :align-to (- right-fringe ,@align)))))
+
+(defsubst marginalia--separator ()
+  "Return separator string."
+  (make-string marginalia-separator-width 32))
+
+(defun marginalia--documentation (str)
+  "Format documentation string STR."
+  (concat
+   (marginalia--align marginalia-documentation-width)
+   (propertize (marginalia--truncate str marginalia-documentation-width)
+               'face 'marginalia-documentation)))
+
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
   (truncate-string-to-width (car (split-string str "\n")) width 0 32 "…"))
@@ -136,16 +190,6 @@ determine it."
    (marginalia-annotate-command-binding cand)
    (marginalia-annotate-symbol cand)))
 
-(defun marginalia--annotation (ann)
-  "Format annotation string ANN."
-  (concat " "
-          (propertize
-           " "
-           'display
-           '(space :align-to (- right-fringe marginalia-annotation-width)))
-          (propertize (marginalia--truncate ann marginalia-annotation-width)
-                      'face 'marginalia-annotation)))
-
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
   (when-let (doc (let ((sym (intern cand)))
@@ -153,75 +197,86 @@ determine it."
                     ((fboundp sym) (ignore-errors (documentation sym)))
                     ((facep sym) (documentation-property sym 'face-documentation))
                     (t (documentation-property sym 'variable-documentation)))))
-    (marginalia--annotation doc)))
+    (marginalia--documentation doc)))
 
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
   (let ((sym (intern cand)))
     (when-let (doc (documentation-property sym 'variable-documentation))
-      (concat " "
-              (propertize
-               " "
-               'display
-               '(space :align-to (- right-fringe marginalia-annotation-width 30)))
-              (propertize (marginalia--truncate (format "%S" (if (boundp sym)
-                                                              (symbol-value sym)
-                                                            'unbound))
-                                             40)
-                          'face 'marginalia-variable)
-              "    "
-              (propertize (marginalia--truncate doc marginalia-annotation-width)
-                          'face 'marginalia-annotation)))))
+      (concat
+       (marginalia--align marginalia-variable-width marginalia-documentation-width)
+       (propertize (marginalia--truncate (format "%S" (if (boundp sym)
+                                                          (symbol-value sym)
+                                                        'unbound))
+                                         marginalia-variable-width)
+                   'face 'marginalia-variable)
+       (marginalia--separator)
+       (propertize (marginalia--truncate doc marginalia-documentation-width)
+                   'face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with documentation string and face example."
   (let ((sym (intern cand)))
     (when-let (doc (documentation-property sym 'face-documentation))
-      (concat " "
-              (propertize
-               " "
-               'display
-               '(space :align-to (- right-fringe marginalia-annotation-width 30)))
-              (propertize "abcdefghijklmNOPQRSTUVWXYZ" 'face sym)
-              "    "
-              (propertize (marginalia--truncate doc marginalia-annotation-width)
-                          'face 'marginalia-annotation)))))
+      (concat
+       (marginalia--align marginalia-documentation-width marginalia-separator-width 26)
+       (propertize "abcdefghijklmNOPQRSTUVWXYZ" 'face sym)
+       (marginalia--separator)
+       (propertize (marginalia--truncate doc marginalia-documentation-width)
+                   'face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
   (when-let* ((pkg (intern (replace-regexp-in-string "-[[:digit:]\\.-]+$" "" cand)))
               ;; taken from embark.el, originally `describe-package-1`
               (desc (or (car (alist-get pkg package-alist))
-                        (if-let ((built-in (assq pkg package--builtins)))
+                        (if-let (built-in (assq pkg package--builtins))
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
-    (marginalia--annotation (package-desc-summary desc))))
+    (marginalia--documentation (package-desc-summary desc))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
   (when-let (doc (documentation-property (intern cand) 'group-documentation))
-    (marginalia--annotation doc)))
+    (marginalia--documentation doc)))
 
 (defun marginalia-annotate-buffer (cand)
   "Annotate buffer CAND with modification status, file name and major mode."
-  (when-let ((buffer (get-buffer cand)))
-    (marginalia--annotation
-     (format "%s%s (%s)"
-             (if (buffer-modified-p buffer) "*" "")
-             (if-let ((file-name (buffer-file-name buffer)))
-                 (abbreviate-file-name file-name)
-               "")
-             (buffer-local-value 'major-mode buffer)))))
+  (when-let (buffer (get-buffer cand))
+    (concat
+     (marginalia--align 30
+                        marginalia-separator-width
+                        1
+                        marginalia-separator-width
+                        marginalia-file-name-width)
+     (propertize
+      (format "%30s" (buffer-local-value 'major-mode buffer))
+      'face 'marginalia-mode)
+     (marginalia--separator)
+     (if (buffer-modified-p buffer) "*" " ")
+     (marginalia--separator)
+     (marginalia--truncate
+      (if-let (file (buffer-file-name buffer))
+          (propertize (abbreviate-file-name file)
+                      'face 'marginalia-file-name)
+        "")
+      marginalia-file-name-width))))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size and modification time."
-  (when-let ((attributes (file-attributes cand)))
-    (marginalia--annotation
-     (format "%7s %s"
-             (file-size-human-readable (file-attribute-size attributes))
-             (format-time-string
-              "%b %e %k:%M"
-              (file-attribute-modification-time attributes))))))
+  (when-let (attributes (file-attributes cand))
+    (concat
+     (marginalia--align 7 ;; size
+                        marginalia-separator-width
+                        12 ;; date
+                        20) ;; offset
+     (propertize (format "%7s" (file-size-human-readable (file-attribute-size attributes)))
+                 'face 'marginalia-size)
+     (marginalia--separator)
+     (propertize (format-time-string
+                  "%b %d %H:%M"
+                  (file-attribute-modification-time attributes))
+                 'face 'marginalia-date))))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
@@ -234,7 +289,7 @@ determine it."
 
 (defun marginalia-classify-symbol ()
   "Determine if currently completing symbols."
-  (when-let ((mct minibuffer-completion-table))
+  (when-let (mct minibuffer-completion-table)
     (when (or (eq mct 'help--symbol-completion-table)
               (obarrayp mct)
               (and (consp mct) (symbolp (car mct))) ; assume list of symbols
@@ -249,7 +304,7 @@ determine it."
   "Determine category by matching regexps against the minibuffer prompt.
 This runs through the `marginalia-prompt-categories' alist
 looking for a regexp that matches the prompt."
-  (when-let ((prompt (minibuffer-prompt)))
+  (when-let (prompt (minibuffer-prompt))
     (setq prompt
           (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
     (cl-loop for (regexp . category) in marginalia-prompt-categories
