@@ -59,7 +59,7 @@
   :type 'integer
   :group 'marginalia)
 
-(defcustom marginalia-annotator-alist
+(defcustom marginalia-annotators
   '((command . marginalia-annotate-command-binding)
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
@@ -96,7 +96,7 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol)
   :group 'marginalia)
 
-(defcustom marginalia-command-category-alist nil
+(defcustom marginalia-command-categories nil
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'marginalia)
@@ -226,7 +226,7 @@ determine it."
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
   (and marginalia--this-command
-       (alist-get marginalia--this-command marginalia-command-category-alist)))
+       (alist-get marginalia--this-command marginalia-command-categories)))
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
@@ -264,7 +264,7 @@ PROP is the property which is looked up."
     ('annotation-function
      (when-let (cat (completion-metadata-get metadata 'category))
        ;; we do want the advice triggered for completion-metadata-get
-       (alist-get cat marginalia-annotator-alist)))
+       (alist-get cat marginalia-annotators)))
     ('category
      (let ((marginalia--original-category (alist-get 'category metadata)))
        ;; using alist-get in the line above bypasses any advice on
@@ -296,12 +296,12 @@ Remember `this-command' for annotation."
 ;;;###autoload
 (defun marginalia-set-command-annotator (cmd ann)
   "Configure marginalia so that annotator ANN is used for command CMD."
-  (setq marginalia-command-category-alist
+  (setq marginalia-command-categories
         (cons (cons cmd cmd)
-              (assq-delete-all cmd marginalia-command-category-alist)))
-  (setq marginalia-command-category-alist
+              (assq-delete-all cmd marginalia-command-categories)))
+  (setq marginalia-command-categories
         (cons (cons cmd ann)
-              (assq-delete-all cmd marginalia-annotator-alist))))
+              (assq-delete-all cmd marginalia-annotators))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
