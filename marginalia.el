@@ -248,7 +248,9 @@ determine it."
                         30 ;; mode
                         marginalia-separator-width
                         marginalia-file-name-width)
-     (if (buffer-modified-p buffer) "* " "  ")
+     (if (buffer-modified-p buffer) "*" " ")
+     (if (buffer-local-value 'buffer-read-only buffer) "%" " ")
+     " "
      (propertize
       (format "%-30s" (buffer-local-value 'major-mode buffer))
       'face 'marginalia-mode)
