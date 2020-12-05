@@ -202,6 +202,27 @@ determine it."
   (when-let (doc (documentation-property (intern cand) 'group-documentation))
     (marginalia--annotation doc)))
 
+(defun marginalia-annotate-buffer (cand)
+  "Annotate buffer CAND with modification status, file name and major mode."
+  (when-let ((buffer (get-buffer cand)))
+    (marginalia--annotation
+     (format "%s%s (%s)"
+             (if (buffer-modified-p buffer) "*" "")
+             (if-let ((file-name (buffer-file-name buffer)))
+                 (abbreviate-file-name file-name)
+               "")
+             (buffer-local-value 'major-mode buffer)))))
+
+(defun marginalia-annotate-file (cand)
+  "Annotate file CAND with its size and modification time."
+  (when-let ((attributes (file-attributes cand)))
+    (marginalia--annotation
+     (format "%7s %s"
+             (file-size-human-readable (file-attribute-size attributes))
+             (format-time-string
+              "%b %e %k:%M"
+              (file-attribute-modification-time attributes))))))
+
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
   (and marginalia--this-command
