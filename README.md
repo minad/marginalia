@@ -24,8 +24,10 @@ specified by the variable `marginalia-classifiers`.
 ~~~ elisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
+  ;; ensure the package is always loaded eagerly
+  :demand t
   ;; The :init configuration is always executed (Not lazy!)
-  :init t
+  :init
 
   ;; Must be in the :init section of use-package such that the mode gets
   ;; enabled right away. Note that this forces loading the package.
