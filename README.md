@@ -8,7 +8,8 @@ annotations placed at the margin of the page of a book or in this case helpful
 colorful annotations placed at the margin of the minibuffer for your completion
 candidates. The annotations are added based on the completion category. For
 example `find-file` reports the `file` category and `M-x` reports the `command`
-category.
+category. You can choose between more or less detailed annotators, by
+setting the variable `marginalia-annotators`.
 
 Since many commands do not report a completion category themselves, Marginalia
 provides a classifier system, which tries to guess the correct category based
@@ -31,11 +32,8 @@ specified by the variable `marginalia-classifiers`.
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode)
 
-  ;; Enable richer annotations for M-x.
-  ;; Only keybindings are shown by default, in order to reduce noise for this very common command.
-  ;; * marginalia-annotate-symbol: Annotate with the documentation string
-  ;; * marginalia-annotate-command-binding (default): Annotate only with the keybinding
-  ;; * marginalia-annotate-command-full: Annotate with the keybinding and the documentation string
-  ;; (setf (alist-get 'command marginalia-annotators) #'marginalia-annotate-command-full)
-)
+  ;; Enable richer, more heavy, annotations.
+  ;; E.g. M-x will show the documentation string additional to the keybinding.
+  ;; By default only the keybinding is shown as annotation.
+  (setq marginalia-annotators 'marginalia-annotators-heavy))
 ~~~
