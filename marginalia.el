@@ -95,6 +95,15 @@
   :group 'marginalia)
 
 (defcustom marginalia-annotators
+  'marginalia-annotators-light
+  "Associate categories with annotators for minibuffer completion.
+Each annotation function must return a string,
+which is appended to the completion candidate.
+Annotations are only shown if `marginalia-mode' is enabled."
+  :type 'symbol
+  :group 'marginalia)
+
+(defvar marginalia-annotators-light
   '((command . marginalia-annotate-command-binding)
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
@@ -102,12 +111,15 @@
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
     (package . marginalia-annotate-package))
-  "Associate categories with annotators for minibuffer completion.
-Each annotation function must return a string,
-which is appended to the completion candidate.
-Annotations are only shown if `marginalia-mode' is enabled."
-  :type '(alist :key-type symbol :value-type function)
-  :group 'marginalia)
+  "Lightweight annotator functions.")
+
+(defvar marginalia-annotators-heavy
+  (append
+   '((file . marginalia-annotate-file)
+     (buffer . marginalia-annotate-buffer)
+     (command . marginalia-annotate-command-full))
+   marginalia-annotators-light)
+  "Heavy annotator functions.")
 
 (defcustom marginalia-classifiers
   '(marginalia-classify-by-command-name
@@ -348,7 +360,7 @@ PROP is the property which is looked up."
     ('annotation-function
      (when-let (cat (completion-metadata-get metadata 'category))
        ;; we do want the advice triggered for completion-metadata-get
-       (alist-get cat marginalia-annotators)))
+       (alist-get cat (symbol-value marginalia-annotators))))
     ('category
      (let ((marginalia--original-category (alist-get 'category metadata)))
        ;; using alist-get in the line above bypasses any advice on
@@ -376,16 +388,6 @@ Remember `this-command' for annotation."
 
     ;; Replace the metadata function.
     (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
-
-;;;###autoload
-(defun marginalia-set-command-annotator (cmd ann)
-  "Configure marginalia so that annotator ANN is used for command CMD."
-  (setq marginalia-command-categories
-        (cons (cons cmd cmd)
-              (assq-delete-all cmd marginalia-command-categories)))
-  (setq marginalia-annotators
-        (cons (cons cmd ann)
-              (assq-delete-all cmd marginalia-annotators))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
