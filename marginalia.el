@@ -262,9 +262,29 @@ determine it."
         "")
       marginalia-file-name-width))))
 
+(defun marginalia--full-candidate (cand)
+  "Return completion candidate CAND in full.
+For some completion tables, the completion candidates offered are
+meant to be only a part of the full minibuffer contents. For
+example, during file name completion the candidates are one path
+component of a full file path.
+
+This function returns what would be the minibuffer contents after
+using `minibuffer-force-complete' on the candidate CAND."
+  (let* ((contents (minibuffer-contents))
+         (pt (- (point) (minibuffer-prompt-end)))
+         (bounds (completion-boundaries
+                  (substring contents 0 pt)
+                  minibuffer-completion-table
+                  minibuffer-completion-predicate
+                  (substring contents pt))))
+    (concat (substring contents 0 (car bounds))
+            cand
+            (substring contents (+ pt (cdr bounds))))))
+
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size and modification time."
-  (when-let (attributes (file-attributes cand))
+  (when-let ((attributes (file-attributes (marginalia--full-candidate cand))))
     (concat
      (marginalia--align 7 ;; size
                         marginalia-separator-width
