@@ -98,8 +98,8 @@
   'marginalia-annotators-light
   "Choose an annotator association list for minibuffer completion.
 Annotations are only shown if `marginalia-mode' is enabled."
-  :type '(choice (const :tag "Light" marginalia-annotator-light)
-                 (const :tag "Heavy" marginalia-annotator-heavy)
+  :type '(choice (const :tag "Light" marginalia-annotators-light)
+                 (const :tag "Heavy" marginalia-annotators-heavy)
                  (symbol :tag "Other"))
   :group 'marginalia)
 
