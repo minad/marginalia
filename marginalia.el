@@ -96,14 +96,14 @@
 
 (defcustom marginalia-annotators
   'marginalia-annotators-light
-  "Associate categories with annotators for minibuffer completion.
-Each annotation function must return a string,
-which is appended to the completion candidate.
+  "Choose an annotator association list for minibuffer completion.
 Annotations are only shown if `marginalia-mode' is enabled."
-  :type 'symbol
+  :type '(choice (const :tag "Light" marginalia-annotator-light)
+                 (const :tag "Heavy" marginalia-annotator-heavy)
+                 (symbol :tag "Other"))
   :group 'marginalia)
 
-(defvar marginalia-annotators-light
+(defcustom marginalia-annotators-light
   '((command . marginalia-annotate-command-binding)
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
@@ -111,15 +111,28 @@ Annotations are only shown if `marginalia-mode' is enabled."
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
     (package . marginalia-annotate-package))
-  "Lightweight annotator functions.")
+  "Lightweight annotator functions.
+Associates completion categories with annotation functions.
+Each annotation function must return a string,
+which is appended to the completion candidate.
+See also `marginalia-annotators-heavy'."
+  :type '(alist :key-type symbol :value-type function)
+  :group 'marginalia)
 
-(defvar marginalia-annotators-heavy
+(defcustom marginalia-annotators-heavy
   (append
    '((file . marginalia-annotate-file)
      (buffer . marginalia-annotate-buffer)
      (command . marginalia-annotate-command-full))
    marginalia-annotators-light)
-  "Heavy annotator functions.")
+  "Heavy annotator functions.
+
+Associates completion categories with annotation functions.
+Each annotation function must return a string,
+which is appended to the completion candidate.
+See also `marginalia-annotators-light'."
+  :type '(alist :key-type symbol :value-type function)
+  :group 'marginalia)
 
 (defcustom marginalia-classifiers
   '(marginalia-classify-by-command-name
