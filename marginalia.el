@@ -383,7 +383,7 @@ Remember `this-command' for annotation."
   (setq marginalia-command-categories
         (cons (cons cmd cmd)
               (assq-delete-all cmd marginalia-command-categories)))
-  (setq marginalia-command-categories
+  (setq marginalia-annotators
         (cons (cons cmd ann)
               (assq-delete-all cmd marginalia-annotators))))
 
