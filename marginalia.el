@@ -262,6 +262,11 @@ determine it."
         "")
       marginalia-file-name-width))))
 
+;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
+;; more direct way to implement it. While Emacs does not use the notion of "full candidate", there
+;; is a function `completion-boundaries' to compute them, and in (info "(elisp)Programmed
+;; Completion") it is documented how a completion table should respond to boundaries requests.
+;; See the discussion at https://github.com/minad/marginalia/commit/4ba98045dd33bcf1396a888dbbae2dc801dce7c5
 (defun marginalia--full-candidate (cand)
   "Return completion candidate CAND in full.
 For some completion tables, the completion candidates offered are
