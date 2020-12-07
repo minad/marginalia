@@ -303,20 +303,28 @@ component of a full file path.
 
 This function returns what would be the minibuffer contents after
 using `minibuffer-force-complete' on the candidate CAND."
-  (if (minibufferp)
-      (let* ((contents (minibuffer-contents))
-             (pt (- (point) (minibuffer-prompt-end)))
-             (bounds (completion-boundaries
-                      (substring contents 0 pt)
-                      minibuffer-completion-table
-                      minibuffer-completion-predicate
-                      (substring contents pt))))
-        (concat (substring contents 0 (car bounds))
-                cand
-                (substring contents (+ pt (cdr bounds)))))
-    ;; not in a minibuffer, trust that cand already conveys all
-    ;; necessary information (there's not much else we can do)
-    cand))
+  (or
+   ;; Selectrum allows access to the full-candidate via property
+   ;; TODO The generic method which follows, does not work yet with selectrum.
+   ;; https://github.com/raxod502/selectrum/issues/255
+   (get-text-property 0 'selectrum-candidate-full cand)
+
+   ;; When in the minibuffer, use the minibuffer contents to expand the candidate.
+   (and (minibufferp)
+        (let* ((contents (minibuffer-contents))
+               (pt (- (point) (minibuffer-prompt-end)))
+               (bounds (completion-boundaries
+                        (substring contents 0 pt)
+                        minibuffer-completion-table
+                        minibuffer-completion-predicate
+                        (substring contents pt))))
+          (concat (substring contents 0 (car bounds))
+                  cand
+                  (substring contents (+ pt (cdr bounds))))))
+
+   ;; Not in a minibuffer, trust that cand already conveys all
+   ;; information, since there is nothing we can do.
+   cand))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size and modification time."
