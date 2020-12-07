@@ -74,6 +74,16 @@
   "Face used to highlight file names in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-file-modes
+  '((t :inherit marginalia-documentation))
+  "Face used to highlight file modes in `marginalia-mode'."
+  :group 'marginalia)
+
+(defface marginalia-file-owner
+  '((t :inherit marginalia-documentation))
+  "Face used to highlight file owners in `marginalia-mode'."
+  :group 'marginalia)
+
 (defcustom marginalia-documentation-width 80
   "Width of documentation string."
   :type 'integer
@@ -339,11 +349,13 @@ using `minibuffer-force-complete' on the candidate CAND."
                         12 marginalia-separator-width ;; user:group
                         7 marginalia-separator-width ;; size
                         12) ;; date
-     (file-attribute-modes attributes)
+     (propertize (file-attribute-modes attributes)
+                 'face 'marginalia-file-modes)
      (marginalia--separator)
-     (format "%12s" (format "%s:%s"
-                            (file-attribute-user-id attributes)
-                            (file-attribute-group-id attributes)))
+     (propertize (format "%12s" (format "%s:%s"
+                                        (file-attribute-user-id attributes)
+                                        (file-attribute-group-id attributes)))
+                 'face 'marginalia-file-owner)
      (marginalia--separator)
      (propertize (format "%7s" (file-size-human-readable (file-attribute-size attributes)))
                  'face 'marginalia-size)
