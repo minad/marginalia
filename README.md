@@ -35,5 +35,5 @@ specified by the variable `marginalia-classifiers`.
   ;; Enable richer, more heavy, annotations.
   ;; E.g. M-x will show the documentation string additional to the keybinding.
   ;; By default only the keybinding is shown as annotation.
-  (setq marginalia-annotators 'marginalia-annotators-heavy))
+  (setq marginalia-annotators '(marginalia-annotators-heavy)))
 ~~~
