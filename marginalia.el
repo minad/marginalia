@@ -411,6 +411,11 @@ Remember `this-command' for annotation."
     ;; Replace the metadata function.
     (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
 
+;; If you want to toggle between annotators while being in the minibuffer, the completion-system
+;; should refresh the candidate list. Currently there is no support for this in marginalia, but it
+;; is possible to advice the `marginalia-toggle-annotators' function with the necessary refreshing
+;; logic. See the discussion in https://github.com/minad/marginalia/issues/10 for reference.
+;;;###autoload
 (defun marginalia-toggle-annotators ()
   "Toggle between annotators in `marginalia-annotators'."
   (interactive)
