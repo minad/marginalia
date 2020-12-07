@@ -226,11 +226,9 @@ determine it."
       (cl-do-all-symbols (sym)
         (when (commandp sym)
           (when-let (key (where-is-internal sym nil t))
-            (puthash sym
-                     (propertize (format " (%s)" (key-description key))
-                                 'face 'marginalia-key)
-                     marginalia-annotate-command-binding--hash)))))
-    (gethash (intern cand) marginalia-annotate-command-binding--hash)))
+            (puthash sym key marginalia-annotate-command-binding--hash)))))
+    (when-let (binding (gethash (intern cand) marginalia-annotate-command-binding--hash))
+      (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
 
 (defun marginalia-annotate-command-full (cand)
   "Annotate command CAND with the keybinding and its documentation string."
