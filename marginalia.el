@@ -95,12 +95,14 @@
   :group 'marginalia)
 
 (defcustom marginalia-annotators
-  'marginalia-annotators-light
+  '(marginalia-annotators-light marginalia-annotators-heavy)
   "Choose an annotator association list for minibuffer completion.
+The first entry in the list is used for annotations.
+You can toggle between the annotators using `marginalia-toggle-annotators'.
 Annotations are only shown if `marginalia-mode' is enabled."
-  :type '(choice (const :tag "Light" marginalia-annotators-light)
-                 (const :tag "Heavy" marginalia-annotators-heavy)
-                 (symbol :tag "Other"))
+  :type '(repeat (choice (const :tag "Light" marginalia-annotators-light)
+                         (const :tag "Heavy" marginalia-annotators-heavy)
+                         (symbol :tag "Other")))
   :group 'marginalia)
 
 (defcustom marginalia-annotators-light
@@ -380,7 +382,7 @@ PROP is the property which is looked up."
     ('annotation-function
      (when-let (cat (completion-metadata-get metadata 'category))
        ;; we do want the advice triggered for completion-metadata-get
-       (alist-get cat (symbol-value marginalia-annotators))))
+       (alist-get cat (symbol-value (car marginalia-annotators)))))
     ('category
      (let ((marginalia--original-category (alist-get 'category metadata)))
        ;; using alist-get in the line above bypasses any advice on
@@ -408,6 +410,12 @@ Remember `this-command' for annotation."
 
     ;; Replace the metadata function.
     (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
+
+(defun marginalia-toggle-annotators ()
+  "Toggle between annotators in `marginalia-annotators'."
+  (interactive)
+  (setq marginalia-annotators (append (cdr marginalia-annotators)
+                                      (list (car marginalia-annotators)))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
