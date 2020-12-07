@@ -217,14 +217,18 @@ determine it."
   "Truncate string STR to WIDTH."
   (truncate-string-to-width (car (split-string str "\n")) width 0 32 "…"))
 
+(defvar marginalia-annotate-command-binding--init nil)
 (defun marginalia-annotate-command-binding (cand)
   "Annotate command CAND with keybinding."
-  ;; Taken from Emacs 28, read-extended-command--annotation
-  (when-let* ((binding
-               (with-current-buffer (window-buffer (minibuffer-selected-window))
-                 (where-is-internal (intern cand) overriding-local-map t)))
-              (desc (and (not (stringp binding)) (key-description binding))))
-    (propertize (format " (%s)" desc) 'face 'marginalia-key)))
+  (unless marginalia-annotate-command-binding--init
+    (setq marginalia-annotate-command-binding--init t)
+    (cl-do-all-symbols (sym)
+      (when (commandp sym)
+        (when-let (key (where-is-internal sym nil t))
+          (put sym 'marginalia--cached-binding
+               (propertize (format " (%s)" (key-description key))
+                           'face 'marginalia-key))))))
+  (get (intern cand) 'marginalia--cached-binding))
 
 (defun marginalia-annotate-command-full (cand)
   "Annotate command CAND with the keybinding and its documentation string."
