@@ -318,12 +318,19 @@ using `minibuffer-force-complete' on the candidate CAND."
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size and modification time."
-  (when-let ((attributes (file-attributes (marginalia--full-candidate cand))))
+  (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
     (concat
-     (marginalia--align 7 ;; size
-                        marginalia-separator-width
+     (marginalia--align 10 marginalia-separator-width ;; modes
+                        12 marginalia-separator-width ;; user:group
+                        7 marginalia-separator-width ;; size
                         12 ;; date
                         20) ;; offset
+     (file-attribute-modes attributes)
+     (marginalia--separator)
+     (format "%12s" (format "%s:%s"
+                            (file-attribute-user-id attributes)
+                            (file-attribute-group-id attributes)))
+     (marginalia--separator)
      (propertize (format "%7s" (file-size-human-readable (file-attribute-size attributes)))
                  'face 'marginalia-size)
      (marginalia--separator)
