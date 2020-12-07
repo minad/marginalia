@@ -217,18 +217,20 @@ determine it."
   "Truncate string STR to WIDTH."
   (truncate-string-to-width (car (split-string str "\n")) width 0 32 "…"))
 
-(defvar marginalia-annotate-command-binding--init nil)
+(defvar-local marginalia-annotate-command-binding--hash nil)
 (defun marginalia-annotate-command-binding (cand)
   "Annotate command CAND with keybinding."
-  (unless marginalia-annotate-command-binding--init
-    (setq marginalia-annotate-command-binding--init t)
-    (cl-do-all-symbols (sym)
-      (when (commandp sym)
-        (when-let (key (where-is-internal sym nil t))
-          (put sym 'marginalia--cached-binding
-               (propertize (format " (%s)" (key-description key))
-                           'face 'marginalia-key))))))
-  (get (intern cand) 'marginalia--cached-binding))
+  (with-current-buffer (window-buffer (minibuffer-selected-window))
+    (unless marginalia-annotate-command-binding--hash
+      (setq marginalia-annotate-command-binding--hash (make-hash-table))
+      (cl-do-all-symbols (sym)
+        (when (commandp sym)
+          (when-let (key (where-is-internal sym nil t))
+            (puthash sym
+                     (propertize (format " (%s)" (key-description key))
+                                 'face 'marginalia-key)
+                     marginalia-annotate-command-binding--hash)))))
+    (gethash (intern cand) marginalia-annotate-command-binding--hash)))
 
 (defun marginalia-annotate-command-full (cand)
   "Annotate command CAND with the keybinding and its documentation string."
