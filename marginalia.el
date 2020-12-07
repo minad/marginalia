@@ -338,8 +338,7 @@ using `minibuffer-force-complete' on the candidate CAND."
      (marginalia--align 10 marginalia-separator-width ;; modes
                         12 marginalia-separator-width ;; user:group
                         7 marginalia-separator-width ;; size
-                        12 ;; date
-                        20) ;; offset
+                        12) ;; date
      (file-attribute-modes attributes)
      (marginalia--separator)
      (format "%12s" (format "%s:%s"
