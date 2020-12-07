@@ -32,8 +32,9 @@ specified by the variable `marginalia-classifiers`.
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode)
 
-  ;; Enable richer, more heavy, annotations.
+  ;; Prefer richer, more heavy, annotations over the lighter default variant.
   ;; E.g. M-x will show the documentation string additional to the keybinding.
   ;; By default only the keybinding is shown as annotation.
-  (setq marginalia-annotators 'marginalia-annotators-heavy))
+  ;; Note that there is the command `marginalia-toggle-annotators` to switch between the annotators.
+  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light)))
 ~~~
