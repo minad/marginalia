@@ -98,10 +98,15 @@
   '(marginalia-annotators-light marginalia-annotators-heavy)
   "Choose an annotator association list for minibuffer completion.
 The first entry in the list is used for annotations.
-You can toggle between the annotators using `marginalia-toggle-annotators'.
-Annotations are only shown if `marginalia-mode' is enabled."
+You can cycle between the annotators using `marginalia-cycle-annotators'.
+Annotations are only shown if `marginalia-mode' is enabled.
+An entry of nil disables marginalia's annotations (leaving you
+only with the annotations that come with Emacs) without disabling
+`marginalia-mode'; this can be convenient for users of
+`marginalia-cycle-annotators'."
   :type '(repeat (choice (const :tag "Light" marginalia-annotators-light)
                          (const :tag "Heavy" marginalia-annotators-heavy)
+                         (const :tag "None" nil)
                          (symbol :tag "Other")))
   :group 'marginalia)
 
@@ -419,19 +424,22 @@ Remember `this-command' for annotation."
     ;; Replace the metadata function.
     (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
 
-;; If you want to toggle between annotators while being in the minibuffer, the completion-system
+;; If you want to cycle between annotators while being in the minibuffer, the completion-system
 ;; should refresh the candidate list. Currently there is no support for this in marginalia, but it
-;; is possible to advice the `marginalia-toggle-annotators' function with the necessary refreshing
+;; is possible to advise the `marginalia-cycle-annotators' function with the necessary refreshing
 ;; logic. See the discussion in https://github.com/minad/marginalia/issues/10 for reference.
 ;;;###autoload
-(defun marginalia-toggle-annotators ()
-  "Toggle between annotators in `marginalia-annotators'."
+(defun marginalia-cycle-annotators ()
+  "Cycle between annotators in `marginalia-annotators'.
+If called from the minibuffer the annotator cycling is local,
+that it is, it does not affect subsequent minibuffers.  When called
+from a regular buffer the effect is global."
   (interactive)
   (let ((annotators (append (cdr marginalia-annotators)
                             (list (car marginalia-annotators)))))
-    ;; If `marginalia-toggle-annotators' has been invoked from inside the minibuffer, only change
+    ;; If `marginalia-cycle-annotators' has been invoked from inside the minibuffer, only change
     ;; the annotators locally. This is useful if the command is used as an action. If the command is
-    ;; not triggered from inside the minibuffer, toggle the annotator globally. Hopefully this is
+    ;; not triggered from inside the minibuffer, cycle the annotator globally. Hopefully this is
     ;; not too confusing.
     (if (minibufferp)
         (setq-local marginalia-annotators annotators)
