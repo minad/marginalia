@@ -217,16 +217,22 @@ determine it."
   "Truncate string STR to WIDTH."
   (truncate-string-to-width (car (split-string str "\n")) width 0 32 "…"))
 
-(defvar-local marginalia-annotate-command-binding--hash nil)
+(defvar-local marginalia-annotate-command-binding--hash nil
+  "Hash table storing the keybinding of every command.
+This hash table is needed to speed up `marginalia-annotate-command-binding'.")
+
 (defun marginalia-annotate-command-binding (cand)
   "Annotate command CAND with keybinding."
   (with-current-buffer (window-buffer (minibuffer-selected-window))
+    ;; Precomputing the keybinding of every command is faster than looking it up every time using
+    ;; `where-is-internal'. `where-is-internal' generates a lot of garbage, leading to garbage
+    ;; collecting pauses when interacting with the minibuffer. See
+    ;; https://github.com/minad/marginalia/issues/16.
     (unless marginalia-annotate-command-binding--hash
       (setq marginalia-annotate-command-binding--hash (make-hash-table))
       (cl-do-all-symbols (sym)
-        (when (commandp sym)
-          (when-let (key (where-is-internal sym nil t))
-            (puthash sym key marginalia-annotate-command-binding--hash)))))
+        (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
+          (puthash sym key marginalia-annotate-command-binding--hash))))
     (when-let (binding (gethash (intern cand) marginalia-annotate-command-binding--hash))
       (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
 
