@@ -419,8 +419,15 @@ Remember `this-command' for annotation."
 (defun marginalia-toggle-annotators ()
   "Toggle between annotators in `marginalia-annotators'."
   (interactive)
-  (setq marginalia-annotators (append (cdr marginalia-annotators)
-                                      (list (car marginalia-annotators)))))
+  (let ((annotators (append (cdr marginalia-annotators)
+                            (list (car marginalia-annotators)))))
+    ;; If `marginalia-toggle-annotators' has been invoked from inside the minibuffer, only change
+    ;; the annotators locally. This is useful if the command is used as an action. If the command is
+    ;; not triggered from inside the minibuffer, toggle the annotator globally. Hopefully this is
+    ;; not too confusing.
+    (if (minibufferp)
+        (setq-local marginalia-annotators annotators)
+      (setq marginalia-annotators annotators))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
