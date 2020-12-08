@@ -196,6 +196,7 @@ determine it."
 (declare-function package-desc-summary "package")
 (declare-function package-desc-version "package")
 (declare-function package-desc-archive "package")
+(declare-function package-installed-p "package")
 (declare-function package-version-join "package")
 (declare-function package--from-builtin "package")
 
@@ -307,7 +308,9 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                           (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
      ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
-     ((package-desc-archive desc) :width 8 :face 'marginalia-archive)
+     ((if (package-installed-p desc)
+          "installed"
+        (package-desc-archive desc)) :width 9 :face 'marginalia-archive)
      ((package-desc-summary desc) :truncate marginalia-documentation-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
