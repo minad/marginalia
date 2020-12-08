@@ -277,7 +277,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (when-let (doc (documentation-property sym 'variable-documentation))
       (marginalia--fields
        ((if (boundp sym) (symbol-value sym) 'unbound)
-        :truncate (/ marginalia-truncate-width 2) :format "%S" :face 'marginalia-variable)
+        :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
        (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-face (cand)
