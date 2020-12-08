@@ -94,6 +94,11 @@
   "Face used to highlight file owners in `marginalia-mode'."
   :group 'marginalia)
 
+(defcustom marginalia-separator "    "
+  "Field separator."
+  :type 'string
+  :group 'marginalia)
+
 (defcustom marginalia-documentation-width 80
   "Width of documentation string."
   :type 'integer
@@ -102,11 +107,6 @@
 (defcustom marginalia-file-name-width 80
   "Width of file name."
   :type 'integer
-  :group 'marginalia)
-
-(defcustom marginalia-separator-width 4
-  "Field separator width."
-  :type 'string
   :group 'marginalia)
 
 (defcustom marginalia-variable-width 30
@@ -214,10 +214,6 @@ determine it."
              `(space :align-to (- right-fringe ,(length str))))
             str)))
 
-(defsubst marginalia--separator ()
-  "Return separator string."
-  (make-string marginalia-separator-width 32))
-
 (defun marginalia--documentation (str)
   "Format documentation string STR."
   (marginalia--align
@@ -272,7 +268,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                                                         'unbound))
                                          marginalia-variable-width)
                    'face 'marginalia-variable)
-       (marginalia--separator)
+       marginalia-separator
        (propertize (marginalia--truncate doc marginalia-documentation-width)
                    'face 'marginalia-documentation)))))
 
@@ -282,7 +278,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (when-let (doc (documentation-property sym 'face-documentation))
       (marginalia--align
        (propertize "abcdefghijklmNOPQRSTUVWXYZ" 'face sym)
-       (marginalia--separator)
+       marginalia-separator
        (propertize (marginalia--truncate doc marginalia-documentation-width)
                    'face 'marginalia-documentation)))))
 
@@ -297,10 +293,10 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (marginalia--align
      (propertize (format "%-16s" (package-version-join (package-desc-version desc)))
                  'face 'marginalia-version)
-     (marginalia--separator)
+     marginalia-separator
      (propertize (format "%-8s" (package-desc-archive desc))
                  'face 'marginalia-archive)
-     (marginalia--separator)
+     marginalia-separator
      (propertize (package-desc-summary desc)
                  'face 'marginalia-documentation))))
 
@@ -319,7 +315,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
      (propertize
       (format "%-30s" (buffer-local-value 'major-mode buffer))
       'face 'marginalia-mode)
-     (marginalia--separator)
+     marginalia-separator
      (marginalia--truncate
       (if-let (file (buffer-file-name buffer))
           (propertize (abbreviate-file-name file)
@@ -362,15 +358,15 @@ using `minibuffer-force-complete' on the candidate CAND."
     (marginalia--align
      (propertize (file-attribute-modes attributes)
                  'face 'marginalia-file-modes)
-     (marginalia--separator)
+     marginalia-separator
      (propertize (format "%12s" (format "%s:%s"
                                         (file-attribute-user-id attributes)
                                         (file-attribute-group-id attributes)))
                  'face 'marginalia-file-owner)
-     (marginalia--separator)
+     marginalia-separator
      (propertize (format "%7s" (file-size-human-readable (file-attribute-size attributes)))
                  'face 'marginalia-size)
-     (marginalia--separator)
+     marginalia-separator
      (propertize (format-time-string
                   "%b %d %H:%M"
                   (file-attribute-modification-time attributes))
