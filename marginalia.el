@@ -204,13 +204,15 @@ determine it."
 (defvar marginalia--original-category nil
   "Original category reported by completion metadata.")
 
-(defmacro marginalia--align (&rest align)
-  "Align annotations to ALIGN."
-  (concat " "
-          (propertize
-           " "
-           'display
-           `(space :align-to (- right-fringe ,@align)))))
+(defun marginalia--align (&rest strs)
+  "Align STRS at the right margin."
+  (let ((str (apply #'concat strs)))
+    (concat " "
+            (propertize
+             " "
+             'display
+             `(space :align-to (- right-fringe ,(length str))))
+            str)))
 
 (defsubst marginalia--separator ()
   "Return separator string."
@@ -218,8 +220,7 @@ determine it."
 
 (defun marginalia--documentation (str)
   "Format documentation string STR."
-  (concat
-   (marginalia--align marginalia-documentation-width)
+  (marginalia--align
    (propertize (marginalia--truncate str marginalia-documentation-width)
                'face 'marginalia-documentation)))
 
@@ -265,8 +266,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
   "Annotate variable CAND with its documentation string."
   (let ((sym (intern cand)))
     (when-let (doc (documentation-property sym 'variable-documentation))
-      (concat
-       (marginalia--align marginalia-variable-width marginalia-documentation-width)
+      (marginalia--align
        (propertize (marginalia--truncate (format "%S" (if (boundp sym)
                                                           (symbol-value sym)
                                                         'unbound))
@@ -280,8 +280,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
   "Annotate face CAND with documentation string and face example."
   (let ((sym (intern cand)))
     (when-let (doc (documentation-property sym 'face-documentation))
-      (concat
-       (marginalia--align marginalia-documentation-width marginalia-separator-width 26)
+      (marginalia--align
        (propertize "abcdefghijklmNOPQRSTUVWXYZ" 'face sym)
        (marginalia--separator)
        (propertize (marginalia--truncate doc marginalia-documentation-width)
@@ -295,12 +294,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                         (if-let (built-in (assq pkg package--builtins))
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
-    (concat
-     (marginalia--align 16 ;; version
-                        marginalia-separator-width
-                        8 ;; archive
-                        marginalia-separator-width
-                        marginalia-documentation-width)
+    (marginalia--align
      (propertize (format "%-16s" (package-version-join (package-desc-version desc)))
                  'face 'marginalia-version)
      (marginalia--separator)
@@ -318,11 +312,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 (defun marginalia-annotate-buffer (cand)
   "Annotate buffer CAND with modification status, file name and major mode."
   (when-let (buffer (get-buffer cand))
-    (concat
-     (marginalia--align 2 ;; modification
-                        30 ;; mode
-                        marginalia-separator-width
-                        marginalia-file-name-width)
+    (marginalia--align
      (if (buffer-modified-p buffer) "*" " ")
      (if (buffer-local-value 'buffer-read-only buffer) "%" " ")
      " "
@@ -369,11 +359,7 @@ using `minibuffer-force-complete' on the candidate CAND."
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size and modification time."
   (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
-    (concat
-     (marginalia--align 10 marginalia-separator-width ;; modes
-                        12 marginalia-separator-width ;; user:group
-                        7 marginalia-separator-width ;; size
-                        12) ;; date
+    (marginalia--align
      (propertize (file-attribute-modes attributes)
                  'face 'marginalia-file-modes)
      (marginalia--separator)
