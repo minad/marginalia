@@ -194,6 +194,9 @@ determine it."
 (defvar package-alist)
 (defvar package-archive-contents)
 (declare-function package-desc-summary "package")
+(declare-function package-desc-version "package")
+(declare-function package-desc-archive "package")
+(declare-function package-version-join "package")
 (declare-function package--from-builtin "package")
 
 ;;;; Marginalia mode
@@ -217,7 +220,7 @@ determine it."
            `(space :align-to (- right-fringe ,(length str))))
           str))
 
-(cl-defun marginalia--field (field &key truncate format face width)
+(cl-defmacro marginalia--field (field &key truncate format face width)
   "Format FIELD as a string according to some options.
 
 TRUNCATE is the truncation width.
@@ -229,12 +232,12 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
   (when format (setq field `(format ,format ,field)))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
   (when face (setq field `(propertize ,field 'face ,face)))
-  (list 'marginalia-separator field))
+  field)
 
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
   `(marginalia--align (concat ,@(cdr (mapcan (lambda (field)
-                                               (apply #'marginalia--field field))
+                                               (list 'marginalia-separator `(marginalia--field ,@field)))
                                              fields)))))
 
 (defun marginalia--documentation (str)
