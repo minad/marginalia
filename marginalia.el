@@ -319,7 +319,6 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
        (if (buffer-modified-p buffer) "*" " ")
        (if (buffer-local-value 'buffer-read-only buffer) "%" " ")))
      ((buffer-local-value 'major-mode buffer) :width 30 :face 'marginalia-mode)
-
      ((if-let (file (buffer-file-name buffer))
           (abbreviate-file-name file) "")
       :truncate marginalia-file-name-width
@@ -407,13 +406,13 @@ METADATA is the metadata.
 PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
+     ;; we do want the advice triggered for completion-metadata-get
      (when-let (cat (completion-metadata-get metadata 'category))
-       ;; we do want the advice triggered for completion-metadata-get
        (alist-get cat (symbol-value (car marginalia-annotators)))))
     ('category
+     ;; using alist-get bypasses any advice on completion-metadata-get
+     ;; to avoid infinite recursion
      (let ((marginalia--original-category (alist-get 'category metadata)))
-       ;; using alist-get in the line above bypasses any advice on
-       ;; completion-metadata-get to avoid infinite recursion
        (run-hook-with-args-until-success 'marginalia-classifiers)))))
 
 (defun marginalia--minibuffer-setup ()
