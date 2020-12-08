@@ -75,17 +75,17 @@
   :group 'marginalia)
 
 (defface marginalia-file-name
-  '((t :inherit marginalia-documentation))
+  '((t :inherit marginalia-documentation :slant normal))
   "Face used to highlight file names in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-file-modes
-  '((t :inherit marginalia-documentation))
+  '((t :inherit font-lock-string-face :weight normal))
   "Face used to highlight file modes in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-file-owner
-  '((t :inherit marginalia-documentation))
+  '((t :inherit font-lock-preprocessor-face :weight normal))
   "Face used to highlight file owners in `marginalia-mode'."
   :group 'marginalia)
 
