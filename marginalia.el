@@ -64,6 +64,11 @@
   "Face used to highlight dates in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-archive
+  '((t :inherit marginalia-key))
+  "Face used to highlight package archives in `marginalia-mode'."
+  :group 'marginalia)
+
 (defface marginalia-size
   '((t :inherit font-lock-constant-face :weight normal))
   "Face used to highlight sizes in `marginalia-mode'."
@@ -285,7 +290,15 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                         (if-let (built-in (assq pkg package--builtins))
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
-    (marginalia--documentation (package-desc-summary desc))))
+    (concat
+     (marginalia--align 8 ;; archive
+                        marginalia-separator-width
+                        marginalia-documentation-width)
+     (propertize (format "%-8s" (package-desc-archive desc))
+                 'face 'marginalia-archive)
+     (marginalia--separator)
+     (propertize (package-desc-summary desc)
+                 'face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
