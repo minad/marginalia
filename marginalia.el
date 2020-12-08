@@ -64,6 +64,11 @@
   "Face used to highlight dates in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-version
+  '((t :inherit marginalia-size))
+  "Face used to highlight package version in `marginalia-mode'."
+  :group 'marginalia)
+
 (defface marginalia-archive
   '((t :inherit marginalia-key))
   "Face used to highlight package archives in `marginalia-mode'."
@@ -291,9 +296,14 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
     (concat
-     (marginalia--align 8 ;; archive
+     (marginalia--align 16 ;; version
+                        marginalia-separator-width
+                        8 ;; archive
                         marginalia-separator-width
                         marginalia-documentation-width)
+     (propertize (format "%-16s" (package-version-join (package-desc-version desc)))
+                 'face 'marginalia-version)
+     (marginalia--separator)
      (propertize (format "%-8s" (package-desc-archive desc))
                  'face 'marginalia-archive)
      (marginalia--separator)
