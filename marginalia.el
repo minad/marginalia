@@ -94,23 +94,10 @@
   "Face used to highlight file owners in `marginalia-mode'."
   :group 'marginalia)
 
-(defcustom marginalia-separator "    "
-  "Field separator."
-  :type 'string
-  :group 'marginalia)
+(defcustom marginalia-truncate-width 80
+  "Maximum truncation width of annotation fields.
 
-(defcustom marginalia-documentation-width 80
-  "Width of documentation string."
-  :type 'integer
-  :group 'marginalia)
-
-(defcustom marginalia-file-name-width 80
-  "Width of file name."
-  :type 'integer
-  :group 'marginalia)
-
-(defcustom marginalia-variable-width 30
-  "Width of variable value annotation string."
+This value is adjusted in the `minibuffer-setup-hook' depending on the `window-width'."
   :type 'integer
   :group 'marginalia)
 
@@ -202,6 +189,9 @@ determine it."
 
 ;;;; Marginalia mode
 
+(defvar marginalia--separator "    "
+  "Field separator.")
+
 (defvar marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
 
@@ -238,14 +228,14 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
   `(marginalia--align (concat ,@(cdr (mapcan (lambda (field)
-                                               (list 'marginalia-separator `(marginalia--field ,@field)))
+                                               (list 'marginalia--separator `(marginalia--field ,@field)))
                                              fields)))))
 
 (defun marginalia--documentation (str)
   "Format documentation string STR."
   (when str
     (marginalia--fields
-     (str :truncate marginalia-documentation-width :face 'marginalia-documentation))))
+     (str :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defvar-local marginalia-annotate-command-binding--hash nil
   "Hash table storing the keybinding of every command.
@@ -287,8 +277,8 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (when-let (doc (documentation-property sym 'variable-documentation))
       (marginalia--fields
        ((if (boundp sym) (symbol-value sym) 'unbound)
-        :truncate marginalia-variable-width :format "%S" :face 'marginalia-variable)
-       (doc :truncate marginalia-documentation-width :face 'marginalia-documentation)))))
+        :truncate (/ marginalia-truncate-width 2) :format "%S" :face 'marginalia-variable)
+       (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with documentation string and face example."
@@ -296,7 +286,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (when-let (doc (documentation-property sym 'face-documentation))
       (marginalia--fields
        ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
-       (doc :truncate marginalia-documentation-width :face 'marginalia-documentation)))))
+       (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
@@ -311,7 +301,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
      ((if (package-installed-p desc)
           "installed"
         (package-desc-archive desc)) :width 9 :face 'marginalia-archive)
-     ((package-desc-summary desc) :truncate marginalia-documentation-width :face 'marginalia-documentation))))
+     ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
@@ -327,7 +317,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
      ((buffer-local-value 'major-mode buffer) :width 30 :face 'marginalia-mode)
      ((if-let (file (buffer-file-name buffer))
           (abbreviate-file-name file) "")
-      :truncate marginalia-file-name-width
+      :truncate marginalia-truncate-width
       :face 'marginalia-file-name))))
 
 ;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
@@ -424,7 +414,10 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
 Remember `this-command' for annotation."
-  (setq-local marginalia--this-command this-command))
+  (let ((w (window-width)))
+    (setq-local marginalia-truncate-width (min (/ w 2) marginalia-truncate-width))
+    (setq-local marginalia--separator (if (> w 100) "    " " "))
+    (setq-local marginalia--this-command this-command)))
 
 ;;;###autoload
 (define-minor-mode marginalia-mode
