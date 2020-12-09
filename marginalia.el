@@ -40,12 +40,12 @@
   :prefix "marginalia-")
 
 (defface marginalia-key
-  '((t :inherit font-lock-keyword-face :weight normal))
+  '((t :inherit font-lock-keyword-face))
   "Face used to highlight keys in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-documentation
-  '((t :inherit completions-annotations :weight normal))
+  '((t :inherit completions-annotations))
   "Face used to highlight documentation string in `marginalia-mode'."
   :group 'marginalia)
 
@@ -75,22 +75,22 @@
   :group 'marginalia)
 
 (defface marginalia-size
-  '((t :inherit font-lock-constant-face :weight normal))
+  '((t :inherit font-lock-constant-face))
   "Face used to highlight sizes in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-file-name
-  '((t :inherit marginalia-documentation :slant normal))
+  '((t :inherit marginalia-documentation))
   "Face used to highlight file names in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-file-modes
-  '((t :inherit font-lock-string-face :weight normal))
+  '((t :inherit font-lock-string-face))
   "Face used to highlight file modes in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-file-owner
-  '((t :inherit font-lock-preprocessor-face :weight normal))
+  '((t :inherit font-lock-preprocessor-face))
   "Face used to highlight file owners in `marginalia-mode'."
   :group 'marginalia)
 
