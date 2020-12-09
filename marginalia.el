@@ -145,6 +145,7 @@ only with the annotations that come with Emacs) without disabling
     (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
+    (input-method . marginalia-annotate-input-method)
     (charset . marginalia-annotate-charset)
     (package . marginalia-annotate-package))
   "Lightweight annotator functions.
@@ -188,6 +189,7 @@ determine it."
     ("\\<package\\>" . package)
     ("\\<face\\>" . face)
     ("\\<variable\\>" . variable)
+    ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
     ("\\<minor mode\\>" . minor-mode))
   "Associates regexps to match against minibuffer prompts with categories."
@@ -352,6 +354,10 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
   (marginalia--documentation (documentation-property (intern cand) 'group-documentation)))
+
+(defun marginalia-annotate-input-method (cand)
+  "Annotate input method CAND with its description."
+  (marginalia--documentation (nth 4 (assoc cand input-method-alist))))
 
 (defun marginalia-annotate-charset (cand)
   "Annotate charset CAND with its description."
