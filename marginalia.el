@@ -307,11 +307,12 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
-  (let* ((ind
-          (with-selected-window
-              (or (minibuffer-selected-window) (selected-window))
-            (lookup-minor-mode-from-indicator cand)))
-         (mode (or ind (intern cand)))
+  (let* ((sym (intern-soft cand))
+         (mode (if (and sym (boundp sym))
+                   sym
+                 (with-selected-window
+                     (or (minibuffer-selected-window) (selected-window))
+                   (lookup-minor-mode-from-indicator cand))))
          (lighter (cdr (assq mode minor-mode-alist)))
          (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
     (concat
@@ -319,7 +320,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
       ((if (and (boundp mode) (symbol-value mode))
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
-      ((or lighter-str "") :width 10 :face 'marginalia-lighter)
+      ((or lighter-str "") :width 14 :face 'marginalia-lighter)
       ((or (ignore-errors (documentation mode)) "")
        :truncate marginalia-truncate-width
        :face 'marginalia-documentation)))))
