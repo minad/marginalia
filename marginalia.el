@@ -85,8 +85,13 @@
   :group 'marginalia)
 
 (defface marginalia-archive
-  '((t :inherit marginalia-key))
+  '((t :inherit warning))
   "Face used to highlight package archives in `marginalia-mode'."
+  :group 'marginalia)
+
+(defface marginalia-installed
+  '((t :inherit success))
+  "Face used to highlight package status in `marginalia-mode'."
   :group 'marginalia)
 
 (defface marginalia-size
@@ -197,12 +202,13 @@ determine it."
 (defvar package--builtins)
 (defvar package-alist)
 (defvar package-archive-contents)
+(declare-function package--from-builtin "package")
+(declare-function package-desc-archive "package")
+(declare-function package-desc-dir "package")
 (declare-function package-desc-summary "package")
 (declare-function package-desc-version "package")
-(declare-function package-desc-archive "package")
 (declare-function package-installed-p "package")
 (declare-function package-version-join "package")
-(declare-function package--from-builtin "package")
 
 ;;;; Marginalia mode
 
@@ -335,9 +341,10 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                           (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
      ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
-     ((if (package-installed-p desc)
-          "installed"
-        (package-desc-archive desc)) :width 9 :face 'marginalia-archive)
+     ((cond
+       ((eq (package-desc-dir desc) 'builtin) (propertize "builtin" 'face 'marginalia-installed))
+       ((package-installed-p desc) (propertize "installed" 'face 'marginalia-installed))
+       (t (propertize (package-desc-archive desc) 'face 'marginalia-archive))) :width 9)
      ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
