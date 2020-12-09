@@ -1,6 +1,6 @@
 # marginalia.el - Marginalia in the minibuffer
 
-![marginalia-mode with Selectrum](https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true)
+[![](https://melpa.org/packages/marginalia-badge.svg)](https://melpa.org/#/marginalia)
 
 This package provides `marginalia-mode` which adds marginalia to the minibuffer
 completions. [Marginalia](https://en.wikipedia.org/wiki/Marginalia) are marks or
@@ -19,6 +19,8 @@ always the possibility to overwrite categories by command name. This way you can
 associate a fixed category with the completion initiated by the command (see the
 variable `marginalia-command-categories`). The list of available classifiers is
 specified by the variable `marginalia-classifiers`.
+
+![marginalia-mode with Selectrum](https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true)
 
 ## Configuration
 
