@@ -44,6 +44,21 @@
   "Face used to highlight keys in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-lighter
+  '((t :inherit marginalia-size))
+  "Face used to highlight lighters in `marginalia-mode'."
+  :group 'marginalia)
+
+(defface marginalia-on
+  '((t :inherit success))
+  "Face used to signal enabled modes."
+  :group 'marginalia)
+
+(defface marginalia-off
+  '((t :inherit error))
+  "Face used to signal disabled modes."
+  :group 'marginalia)
+
 (defface marginalia-documentation
   '((t :inherit completions-annotations))
   "Face used to highlight documentation string in `marginalia-mode'."
@@ -122,6 +137,7 @@ only with the annotations that come with Emacs) without disabling
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
     (face . marginalia-annotate-face)
+    (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
     (package . marginalia-annotate-package))
@@ -165,7 +181,8 @@ determine it."
     ("\\<M-x\\>" . command)
     ("\\<package\\>" . package)
     ("\\<face\\>" . face)
-    ("\\<variable\\>" . variable))
+    ("\\<variable\\>" . variable)
+    ("\\<minor mode\\>" . minor-mode))
   "Associates regexps to match against minibuffer prompts with categories."
   :type '(alist :key-type regexp :value-type symbol)
   :group 'marginalia)
@@ -287,6 +304,25 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
       (marginalia--fields
        ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
        (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+
+(defun marginalia-annotate-minor-mode (cand)
+  "Annotate minor-mode CAND with status and documentation string."
+  (let* ((ind
+          (with-selected-window
+              (or (minibuffer-selected-window) (selected-window))
+            (lookup-minor-mode-from-indicator cand)))
+         (mode (or ind (intern cand)))
+         (lighter (cdr (assq mode minor-mode-alist)))
+         (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
+    (concat
+     (marginalia--fields
+      ((if (and (boundp mode) (symbol-value mode))
+           (propertize "On" 'face 'marginalia-on)
+         (propertize "Off" 'face 'marginalia-off)) :width 3)
+      ((or lighter-str "") :width 10 :face 'marginalia-lighter)
+      ((or (ignore-errors (documentation mode)) "")
+       :truncate marginalia-truncate-width
+       :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
