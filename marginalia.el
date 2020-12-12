@@ -150,7 +150,7 @@ only with the annotations that come with Emacs) without disabling
     (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
-    (environment-variable . getenv)
+    (environment-variable . marginalia-annotate-environment-variable)
     (input-method . marginalia-annotate-input-method)
     (coding-system . marginalia-annotate-coding-system)
     (charset . marginalia-annotate-charset)
@@ -365,6 +365,12 @@ This hash table is needed to speed up `marginalia-annotate-command'.")
       :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+
+(defun marginalia-annotate-environment-variable (cand)
+  "Annotate environment variable CAND with its current value."
+  (when-let (val (getenv cand))
+    (marginalia--fields
+     (val :truncate marginalia-truncate-width :face 'marginalia-variable))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with documentation string and face example."
