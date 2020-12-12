@@ -293,10 +293,21 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
-  (marginalia--documentation
-   (let ((sym (intern cand)))
+  (when-let ((sym (intern-soft cand)))
+    (marginalia--documentation
      (cond
-      ((fboundp sym) (ignore-errors (documentation sym)))
+      ((fboundp sym)
+       (when-let ((doc (ignore-errors (documentation sym))))
+         (replace-regexp-in-string
+          (rx bos
+              (1+ (seq "This function has "
+                       (or ":before" ":after" ":around" ":override"     
+                           ":before-while" ":before-until" ":after-while"  
+                           ":after-until" ":filter-args" ":filter-return")
+                       " advice: " (0+ nonl) "\n"))
+              "\n")
+          ""
+          doc)))
       ((facep sym) (documentation-property sym 'face-documentation))
       (t (documentation-property sym 'variable-documentation))))))
 
