@@ -291,6 +291,16 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
    (marginalia-annotate-command-binding cand)
    (marginalia-annotate-symbol cand)))
 
+(defconst marginalia--advice-regexp
+  (rx bos
+      (1+ (seq (? "This function has ")
+               (or ":before" ":after" ":around" ":override"
+                   ":before-while" ":before-until" ":after-while"
+                   ":after-until" ":filter-args" ":filter-return")
+               " advice: " (0+ nonl) "\n"))
+      "\n")
+  "Regexp to match lines about advice in function documentation strings.")
+
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
   (when-let ((sym (intern-soft cand)))
@@ -298,16 +308,11 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
      (cond
       ((fboundp sym)
        (when-let ((doc (ignore-errors (documentation sym))))
-         (replace-regexp-in-string
-          (rx bos
-              (1+ (seq (? "This function has ")
-                       (or ":before" ":after" ":around" ":override"     
-                           ":before-while" ":before-until" ":after-while"  
-                           ":after-until" ":filter-args" ":filter-return")
-                       " advice: " (0+ nonl) "\n"))
-              "\n")
-          ""
-          doc)))
+         (if (string-match-p marginalia--advice-regexp doc)
+             (concat "*"
+                     (replace-regexp-in-string
+                      marginalia--advice-regexp "" doc))
+           (concat " " doc))))
       ((facep sym) (documentation-property sym 'face-documentation))
       (t (documentation-property sym 'variable-documentation))))))
 
