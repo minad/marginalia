@@ -143,7 +143,7 @@ only with the annotations that come with Emacs) without disabling
   :group 'marginalia)
 
 (defcustom marginalia-annotators-light
-  '((command . marginalia-annotate-command-binding)
+  '((command . marginalia-annotate-command)
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
     (face . marginalia-annotate-face)
@@ -169,7 +169,7 @@ See also `marginalia-annotators-heavy'."
    '((file . marginalia-annotate-file)
      (buffer . marginalia-annotate-buffer)
      (virtual-buffer . marginalia-annotate-virtual-buffer-full)
-     (command . marginalia-annotate-command-full))
+     (command . marginalia-annotate-symbol))
    marginalia-annotators-light)
   "Heavy annotator functions.
 
@@ -277,31 +277,25 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
     (marginalia--fields
      (str :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
-(defvar-local marginalia-annotate-command-binding--hash nil
+(defvar-local marginalia-annotate-command--hash nil
   "Hash table storing the keybinding of every command.
-This hash table is needed to speed up `marginalia-annotate-command-binding'.")
+This hash table is needed to speed up `marginalia-annotate-command'.")
 
-(defun marginalia-annotate-command-binding (cand)
+(defun marginalia-annotate-command (cand)
   "Annotate command CAND with keybinding."
   (with-current-buffer (window-buffer (minibuffer-selected-window))
     ;; Precomputing the keybinding of every command is faster than looking it up every time using
     ;; `where-is-internal'. `where-is-internal' generates a lot of garbage, leading to garbage
     ;; collecting pauses when interacting with the minibuffer. See
     ;; https://github.com/minad/marginalia/issues/16.
-    (unless marginalia-annotate-command-binding--hash
-      (setq marginalia-annotate-command-binding--hash (make-hash-table))
+    (unless marginalia-annotate-command--hash
+      (setq marginalia-annotate-command--hash (make-hash-table))
       (cl-do-all-symbols (sym)
         (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
-          (puthash sym key marginalia-annotate-command-binding--hash))))
+          (puthash sym key marginalia-annotate-command--hash))))
     (when-let* ((sym (intern-soft cand))
-                (binding (gethash sym marginalia-annotate-command-binding--hash)))
+                (binding (gethash sym marginalia-annotate-command--hash)))
       (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
-
-(defun marginalia-annotate-command-full (cand)
-  "Annotate command CAND with the keybinding and its documentation string."
-  (concat
-   (marginalia-annotate-command-binding cand)
-   (marginalia-annotate-symbol cand)))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-virtual-buffer-class (cand)
@@ -341,14 +335,16 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
                     ((facep sym) (documentation-property sym 'face-documentation))
                     (t (documentation-property sym 'variable-documentation)))
                    "")))
-      (marginalia--fields
-       ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
-            "*" " ")
-        :face 'marginalia-modified)
-       ((if (fboundp sym)
-            (replace-regexp-in-string marginalia--advice-regexp "" doc)
-          doc)
-        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+      (concat
+       (marginalia-annotate-command cand)
+       (marginalia--fields
+        ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
+             "*" " ")
+         :face 'marginalia-modified)
+        ((if (fboundp sym)
+             (replace-regexp-in-string marginalia--advice-regexp "" doc)
+           doc)
+         :truncate marginalia-truncate-width :face 'marginalia-documentation))))))
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
