@@ -99,6 +99,11 @@
   "Face used to highlight sizes in `marginalia-mode'."
   :group 'marginalia)
 
+(defface marginalia-modified
+  '((t :inherit font-lock-negation-char-face))
+  "Face used to highlight modification indicators in `marginalia-mode'."
+  :group 'marginalia)
+
 (defface marginalia-file-name
   '((t :inherit marginalia-documentation))
   "Face used to highlight file names in `marginalia-mode'."
@@ -303,18 +308,19 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
-  (when-let ((sym (intern-soft cand)))
-    (marginalia--documentation
-     (cond
-      ((fboundp sym)
-       (when-let ((doc (ignore-errors (documentation sym))))
-         (if (string-match-p marginalia--advice-regexp doc)
-             (concat "*"
-                     (replace-regexp-in-string
-                      marginalia--advice-regexp "" doc))
-           (concat " " doc))))
-      ((facep sym) (documentation-property sym 'face-documentation))
-      (t (documentation-property sym 'variable-documentation))))))
+  (when-let* ((sym (intern-soft cand))
+              (doc (cond
+                    ((fboundp sym) (ignore-errors (documentation sym)))
+                    ((facep sym) (documentation-property sym 'face-documentation))
+                    (t (documentation-property sym 'variable-documentation)))))
+    (marginalia--fields
+     ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
+          "*" " ")
+      :face 'marginalia-modified)
+     ((if (fboundp sym)
+          (replace-regexp-in-string marginalia--advice-regexp "" doc)
+        doc)
+      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
@@ -391,7 +397,8 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
     (marginalia--fields
      ((concat
        (if (buffer-modified-p buffer) "*" " ")
-       (if (buffer-local-value 'buffer-read-only buffer) "%" " ")))
+       (if (buffer-local-value 'buffer-read-only buffer) "%" " "))
+      :face 'marginalia-modified)
      ((buffer-local-value 'major-mode buffer) :width 30 :face 'marginalia-mode)
      ((if-let (file (buffer-file-name buffer))
           (abbreviate-file-name file) "")
