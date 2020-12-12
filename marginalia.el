@@ -150,6 +150,7 @@ only with the annotations that come with Emacs) without disabling
     (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
+    (environment-variable . getenv)
     (input-method . marginalia-annotate-input-method)
     (coding-system . marginalia-annotate-coding-system)
     (charset . marginalia-annotate-charset)
