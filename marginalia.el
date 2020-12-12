@@ -258,7 +258,9 @@ FACE is the name of the face, with which the field should be propertized.
 WIDTH is the format width. This can be specified as alternative to FORMAT."
   (cl-assert (not (and width format)))
   (when width (setq format (format "%%%ds" (- width))))
-  (when format (setq field `(format ,format ,field)))
+  (if format
+      (setq field `(format ,format ,field))
+    (setq field `(or ,field "")))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
   (when face (setq field `(propertize ,field 'face ,face)))
   field)
@@ -291,7 +293,8 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
       (cl-do-all-symbols (sym)
         (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
           (puthash sym key marginalia-annotate-command-binding--hash))))
-    (when-let (binding (gethash (intern cand) marginalia-annotate-command-binding--hash))
+    (when-let* ((sym (intern-soft cand))
+                (binding (gethash sym marginalia-annotate-command-binding--hash)))
       (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
 
 (defun marginalia-annotate-command-full (cand)
@@ -332,19 +335,20 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
-  (when-let* ((sym (intern-soft cand))
-              (doc (cond
+  (when-let (sym (intern-soft cand))
+    (let ((doc (or (cond
                     ((fboundp sym) (ignore-errors (documentation sym)))
                     ((facep sym) (documentation-property sym 'face-documentation))
-                    (t (documentation-property sym 'variable-documentation)))))
-    (marginalia--fields
-     ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
-          "*" " ")
-      :face 'marginalia-modified)
-     ((if (fboundp sym)
-          (replace-regexp-in-string marginalia--advice-regexp "" doc)
-        doc)
-      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+                    (t (documentation-property sym 'variable-documentation)))
+                   "")))
+      (marginalia--fields
+       ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
+            "*" " ")
+        :face 'marginalia-modified)
+       ((if (fboundp sym)
+            (replace-regexp-in-string marginalia--advice-regexp "" doc)
+          doc)
+        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
@@ -355,23 +359,23 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
 
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
-  (let ((sym (intern cand)))
-    (when-let (doc (documentation-property sym 'variable-documentation))
-      (marginalia--fields
-       ((if (and (boundp sym) (not (equal (symbol-value sym) (default-value sym))))
-            "*" " ")
-        :face 'marginalia-modified)
-       ((if (boundp sym) (symbol-value sym) 'unbound)
-        :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
-       (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+  (when-let (sym (intern-soft cand))
+    (marginalia--fields
+     ((if (and (boundp sym) (not (equal (symbol-value sym) (default-value sym))))
+          "*" " ")
+      :face 'marginalia-modified)
+     ((if (boundp sym) (symbol-value sym) 'unbound)
+      :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
+     ((documentation-property sym 'variable-documentation)
+      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with documentation string and face example."
-  (let ((sym (intern cand)))
-    (when-let (doc (documentation-property sym 'face-documentation))
-      (marginalia--fields
-       ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
-       (doc :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+  (when-let (sym (intern-soft cand))
+    (marginalia--fields
+     ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
+     ((documentation-property sym 'face-documentation)
+      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
@@ -388,8 +392,8 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
       ((if (and (boundp mode) (symbol-value mode))
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
-      ((or lighter-str "") :width 14 :face 'marginalia-lighter)
-      ((or (ignore-errors (documentation mode)) "")
+      (lighter-str :width 14 :face 'marginalia-lighter)
+      ((ignore-errors (documentation mode))
        :truncate marginalia-truncate-width
        :face 'marginalia-documentation)))))
 
@@ -434,8 +438,8 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
        (if (buffer-local-value 'buffer-read-only buffer) "%" " "))
       :face 'marginalia-modified)
      ((buffer-local-value 'major-mode buffer) :width 30 :face 'marginalia-mode)
-     ((if-let (file (buffer-file-name buffer))
-          (abbreviate-file-name file) "")
+     ((when-let (file (buffer-file-name buffer))
+        (abbreviate-file-name file))
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
