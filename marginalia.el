@@ -300,7 +300,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
        (when-let ((doc (ignore-errors (documentation sym))))
          (replace-regexp-in-string
           (rx bos
-              (1+ (seq "This function has "
+              (1+ (seq (? "This function has ")
                        (or ":before" ":after" ":around" ":override"     
                            ":before-while" ":before-until" ":after-while"  
                            ":after-until" ":filter-args" ":filter-return")
