@@ -154,6 +154,7 @@ only with the annotations that come with Emacs) without disabling
     (coding-system . marginalia-annotate-coding-system)
     (charset . marginalia-annotate-charset)
     (package . marginalia-annotate-package)
+    (imenu . marginalia-annotate-imenu)
     (virtual-buffer . marginalia-annotate-virtual-buffer-class))
   "Lightweight annotator functions.
 Associates completion categories with annotation functions.
@@ -205,7 +206,8 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol)
   :group 'marginalia)
 
-(defcustom marginalia-command-categories nil
+(defcustom marginalia-command-categories
+  '((imenu . imenu))
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol)
   :group 'marginalia)
@@ -343,6 +345,13 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
           (replace-regexp-in-string marginalia--advice-regexp "" doc)
         doc)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+
+(defun marginalia-annotate-imenu (cand)
+  "Annotate imenu CAND with its documentation string."
+  (when (provided-mode-derived-p (buffer-local-value 'major-mode
+                                                     (window-buffer (minibuffer-selected-window)))
+                                 'emacs-lisp-mode)
+    (marginalia-annotate-symbol (replace-regexp-in-string "^.*? " "" cand))))
 
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
@@ -484,12 +493,7 @@ using `minibuffer-force-complete' on the candidate CAND."
   (when-let (mct minibuffer-completion-table)
     (when (or (eq mct 'help--symbol-completion-table)
               (obarrayp mct)
-              (and (consp mct) (symbolp (car mct))) ; assume list of symbols
-              ;; imenu from an Emacs Lisp buffer produces symbols
-              (and (eq marginalia--this-command 'imenu)
-                   (with-current-buffer
-                       (window-buffer (minibuffer-selected-window))
-                     (derived-mode-p 'emacs-lisp-mode))))
+              (and (consp mct) (symbolp (car mct)))) ; assume list of symbols
       'symbol)))
 
 (defun marginalia-classify-by-prompt ()
