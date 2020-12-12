@@ -153,7 +153,8 @@ only with the annotations that come with Emacs) without disabling
     (input-method . marginalia-annotate-input-method)
     (coding-system . marginalia-annotate-coding-system)
     (charset . marginalia-annotate-charset)
-    (package . marginalia-annotate-package))
+    (package . marginalia-annotate-package)
+    (virtual-buffer . marginalia-annotate-virtual-buffer-class))
   "Lightweight annotator functions.
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
@@ -166,6 +167,7 @@ See also `marginalia-annotators-heavy'."
   (append
    '((file . marginalia-annotate-file)
      (buffer . marginalia-annotate-buffer)
+     (virtual-buffer . marginalia-annotate-virtual-buffer-full)
      (command . marginalia-annotate-command-full))
    marginalia-annotators-light)
   "Heavy annotator functions.
@@ -296,6 +298,26 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
    (marginalia-annotate-command-binding cand)
    (marginalia-annotate-symbol cand)))
 
+;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
+(defun marginalia-annotate-virtual-buffer-class (cand)
+  "Annotate virtual-buffer CAND with the buffer class."
+  (marginalia--fields
+   ((pcase (elt cand 0)
+      (?b "Buffer")
+      (?f "File")
+      (?m "Bookmark")
+      (?v "View"))
+    :width -8 :face 'marginalia-documentation)))
+
+;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
+(defun marginalia-annotate-virtual-buffer-full (cand)
+  "Annotate virtual-buffer CAND with the buffer class."
+  (let ((cand-without-prefix (replace-regexp-in-string "^[^ ]+ " "" cand)))
+    (pcase (elt cand 0)
+      (?b (marginalia-annotate-buffer cand-without-prefix))
+      (?f (marginalia-annotate-file cand-without-prefix))
+      (_ (marginalia-annotate-virtual-buffer-class cand)))))
+
 (defconst marginalia--advice-regexp
   (rx bos
       (1+ (seq (? "This function has ")
@@ -402,7 +424,7 @@ This hash table is needed to speed up `marginalia-annotate-command-binding'.")
      ((buffer-local-value 'major-mode buffer) :width 30 :face 'marginalia-mode)
      ((if-let (file (buffer-file-name buffer))
           (abbreviate-file-name file) "")
-      :truncate marginalia-truncate-width
+      :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
 ;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
