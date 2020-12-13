@@ -269,9 +269,9 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
     ;; https://github.com/minad/marginalia/issues/16.
     (unless marginalia-annotate-binding--hash
       (setq marginalia-annotate-binding--hash (make-hash-table))
-      (cl-do-all-symbols (sym)
-        (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
-          (puthash sym key marginalia-annotate-binding--hash))))
+      (mapatoms (lambda (sym)
+                  (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
+                    (puthash sym key marginalia-annotate-binding--hash)))))
     (when-let* ((sym (intern-soft cand))
                 (binding (gethash sym marginalia-annotate-binding--hash)))
       (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
