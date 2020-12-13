@@ -39,69 +39,6 @@
   :group 'convenience
   :prefix "marginalia-")
 
-(defface marginalia-key
-  '((t :inherit font-lock-keyword-face))
-  "Face used to highlight keys in `marginalia-mode'.")
-
-(defface marginalia-lighter
-  '((t :inherit marginalia-size))
-  "Face used to highlight lighters in `marginalia-mode'.")
-
-(defface marginalia-on
-  '((t :inherit success))
-  "Face used to signal enabled modes.")
-
-(defface marginalia-off
-  '((t :inherit error))
-  "Face used to signal disabled modes.")
-
-(defface marginalia-documentation
-  '((t :inherit completions-annotations))
-  "Face used to highlight documentation string in `marginalia-mode'.")
-
-(defface marginalia-variable
-  '((t :inherit marginalia-key))
-  "Face used to highlight variable values in `marginalia-mode'.")
-
-(defface marginalia-mode
-  '((t :inherit marginalia-key))
-  "Face used to highlight major modes in `marginalia-mode'.")
-
-(defface marginalia-date
-  '((t :inherit marginalia-key))
-  "Face used to highlight dates in `marginalia-mode'.")
-
-(defface marginalia-version
-  '((t :inherit marginalia-size))
-  "Face used to highlight package version in `marginalia-mode'.")
-
-(defface marginalia-archive
-  '((t :inherit warning))
-  "Face used to highlight package archives in `marginalia-mode'.")
-
-(defface marginalia-installed
-  '((t :inherit success))
-  "Face used to highlight package status in `marginalia-mode'.")
-
-(defface marginalia-size
-  '((t :inherit font-lock-constant-face))
-  "Face used to highlight sizes in `marginalia-mode'.")
-
-(defface marginalia-modified
-  '((t :inherit font-lock-negation-char-face))
-  "Face used to highlight modification indicators in `marginalia-mode'.")
-
-(defface marginalia-file-name
-  '((t :inherit marginalia-documentation))
-  "Face used to highlight file names in `marginalia-mode'.")
-
-(defface marginalia-file-modes
-  '((t :inherit font-lock-string-face))
-  "Face used to highlight file modes in `marginalia-mode'.")
-
-(defface marginalia-file-owner
-  '((t :inherit font-lock-preprocessor-face))
-  "Face used to highlight file owners in `marginalia-mode'.")
 
 (defcustom marginalia-truncate-width 80
   "Maximum truncation width of annotation fields.
@@ -190,6 +127,75 @@ determine it."
   '((imenu . imenu))
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
+
+(defgroup marginalia-faces nil
+  "Faces used by `marginalia-mode'."
+  :group 'marginalia
+  :group 'faces)
+
+(defface marginalia-key
+  '((t :inherit font-lock-keyword-face))
+  "Face used to highlight keys in `marginalia-mode'.")
+
+(defface marginalia-lighter
+  '((t :inherit marginalia-size))
+  "Face used to highlight lighters in `marginalia-mode'.")
+
+(defface marginalia-on
+  '((t :inherit success))
+  "Face used to signal enabled modes.")
+
+(defface marginalia-off
+  '((t :inherit error))
+  "Face used to signal disabled modes.")
+
+(defface marginalia-documentation
+  '((t :inherit completions-annotations))
+  "Face used to highlight documentation string in `marginalia-mode'.")
+
+(defface marginalia-variable
+  '((t :inherit marginalia-key))
+  "Face used to highlight variable values in `marginalia-mode'.")
+
+(defface marginalia-mode
+  '((t :inherit marginalia-key))
+  "Face used to highlight major modes in `marginalia-mode'.")
+
+(defface marginalia-date
+  '((t :inherit marginalia-key))
+  "Face used to highlight dates in `marginalia-mode'.")
+
+(defface marginalia-version
+  '((t :inherit marginalia-size))
+  "Face used to highlight package version in `marginalia-mode'.")
+
+(defface marginalia-archive
+  '((t :inherit warning))
+  "Face used to highlight package archives in `marginalia-mode'.")
+
+(defface marginalia-installed
+  '((t :inherit success))
+  "Face used to highlight package status in `marginalia-mode'.")
+
+(defface marginalia-size
+  '((t :inherit font-lock-constant-face))
+  "Face used to highlight sizes in `marginalia-mode'.")
+
+(defface marginalia-modified
+  '((t :inherit font-lock-negation-char-face))
+  "Face used to highlight modification indicators in `marginalia-mode'.")
+
+(defface marginalia-file-name
+  '((t :inherit marginalia-documentation))
+  "Face used to highlight file names in `marginalia-mode'.")
+
+(defface marginalia-file-modes
+  '((t :inherit font-lock-string-face))
+  "Face used to highlight file modes in `marginalia-mode'.")
+
+(defface marginalia-file-owner
+  '((t :inherit font-lock-preprocessor-face))
+  "Face used to highlight file owners in `marginalia-mode'.")
 
 ;;;; Pre-declarations for external packages
 
