@@ -402,8 +402,11 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-modified)
-     ((if (boundp sym) (symbol-value sym) 'unbound)
-      :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
+     ((let ((print-escape-newlines t)
+            (print-escape-control-characters t)
+            (print-escape-multibyte t))
+        (prin1-to-string (if (boundp sym) (symbol-value sym) 'unbound)))
+      :truncate (/ marginalia-truncate-width 3) :face 'marginalia-variable)
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
