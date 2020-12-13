@@ -41,90 +41,73 @@
 
 (defface marginalia-key
   '((t :inherit font-lock-keyword-face))
-  "Face used to highlight keys in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight keys in `marginalia-mode'.")
 
 (defface marginalia-lighter
   '((t :inherit marginalia-size))
-  "Face used to highlight lighters in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight lighters in `marginalia-mode'.")
 
 (defface marginalia-on
   '((t :inherit success))
-  "Face used to signal enabled modes."
-  :group 'marginalia)
+  "Face used to signal enabled modes.")
 
 (defface marginalia-off
   '((t :inherit error))
-  "Face used to signal disabled modes."
-  :group 'marginalia)
+  "Face used to signal disabled modes.")
 
 (defface marginalia-documentation
   '((t :inherit completions-annotations))
-  "Face used to highlight documentation string in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight documentation string in `marginalia-mode'.")
 
 (defface marginalia-variable
   '((t :inherit marginalia-key))
-  "Face used to highlight variable values in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight variable values in `marginalia-mode'.")
 
 (defface marginalia-mode
   '((t :inherit marginalia-key))
-  "Face used to highlight major modes in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight major modes in `marginalia-mode'.")
 
 (defface marginalia-date
   '((t :inherit marginalia-key))
-  "Face used to highlight dates in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight dates in `marginalia-mode'.")
 
 (defface marginalia-version
   '((t :inherit marginalia-size))
-  "Face used to highlight package version in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight package version in `marginalia-mode'.")
 
 (defface marginalia-archive
   '((t :inherit warning))
-  "Face used to highlight package archives in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight package archives in `marginalia-mode'.")
 
 (defface marginalia-installed
   '((t :inherit success))
-  "Face used to highlight package status in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight package status in `marginalia-mode'.")
 
 (defface marginalia-size
   '((t :inherit font-lock-constant-face))
-  "Face used to highlight sizes in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight sizes in `marginalia-mode'.")
 
 (defface marginalia-modified
   '((t :inherit font-lock-negation-char-face))
-  "Face used to highlight modification indicators in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight modification indicators in `marginalia-mode'.")
 
 (defface marginalia-file-name
   '((t :inherit marginalia-documentation))
-  "Face used to highlight file names in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight file names in `marginalia-mode'.")
 
 (defface marginalia-file-modes
   '((t :inherit font-lock-string-face))
-  "Face used to highlight file modes in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight file modes in `marginalia-mode'.")
 
 (defface marginalia-file-owner
   '((t :inherit font-lock-preprocessor-face))
-  "Face used to highlight file owners in `marginalia-mode'."
-  :group 'marginalia)
+  "Face used to highlight file owners in `marginalia-mode'.")
 
 (defcustom marginalia-truncate-width 80
   "Maximum truncation width of annotation fields.
 
 This value is adjusted in the `minibuffer-setup-hook' depending on the `window-width'."
-  :type 'integer
-  :group 'marginalia)
+  :type 'integer)
 
 (defcustom marginalia-annotators
   '(marginalia-annotators-light marginalia-annotators-heavy)
@@ -139,8 +122,7 @@ only with the annotations that come with Emacs) without disabling
   :type '(repeat (choice (const :tag "Light" marginalia-annotators-light)
                          (const :tag "Heavy" marginalia-annotators-heavy)
                          (const :tag "None" nil)
-                         (symbol :tag "Other")))
-  :group 'marginalia)
+                         (symbol :tag "Other"))))
 
 (defcustom marginalia-annotators-light
   '((command . marginalia-annotate-binding)
@@ -162,8 +144,7 @@ Associates completion categories with annotation functions.
 Each annotation function must return a string,
 which is appended to the completion candidate.
 See also `marginalia-annotators-heavy'."
-  :type '(alist :key-type symbol :value-type function)
-  :group 'marginalia)
+  :type '(alist :key-type symbol :value-type function))
 
 (defcustom marginalia-annotators-heavy
   (append
@@ -178,8 +159,7 @@ Associates completion categories with annotation functions.
 Each annotation function must return a string,
 which is appended to the completion candidate.
 See also `marginalia-annotators-light'."
-  :type '(alist :key-type symbol :value-type function)
-  :group 'marginalia)
+  :type '(alist :key-type symbol :value-type function))
 
 (defcustom marginalia-classifiers
   '(marginalia-classify-by-command-name
@@ -190,8 +170,7 @@ See also `marginalia-annotators-light'."
 Each function should take no arguments and return a symbol
 indicating the category, or nil to indicate it could not
 determine it."
-  :type 'hook
-  :group 'marginalia)
+  :type 'hook)
 
 (defcustom marginalia-prompt-categories
   '(("\\<group\\>" . customize-group)
@@ -205,14 +184,12 @@ determine it."
     ("\\<coding system\\>" . coding-system)
     ("\\<minor mode\\>" . minor-mode))
   "Associates regexps to match against minibuffer prompts with categories."
-  :type '(alist :key-type regexp :value-type symbol)
-  :group 'marginalia)
+  :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-command-categories
   '((imenu . imenu))
   "Associate commands with a completion category."
-  :type '(alist :key-type symbol :value-type symbol)
-  :group 'marginalia)
+  :type '(alist :key-type symbol :value-type symbol))
 
 ;;;; Pre-declarations for external packages
 
