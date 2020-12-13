@@ -329,24 +329,58 @@ This hash table is needed to speed up `marginalia-annotate-command'.")
       "\n")
   "Regexp to match lines about advice in function documentation strings.")
 
+;; Taken from advice--make-docstring, is this robust?
+(defun marginalia--advised (fun)
+  "Return t if function FUN is advised."
+  (let ((flist (indirect-function fun)))
+    (advice--p (if (eq 'macro (car-safe flist)) (cdr flist) flist))))
+
+;; Symbol class characters from Emacs 28 `help--symbol-completion-table-affixation'
+;; ! and * are our additions
+(defun marginalia--symbol-class (s)
+  "Return symbol class characters for symbol S.
+f function
+c command
+! advised
+m macro
+u custom
+v variable
+* modified
+a face"
+  (format
+   "%-6s"
+   (concat
+    (when (fboundp s)
+      (concat
+       (cond
+        ((commandp s) "c")
+        ((eq (car-safe (symbol-function s)) 'macro) "m")
+        (t "f"))
+       (when (marginalia--advised s) "!")))
+    (when (boundp s)
+      (concat
+       (if (custom-variable-p s) "u" "v")
+       (when (and (boundp s) (not (equal (symbol-value s) (default-value s)))) "*")))
+    (when (facep s) "a")
+    (when (and (fboundp 'cl-find-class) (cl-find-class s)) "t"))))
+
+(defun marginalia--function-doc (sym)
+  "Documentation string of function SYM."
+  (when-let (doc (ignore-errors (documentation sym)))
+    (replace-regexp-in-string marginalia--advice-regexp "" doc)))
+
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
   (when-let (sym (intern-soft cand))
-    (let ((doc (or (cond
-                    ((fboundp sym) (ignore-errors (documentation sym)))
-                    ((facep sym) (documentation-property sym 'face-documentation))
-                    (t (documentation-property sym 'variable-documentation)))
-                   "")))
-      (concat
-       (marginalia-annotate-command cand)
-       (marginalia--fields
-        ((if (and (fboundp sym) (string-match-p marginalia--advice-regexp doc))
-             "*" " ")
-         :face 'marginalia-modified)
-        ((if (fboundp sym)
-             (replace-regexp-in-string marginalia--advice-regexp "" doc)
-           doc)
-         :truncate marginalia-truncate-width :face 'marginalia-documentation))))))
+    (concat
+     (marginalia-annotate-command cand)
+     (marginalia--fields
+      ((marginalia--symbol-class sym) :face 'marginalia-modified)
+      ((cond
+        ((fboundp sym) (marginalia--function-doc sym))
+        ((facep sym) (documentation-property sym 'face-documentation))
+        (t (documentation-property sym 'variable-documentation)))
+       :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
@@ -359,9 +393,7 @@ This hash table is needed to speed up `marginalia-annotate-command'.")
   "Annotate variable CAND with its documentation string."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
-     ((if (and (boundp sym) (not (equal (symbol-value sym) (default-value sym))))
-          "*" " ")
-      :face 'marginalia-modified)
+     ((marginalia--symbol-class sym) :face 'marginalia-modified)
      ((if (boundp sym) (symbol-value sym) 'unbound)
       :truncate (/ marginalia-truncate-width 3) :format "%S" :face 'marginalia-variable)
      ((documentation-property sym 'variable-documentation)
@@ -397,9 +429,8 @@ This hash table is needed to speed up `marginalia-annotate-command'.")
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
       (lighter-str :width 14 :face 'marginalia-lighter)
-      ((ignore-errors (documentation mode))
-       :truncate marginalia-truncate-width
-       :face 'marginalia-documentation)))))
+      ((marginalia--function-doc mode)
+       :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
