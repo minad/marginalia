@@ -170,7 +170,7 @@ See also `marginalia-annotators-heavy'."
    '((file . marginalia-annotate-file)
      (buffer . marginalia-annotate-buffer)
      (virtual-buffer . marginalia-annotate-virtual-buffer-full)
-     (command . marginalia-annotate-symbol))
+     (command . marginalia-annotate-command))
    marginalia-annotators-light)
   "Heavy annotator functions.
 
@@ -381,6 +381,14 @@ a face"
         ((facep sym) (documentation-property sym 'face-documentation))
         (t (documentation-property sym 'variable-documentation)))
        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+
+(defun marginalia-annotate-command (cand)
+  "Annotate command CAND with its documentation string.
+Similar to `marginalia-annotate-symbol', but does not show symbol class."
+  (when-let (sym (intern-soft cand))
+    (concat
+     (marginalia-annotate-binding cand)
+     (marginalia--documentation (marginalia--function-doc sym)))))
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
