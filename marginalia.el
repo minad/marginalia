@@ -343,7 +343,7 @@ a face"
     (when (boundp s)
       (concat
        (if (custom-variable-p s) "u" "v")
-       (when (and (boundp s) (not (equal (symbol-value s) (default-value s)))) "*")))
+       (when (and (boundp s) (default-boundp s) (not (equal (symbol-value s) (default-value s)))) "*")))
     (when (facep s) "a")
     (when (and (fboundp 'cl-find-class) (cl-find-class s)) "t"))))
 
