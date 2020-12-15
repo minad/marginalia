@@ -378,7 +378,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   (when (provided-mode-derived-p (buffer-local-value 'major-mode
                                                      (window-buffer (minibuffer-selected-window)))
                                  'emacs-lisp-mode)
-    (marginalia-annotate-symbol (replace-regexp-in-string "^.*? " "" cand))))
+    (marginalia-annotate-symbol (replace-regexp-in-string "^.* " "" cand))))
 
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
