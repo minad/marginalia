@@ -353,8 +353,11 @@ a face"
 
 (defun marginalia--function-doc (sym)
   "Documentation string of function SYM."
-  (when-let (doc (ignore-errors (documentation sym)))
-    (replace-regexp-in-string marginalia--advice-regexp "" doc)))
+  (when-let (str (ignore-errors (documentation sym)))
+    (save-match-data
+      (if (string-match marginalia--advice-regexp str)
+          (substring str (match-end 0))
+        str))))
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
