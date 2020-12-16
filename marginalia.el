@@ -221,9 +221,13 @@ determine it."
 (defvar marginalia--original-category nil
   "Original category reported by completion metadata.")
 
-(defsubst marginalia--truncate (str width)
+(defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
-  (truncate-string-to-width (car (split-string str "\n")) width 0 32 "…"))
+  (truncate-string-to-width
+   (if-let (pos (string-match-p "\n" str))
+       (substring str 0 pos)
+     str)
+   width 0 32 "…"))
 
 (defsubst marginalia--align (str)
   "Align STR at the right margin."
