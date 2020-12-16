@@ -262,7 +262,7 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
     (marginalia--fields
      (str :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
-(defvar-local marginalia-annotate-binding--hash nil
+(defvar-local marginalia--annotate-binding-hash nil
   "Hash table storing the keybinding of every command.
 This hash table is needed to speed up `marginalia-annotate-binding'.")
 
@@ -273,13 +273,13 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
     ;; `where-is-internal'. `where-is-internal' generates a lot of garbage, leading to garbage
     ;; collecting pauses when interacting with the minibuffer. See
     ;; https://github.com/minad/marginalia/issues/16.
-    (unless marginalia-annotate-binding--hash
-      (setq marginalia-annotate-binding--hash (make-hash-table))
+    (unless marginalia--annotate-binding-hash
+      (setq marginalia--annotate-binding-hash (make-hash-table))
       (mapatoms (lambda (sym)
                   (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
-                    (puthash sym key marginalia-annotate-binding--hash)))))
+                    (puthash sym key marginalia--annotate-binding-hash)))))
     (when-let* ((sym (intern-soft cand))
-                (binding (gethash sym marginalia-annotate-binding--hash)))
+                (binding (gethash sym marginalia--annotate-binding-hash)))
       (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
