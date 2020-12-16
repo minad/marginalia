@@ -231,12 +231,13 @@ determine it."
 
 (defsubst marginalia--align (str)
   "Align STR at the right margin."
-  (concat " "
-          (propertize
-           " "
-           'display
-           `(space :align-to (- right-fringe ,(length str))))
-          str))
+  (unless (string-blank-p str)
+    (concat " "
+            (propertize
+             " "
+             'display
+             `(space :align-to (- right-fringe ,(length str))))
+            str)))
 
 (cl-defmacro marginalia--field (field &key truncate format face width)
   "Format FIELD as a string according to some options.
