@@ -450,7 +450,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
      ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
      ((cond
        ((eq (package-desc-dir desc) 'builtin) (propertize "builtin" 'face 'marginalia-installed))
-       ((package-installed-p desc) (propertize "installed" 'face 'marginalia-installed))
+       ((not (package-desc-archive desc)) (propertize "installed" 'face 'marginalia-installed))
        (t (propertize (package-desc-archive desc) 'face 'marginalia-archive))) :width 9)
      ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
