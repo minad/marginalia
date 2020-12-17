@@ -86,6 +86,7 @@ See also `marginalia-annotators-heavy'."
 (defcustom marginalia-annotators-heavy
   (append
    '((file . marginalia-annotate-file)
+     (project-file . marginalia-annotate-project-file)
      (buffer . marginalia-annotate-buffer)
      (virtual-buffer . marginalia-annotate-virtual-buffer-full)
      (command . marginalia-annotate-command))
@@ -209,6 +210,9 @@ determine it."
 (declare-function package-desc-version "package")
 (declare-function package-installed-p "package")
 (declare-function package-version-join "package")
+
+(declare-function project-current "project")
+(declare-function project-root "project")
 
 ;;;; Marginalia mode
 
@@ -510,7 +514,7 @@ using `minibuffer-force-complete' on the candidate CAND."
     cand))
 
 (defun marginalia-annotate-file (cand)
-  "Annotate file CAND with its size and modification time."
+  "Annotate file CAND with its size, modification time and other attributes."
   (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
     (marginalia--fields
      ((file-attribute-modes attributes) :face 'marginalia-file-modes)
@@ -522,6 +526,13 @@ using `minibuffer-force-complete' on the candidate CAND."
      ((format-time-string
        "%b %d %H:%M"
        (file-attribute-modification-time attributes)) :face 'marginalia-date))))
+
+(defun marginalia-annotate-project-file (cand)
+  "Annotate file CAND with its size, modification time and other attributes."  
+  (when-let ((project (project-current))
+             (root (project-root project))
+             (file (expand-file-name cand root)))
+    (marginalia-annotate-file file)))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
