@@ -559,7 +559,7 @@ using `minibuffer-force-complete' on the candidate CAND."
   (when-let (mct minibuffer-completion-table)
     (when (or (eq mct 'help--symbol-completion-table)
               (obarrayp mct)
-              (and (consp mct) (symbolp (car mct)))) ; assume list of symbols
+              (and (not (functionp mct)) (consp mct) (symbolp (car mct)))) ; assume list of symbols
       'symbol)))
 
 (defun marginalia-classify-by-prompt ()
