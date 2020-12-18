@@ -331,14 +331,21 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; ! and * are our additions
 (defun marginalia--symbol-class (s)
   "Return symbol class characters for symbol S.
+
+Function:
 f function
 c command
-! advised
 m macro
+! advised
+
+Variable:
 u custom
 v variable
 * modified
-a face"
+
+Other:
+a face
+t cl-type"
   (format
    "%-6s"
    (concat
