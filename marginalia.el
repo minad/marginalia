@@ -589,6 +589,12 @@ PROP is the property which is looked up."
      ;; we do want the advice triggered for completion-metadata-get
      (when-let (cat (completion-metadata-get metadata 'category))
        (alist-get cat (symbol-value (car marginalia-annotators)))))
+    ('affixation-function
+     ;; We do want the advice triggered for `completion-metadata-get'.
+     ;; Return wrapper around `annotation-function'.
+     (when-let* ((cat (completion-metadata-get metadata 'category))
+                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+       (lambda (cands) (mapcar (lambda (x) (list x (funcall annotate x))) cands))))
     ('category
      ;; using alist-get bypasses any advice on completion-metadata-get
      ;; to avoid infinite recursion
