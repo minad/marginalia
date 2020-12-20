@@ -457,7 +457,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
     (concat
      (propertize (format " (%c)" char) 'face 'marginalia-char)
      (marginalia--fields
-      (char :format "%05x" :face 'marginalia-number)
+      (char :format "%06X" :face 'marginalia-number)
       ((char-code-property-description
         'general-category
         (get-char-code-property char 'general-category))
