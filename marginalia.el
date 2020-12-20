@@ -77,6 +77,7 @@ only with the annotations that come with Emacs) without disabling
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
     (face . marginalia-annotate-face)
+    (unicode-name . marginalia-annotate-char)
     (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
     (variable . marginalia-annotate-variable)
@@ -149,6 +150,10 @@ determine it."
   '((t :inherit font-lock-keyword-face))
   "Face used to highlight keys in `marginalia-mode'.")
 
+(defface marginalia-char
+  '((t :inherit marginalia-key))
+  "Face used to highlight char in `marginalia-mode'.")
+
 (defface marginalia-lighter
   '((t :inherit marginalia-size))
   "Face used to highlight lighters in `marginalia-mode'.")
@@ -178,7 +183,7 @@ determine it."
   "Face used to highlight dates in `marginalia-mode'.")
 
 (defface marginalia-version
-  '((t :inherit marginalia-size))
+  '((t :inherit marginalia-number))
   "Face used to highlight package version in `marginalia-mode'.")
 
 (defface marginalia-archive
@@ -190,8 +195,12 @@ determine it."
   "Face used to highlight package status in `marginalia-mode'.")
 
 (defface marginalia-size
-  '((t :inherit font-lock-constant-face))
+  '((t :inherit marginalia-number))
   "Face used to highlight sizes in `marginalia-mode'.")
+
+(defface marginalia-number
+  '((t :inherit font-lock-constant-face))
+  "Face used to highlight char in `marginalia-mode'.")
 
 (defface marginalia-modified
   '((t :inherit font-lock-negation-char-face))
@@ -435,12 +444,24 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
      (val :truncate marginalia-truncate-width :face 'marginalia-variable))))
 
 (defun marginalia-annotate-face (cand)
-  "Annotate face CAND with documentation string and face example."
+  "Annotate face CAND with its documentation string and face example."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
      ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
      ((documentation-property sym 'face-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+
+(defun marginalia-annotate-char (cand)
+  "Annotate character CAND with its general character category and character code."
+  (when-let (char (char-from-name cand t))
+    (concat
+     (propertize (format " (%c)" char) 'face 'marginalia-char)
+     (marginalia--fields
+      (char :format "%05x" :face 'marginalia-number)
+      ((char-code-property-description
+        'general-category
+        (get-char-code-property char 'general-category))
+       :width 30 :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
