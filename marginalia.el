@@ -49,6 +49,10 @@ This value is adjusted in the `minibuffer-setup-hook' depending on the `window-w
   "Use wider separator for window widths larger than this value."
   :type 'integer)
 
+(defcustom marginalia-margin-min 8
+  "Minimum whitespace margin at the right side."
+  :type 'integer)
+
 (defcustom marginalia-margin-threshold 160
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
@@ -618,8 +622,8 @@ PROP is the property which is looked up."
 Remember `this-command' for annotation."
   (let ((w (window-width)))
     (setq-local marginalia-truncate-width (min (/ w 2) marginalia-truncate-width))
-    (setq-local marginalia--separator (if (> w marginalia-separator-threshold) "    " " "))
-    (setq-local marginalia--margin (when (> w marginalia-margin-threshold)
+    (setq-local marginalia--separator (if (>= w marginalia-separator-threshold) "    " " "))
+    (setq-local marginalia--margin (when (>= w (+ marginalia-margin-min marginalia-margin-threshold))
                                        (make-string (- w marginalia-margin-threshold) 32)))
     (setq-local marginalia--this-command this-command)))
 
