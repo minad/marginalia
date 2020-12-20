@@ -39,11 +39,18 @@
   :group 'convenience
   :prefix "marginalia-")
 
-
 (defcustom marginalia-truncate-width 80
   "Maximum truncation width of annotation fields.
 
 This value is adjusted in the `minibuffer-setup-hook' depending on the `window-width'."
+  :type 'integer)
+
+(defcustom marginalia-separator-threshold 120
+  "Use wider separator for window widths larger than this value."
+  :type 'integer)
+
+(defcustom marginalia-margin-threshold 160
+  "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
 (defcustom marginalia-annotators
@@ -219,6 +226,9 @@ determine it."
 (defvar marginalia--separator "    "
   "Field separator.")
 
+(defvar marginalia--margin nil
+  "Right margin.")
+
 (defvar marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
 
@@ -236,6 +246,8 @@ determine it."
 (defsubst marginalia--align (str)
   "Align STR at the right margin."
   (unless (string-blank-p str)
+    (when marginalia--margin
+      (setq str (concat str marginalia--margin)))
     (concat " "
             (propertize
              " "
@@ -606,7 +618,9 @@ PROP is the property which is looked up."
 Remember `this-command' for annotation."
   (let ((w (window-width)))
     (setq-local marginalia-truncate-width (min (/ w 2) marginalia-truncate-width))
-    (setq-local marginalia--separator (if (> w 100) "    " " "))
+    (setq-local marginalia--separator (if (> w marginalia-separator-threshold) "    " " "))
+    (setq-local marginalia--margin (when (> w marginalia-margin-threshold)
+                                       (make-string (- w marginalia-margin-threshold) 32)))
     (setq-local marginalia--this-command this-command)))
 
 ;;;###autoload
