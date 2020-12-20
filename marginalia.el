@@ -58,7 +58,7 @@ This value is adjusted in the `minibuffer-setup-hook' depending on the `window-w
   :type 'integer)
 
 (defcustom marginalia-annotators
-  '(marginalia-annotators-light marginalia-annotators-heavy)
+  '(marginalia-annotators-light marginalia-annotators-heavy nil)
   "Choose an annotator association list for minibuffer completion.
 The first entry in the list is used for annotations.
 You can cycle between the annotators using `marginalia-cycle-annotators'.
@@ -678,15 +678,16 @@ If called from the minibuffer the annotator cycling is local,
 that it is, it does not affect subsequent minibuffers.  When called
 from a regular buffer the effect is global."
   (interactive)
-  (let ((annotators (append (cdr marginalia-annotators)
-                            (list (car marginalia-annotators)))))
-    ;; If `marginalia-cycle-annotators' has been invoked from inside the minibuffer, only change
-    ;; the annotators locally. This is useful if the command is used as an action. If the command is
-    ;; not triggered from inside the minibuffer, cycle the annotator globally. Hopefully this is
-    ;; not too confusing.
-    (if (minibufferp)
-        (setq-local marginalia-annotators annotators)
-      (setq marginalia-annotators annotators))))
+  ;; If `marginalia-cycle-annotators' has been invoked from inside the minibuffer, only change
+  ;; the annotators locally. This is useful if the command is used as an action. If the command is
+  ;; not triggered from inside the minibuffer, cycle the annotator globally. Hopefully this is
+  ;; not too confusing.
+  (if-let* ((win (active-minibuffer-window))
+            (buf (window-buffer win)))
+      (let ((a (buffer-local-value 'marginalia-annotators buf)))
+        (setf (buffer-local-value 'marginalia-annotators buf) (append (cdr a) (list (car a)))))
+    (let ((a marginalia-annotators))
+      (setq marginalia-annotators (append (cdr a) (list (car a)))))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here

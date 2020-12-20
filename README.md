@@ -40,6 +40,11 @@ commands.
 ~~~ elisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
+  ;; When using the Embark package, you can bind `marginalia-cycle-annotators'
+  ;; as an Embark action!
+  ;; :bind (:map embark-general-map
+  ;;        ("A" . marginalia-cycle-annotators))
+
   ;; The :init configuration is always executed (Not lazy!)
   :init
 
@@ -52,5 +57,5 @@ commands.
   ;; By default only the keybinding is shown as annotation.
   ;; Note that there is the command `marginalia-cycle-annotators` to
   ;; switch between the annotators.
-  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light)))
+  ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 ~~~
