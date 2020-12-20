@@ -276,10 +276,12 @@ FORMAT is a format string. This must be used if the field value is not a string.
 FACE is the name of the face, with which the field should be propertized.
 WIDTH is the format width. This can be specified as alternative to FORMAT."
   (cl-assert (not (and width format)))
-  (when width (setq format (format "%%%ds" (- width))))
-  (if format
-      (setq field `(format ,format ,field))
-    (setq field `(or ,field "")))
+  (when width
+    (setq field `(or ,field "")
+          format (format "%%%ds" (- width))))
+  (setq field (if format
+                  `(format ,format ,field)
+                `(or ,field "")))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
   (when face (setq field `(propertize ,field 'face ,face)))
   field)
