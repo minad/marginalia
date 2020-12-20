@@ -61,12 +61,12 @@ This value is adjusted in the `minibuffer-setup-hook' depending on the `window-w
   '(marginalia-annotators-light marginalia-annotators-heavy nil)
   "Choose an annotator association list for minibuffer completion.
 The first entry in the list is used for annotations.
-You can cycle between the annotators using `marginalia-cycle-annotators'.
+You can cycle between the annotators using `marginalia-cycle'.
 Annotations are only shown if `marginalia-mode' is enabled.
 An entry of nil disables marginalia's annotations (leaving you
 only with the annotations that come with Emacs) without disabling
 `marginalia-mode'; this can be convenient for users of
-`marginalia-cycle-annotators'."
+`marginalia-cycle'."
   :type '(repeat (choice (const :tag "Light" marginalia-annotators-light)
                          (const :tag "Heavy" marginalia-annotators-heavy)
                          (const :tag "None" nil)
@@ -669,19 +669,18 @@ Remember `this-command' for annotation."
 
 ;; If you want to cycle between annotators while being in the minibuffer, the completion-system
 ;; should refresh the candidate list. Currently there is no support for this in marginalia, but it
-;; is possible to advise the `marginalia-cycle-annotators' function with the necessary refreshing
-;; logic. See the discussion in https://github.com/minad/marginalia/issues/10 for reference.
+;; is possible to advise the `marginalia-cycle' function with the necessary refreshing logic. See
+;; the discussion in https://github.com/minad/marginalia/issues/10 for reference.
 ;;;###autoload
-(defun marginalia-cycle-annotators ()
+(defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotators'.
 If called from the minibuffer the annotator cycling is local,
 that it is, it does not affect subsequent minibuffers.  When called
 from a regular buffer the effect is global."
   (interactive)
-  ;; If `marginalia-cycle-annotators' has been invoked from inside the minibuffer, only change
-  ;; the annotators locally. This is useful if the command is used as an action. If the command is
-  ;; not triggered from inside the minibuffer, cycle the annotator globally. Hopefully this is
-  ;; not too confusing.
+  ;; If `marginalia-cycle' has been invoked from inside the minibuffer, only change the annotators
+  ;; locally. This is useful if the command is used as an action. If the command is not triggered
+  ;; from inside the minibuffer, cycle the annotator globally. Hopefully this is not too confusing.
   (if-let* ((win (active-minibuffer-window))
             (buf (window-buffer win)))
       (let ((a (buffer-local-value 'marginalia-annotators buf)))

@@ -14,7 +14,7 @@ The annotations are added based on the completion category. For example
 `find-file` reports the `file` category and `M-x` reports the `command`
 category. You can choose between more or less detailed annotators, by setting
 the variable `marginalia-annotators` or by invoking the command
-`marginalia-cycle-annotators`.
+`marginalia-cycle`.
 
 Since many commands do not report a completion category themselves, Marginalia
 provides a classifier system, which tries to guess the correct category based
@@ -40,10 +40,9 @@ commands.
 ~~~ elisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
-  ;; When using the Embark package, you can bind `marginalia-cycle-annotators'
-  ;; as an Embark action!
+  ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
   ;; :bind (:map embark-general-map
-  ;;        ("A" . marginalia-cycle-annotators))
+  ;;        ("A" . marginalia-cycle))
 
   ;; The :init configuration is always executed (Not lazy!)
   :init
@@ -55,7 +54,7 @@ commands.
   ;; Prefer richer, more heavy, annotations over the lighter default variant.
   ;; E.g. M-x will show the documentation string additional to the keybinding.
   ;; By default only the keybinding is shown as annotation.
-  ;; Note that there is the command `marginalia-cycle-annotators` to
+  ;; Note that there is the command `marginalia-cycle` to
   ;; switch between the annotators.
   ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil)))
 ~~~
