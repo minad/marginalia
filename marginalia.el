@@ -482,6 +482,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
       ((if (and (boundp mode) (symbol-value mode))
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
+      ((if (local-variable-if-set-p mode) "L" "G") :face 'marginalia-modified)
       (lighter-str :width 14 :face 'marginalia-lighter)
       ((marginalia--function-doc mode)
        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
