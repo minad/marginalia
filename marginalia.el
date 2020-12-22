@@ -310,7 +310,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
     ;; collecting pauses when interacting with the minibuffer. See
     ;; https://github.com/minad/marginalia/issues/16.
     (unless marginalia--annotate-binding-hash
-      (setq marginalia--annotate-binding-hash (make-hash-table))
+      (setq marginalia--annotate-binding-hash (make-hash-table :size 1025))
       (mapatoms (lambda (sym)
                   (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
                     (puthash sym key marginalia--annotate-binding-hash)))))
