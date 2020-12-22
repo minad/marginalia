@@ -491,7 +491,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
   (when-let* ((pkg (intern (replace-regexp-in-string "-[[:digit:]\\.-]+$" "" cand)))
-              ;; taken from embark.el, originally `describe-package-1`
+              ;; taken from `describe-package-1'
               (desc (or (car (alist-get pkg package-alist))
                         (if-let (built-in (assq pkg package--builtins))
                             (package--from-builtin built-in)
