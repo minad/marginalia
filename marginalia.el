@@ -368,6 +368,7 @@ m macro
 Variable:
 u custom
 v variable
+l local
 * modified
 
 Other:
@@ -385,6 +386,7 @@ t cl-type"
        (when (marginalia--advised s) "!")))
     (when (boundp s)
       (concat
+       (when (local-variable-if-set-p s) "l")
        (if (custom-variable-p s) "u" "v")
        (when (and (boundp s) (default-boundp s) (not (equal (symbol-value s) (default-value s)))) "*")))
     (when (facep s) "a")
