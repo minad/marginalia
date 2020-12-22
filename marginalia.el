@@ -332,7 +332,8 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-virtual-buffer-full (cand)
   "Annotate virtual-buffer CAND with the buffer class."
-  (let ((cand-without-prefix (replace-regexp-in-string "^[^ ]+ " "" cand)))
+  ;; Strip consult narrowing prefix
+  (let ((cand-without-prefix (replace-regexp-in-string "^.[[:nonascii:]] " "" cand)))
     (pcase (elt cand 0)
       (?b (marginalia-annotate-buffer cand-without-prefix))
       (?f (marginalia-annotate-file cand-without-prefix))
@@ -469,23 +470,24 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
-  (let* ((sym (intern-soft cand))
-         (mode (if (and sym (boundp sym))
-                   sym
-                 (with-selected-window
-                     (or (minibuffer-selected-window) (selected-window))
-                   (lookup-minor-mode-from-indicator cand))))
-         (lighter (cdr (assq mode minor-mode-alist)))
-         (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
-    (concat
-     (marginalia--fields
-      ((if (and (boundp mode) (symbol-value mode))
-           (propertize "On" 'face 'marginalia-on)
-         (propertize "Off" 'face 'marginalia-off)) :width 3)
-      ((if (local-variable-if-set-p mode) "L" "G") :face 'marginalia-modified)
-      (lighter-str :width 14 :face 'marginalia-lighter)
-      ((marginalia--function-doc mode)
-       :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+  ;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'
+  (with-selected-window (minibuffer-selected-window)
+    (let* ((cand (replace-regexp-in-string "^\\(.[[:nonascii:]] \\)+" "" cand)) ;; Strip consult narrowing prefix
+           (sym (intern-soft cand))
+           (mode (if (and sym (boundp sym))
+                     sym
+                   (lookup-minor-mode-from-indicator cand)))
+           (lighter (cdr (assq mode minor-mode-alist)))
+           (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
+      (concat
+       (marginalia--fields
+        ((if (and (boundp mode) (symbol-value mode))
+             (propertize "On" 'face 'marginalia-on)
+           (propertize "Off" 'face 'marginalia-off)) :width 3)
+        ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-modified)
+        (lighter-str :width 14 :face 'marginalia-lighter)
+        ((marginalia--function-doc mode)
+         :truncate marginalia-truncate-width :face 'marginalia-documentation))))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
