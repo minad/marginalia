@@ -225,10 +225,9 @@ determine it."
 (defvar package-archive-contents)
 (declare-function package--from-builtin "package")
 (declare-function package-desc-archive "package")
-(declare-function package-desc-dir "package")
 (declare-function package-desc-summary "package")
 (declare-function package-desc-version "package")
-(declare-function package-installed-p "package")
+(declare-function package-desc-status "package")
 (declare-function package-version-join "package")
 
 (declare-function project-current "project")
@@ -500,9 +499,8 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
     (marginalia--fields
      ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
      ((cond
-       ((eq (package-desc-dir desc) 'builtin) (propertize "builtin" 'face 'marginalia-installed))
-       ((not (package-desc-archive desc)) (propertize "installed" 'face 'marginalia-installed))
-       (t (propertize (package-desc-archive desc) 'face 'marginalia-archive))) :width 9)
+       ((package-desc-archive desc) (propertize (package-desc-archive desc) 'face 'marginalia-archive))
+       (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
      ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
