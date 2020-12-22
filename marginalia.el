@@ -624,7 +624,7 @@ looking for a regexp that matches the prompt."
   "Setup annotator context around BODY."
   (let ((w (make-symbol "w")))
     `(let ((,w (window-width)))
-       (with-selected-window (minibuffer-selected-window)
+       (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
                (marginalia--margin (when (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
