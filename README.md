@@ -51,6 +51,10 @@ commands.
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode)
 
+  ;; When using Selectrum and `marginalia-cycle' as an Embark action,
+  ;; ensure that Selectrum is refreshed when cycling annotations.
+  (advice-add #'marginalia-cycle :after #'selectrum-exhibit)
+
   ;; Prefer richer, more heavy, annotations over the lighter default variant.
   ;; E.g. M-x will show the documentation string additional to the keybinding.
   ;; By default only the keybinding is shown as annotation.
