@@ -623,7 +623,10 @@ looking for a regexp that matches the prompt."
 (defmacro marginalia--context (&rest body)
   "Setup annotator context around BODY."
   (let ((w (make-symbol "w")))
+    ;; Take the window width of the current window (minibuffer window!)
     `(let ((,w (window-width)))
+       ;; Switch to the originally selected window before entering the minibuffer
+       ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
