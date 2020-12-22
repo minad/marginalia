@@ -303,19 +303,18 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 
 (defun marginalia-annotate-binding (cand)
   "Annotate command CAND with keybinding."
-  (with-current-buffer (window-buffer (minibuffer-selected-window))
-    ;; Precomputing the keybinding of every command is faster than looking it up every time using
-    ;; `where-is-internal'. `where-is-internal' generates a lot of garbage, leading to garbage
-    ;; collecting pauses when interacting with the minibuffer. See
-    ;; https://github.com/minad/marginalia/issues/16.
-    (unless marginalia--annotate-binding-hash
-      (setq marginalia--annotate-binding-hash (make-hash-table :size 1025))
-      (mapatoms (lambda (sym)
-                  (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
-                    (puthash sym key marginalia--annotate-binding-hash)))))
-    (when-let* ((sym (intern-soft cand))
-                (binding (gethash sym marginalia--annotate-binding-hash)))
-      (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key))))
+  ;; Precomputing the keybinding of every command is faster than looking it up every time using
+  ;; `where-is-internal'. `where-is-internal' generates a lot of garbage, leading to garbage
+  ;; collecting pauses when interacting with the minibuffer. See
+  ;; https://github.com/minad/marginalia/issues/16.
+  (unless marginalia--annotate-binding-hash
+    (setq marginalia--annotate-binding-hash (make-hash-table :size 1025))
+    (mapatoms (lambda (sym)
+                (when-let (key (and (commandp sym) (where-is-internal sym nil t)))
+                  (puthash sym key marginalia--annotate-binding-hash)))))
+  (when-let* ((sym (intern-soft cand))
+              (binding (gethash sym marginalia--annotate-binding-hash)))
+    (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key)))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-virtual-buffer-class (cand)
@@ -423,9 +422,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
-  (when (provided-mode-derived-p (buffer-local-value 'major-mode
-                                                     (window-buffer (minibuffer-selected-window)))
-                                 'emacs-lisp-mode)
+  (when (derived-mode-p 'emacs-lisp-mode)
     (marginalia-annotate-symbol (replace-regexp-in-string "^.* " "" cand))))
 
 (defun marginalia-annotate-variable (cand)
@@ -469,24 +466,22 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
-  ;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'
-  (with-selected-window (minibuffer-selected-window)
-    (let* ((cand (replace-regexp-in-string "^\\(.[[:nonascii:]] \\)+" "" cand)) ;; Strip consult narrowing prefix
-           (sym (intern-soft cand))
-           (mode (if (and sym (boundp sym))
-                     sym
-                   (lookup-minor-mode-from-indicator cand)))
-           (lighter (cdr (assq mode minor-mode-alist)))
-           (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
-      (concat
-       (marginalia--fields
-        ((if (and (boundp mode) (symbol-value mode))
-             (propertize "On" 'face 'marginalia-on)
-           (propertize "Off" 'face 'marginalia-off)) :width 3)
-        ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-modified)
-        (lighter-str :width 14 :face 'marginalia-lighter)
-        ((marginalia--function-doc mode)
-         :truncate marginalia-truncate-width :face 'marginalia-documentation))))))
+  (let* ((cand (replace-regexp-in-string "^\\(.[[:nonascii:]] \\)+" "" cand)) ;; Strip consult narrowing prefix
+         (sym (intern-soft cand))
+         (mode (if (and sym (boundp sym))
+                   sym
+                 (lookup-minor-mode-from-indicator cand)))
+         (lighter (cdr (assq mode minor-mode-alist)))
+         (lighter-str (and lighter (string-trim (format-mode-line (cons t lighter))))))
+    (concat
+     (marginalia--fields
+      ((if (and (boundp mode) (symbol-value mode))
+           (propertize "On" 'face 'marginalia-on)
+         (propertize "Off" 'face 'marginalia-off)) :width 3)
+      ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-modified)
+      (lighter-str :width 14 :face 'marginalia-lighter)
+      ((marginalia--function-doc mode)
+       :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
@@ -622,6 +617,20 @@ looking for a regexp that matches the prompt."
              when (string-match-p regexp prompt)
              return category)))
 
+;; We generally run the annotators in the original window.
+;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'.
+;; Otherwise it would probably suffice to only change the current buffer.
+(defmacro marginalia--context (&rest body)
+  "Setup annotator context around BODY."
+  (let ((w (make-symbol "w")))
+    `(let ((,w (window-width)))
+       (with-selected-window (minibuffer-selected-window)
+         (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
+               (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
+               (marginalia--margin (when (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
+                                     (make-string (- ,w marginalia-margin-threshold) 32))))
+           ,@body)))))
+
 (defun marginalia--completion-metadata-get (metadata prop)
   "Meant as :before-until advice for `completion-metadata-get'.
 METADATA is the metadata.
@@ -629,14 +638,19 @@ PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
      ;; we do want the advice triggered for completion-metadata-get
-     (when-let (cat (completion-metadata-get metadata 'category))
-       (alist-get cat (symbol-value (car marginalia-annotators)))))
+     (when-let* ((cat (completion-metadata-get metadata 'category))
+                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+       (lambda (cand)
+         (marginalia--context
+          (funcall annotate cand)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
      ;; Return wrapper around `annotation-function'.
      (when-let* ((cat (completion-metadata-get metadata 'category))
                  (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
-       (lambda (cands) (mapcar (lambda (x) (list x (funcall annotate x))) cands))))
+       (lambda (cands)
+         (marginalia--context
+          (mapcar (lambda (x) (list x (funcall annotate x))) cands)))))
     ('category
      ;; using alist-get bypasses any advice on completion-metadata-get
      ;; to avoid infinite recursion
@@ -645,13 +659,8 @@ PROP is the property which is looked up."
 
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
-Remember `this-command' for annotation."
-  (let ((w (window-width)))
-    (setq-local marginalia-truncate-width (min (/ w 2) marginalia-truncate-width))
-    (setq-local marginalia--separator (if (>= w marginalia-separator-threshold) "    " " "))
-    (setq-local marginalia--margin (when (>= w (+ marginalia-margin-min marginalia-margin-threshold))
-                                       (make-string (- w marginalia-margin-threshold) 32)))
-    (setq-local marginalia--this-command this-command)))
+Remember `this-command' for `marginalia-classify-by-command-name'."
+  (setq-local marginalia--this-command this-command))
 
 ;;;###autoload
 (define-minor-mode marginalia-mode
