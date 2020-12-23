@@ -522,7 +522,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
                           marginalia--separator
                           (:propertize "%1*%1+" face marginalia-modified)
                           marginalia--separator
-                          (20 (:propertize mode-name face marginalia-mode)))
+                          (16 (:propertize mode-name face marginalia-mode)))
                         nil nil buffer))
      ((when-let (file (buffer-file-name buffer))
         (abbreviate-file-name file))
