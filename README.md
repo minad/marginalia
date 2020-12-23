@@ -40,9 +40,12 @@ commands.
 ~~~ elisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
-  ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
-  ;; :bind (:map embark-general-map
-  ;;        ("A" . marginalia-cycle))
+  :bind (:map minibuffer-local-map
+              ("C-M-a" . marginalia-cycle)
+         ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
+         ;;:map embark-general-map
+         ;;     ("A" . marginalia-cycle)
+        )
 
   ;; The :init configuration is always executed (Not lazy!)
   :init
@@ -51,8 +54,7 @@ commands.
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode)
 
-  ;; When using Selectrum and `marginalia-cycle' as an Embark action,
-  ;; ensure that Selectrum is refreshed when cycling annotations.
+  ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
   (advice-add #'marginalia-cycle :after
               (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
 
