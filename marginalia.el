@@ -533,7 +533,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
        (if (buffer-modified-p buffer) "*" " ")
        (if (buffer-local-value 'buffer-read-only buffer) "%" " "))
       :face 'marginalia-modified)
-     ((buffer-local-value 'mode-name buffer) :width 20 :face 'marginalia-mode)
+     ((format-mode-line (buffer-local-value 'mode-name buffer)) :width 20 :face 'marginalia-mode)
      ((when-let (file (buffer-file-name buffer))
         (abbreviate-file-name file))
       :truncate (/ marginalia-truncate-width 2)
