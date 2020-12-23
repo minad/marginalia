@@ -554,18 +554,19 @@ component of a full file path.
 
 This function returns what would be the minibuffer contents after
 using `minibuffer-force-complete' on the candidate CAND."
-  (if (minibufferp)
-      (let* ((contents (minibuffer-contents))
-             (pt (- (point) (minibuffer-prompt-end)))
-             (bounds (completion-boundaries
-                      (substring contents 0 pt)
-                      minibuffer-completion-table
-                      minibuffer-completion-predicate
-                      (substring contents pt))))
-        (concat (substring contents 0 (car bounds))
-                cand
-                (substring contents (+ pt (cdr bounds)))))
-    ;; not in a minibuffer, trust that cand already conveys all
+  (if-let (win (active-minibuffer-window))
+      (with-selected-window win
+        (let* ((contents (minibuffer-contents))
+               (pt (- (point) (minibuffer-prompt-end)))
+               (bounds (completion-boundaries
+                        (substring contents 0 pt)
+                        minibuffer-completion-table
+                        minibuffer-completion-predicate
+                        (substring contents pt))))
+          (concat (substring contents 0 (car bounds))
+                  cand
+                  (substring contents (+ pt (cdr bounds))))))
+    ;; no minibuffer is active, trust that cand already conveys all
     ;; necessary information (there's not much else we can do)
     cand))
 
