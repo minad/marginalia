@@ -518,9 +518,9 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   "Annotate buffer CAND with modification status, file name and major mode."
   (when-let (buffer (get-buffer cand))
     (marginalia--fields
-     ((format-mode-line '((7 (:propertize "%I" face marginalia-size))
+     ((format-mode-line '((:propertize "%1*%1+%1@" face marginalia-modified)
                           marginalia--separator
-                          (:propertize "%1*%1+" face marginalia-modified)
+                          (7 (:propertize "%I" face marginalia-size))
                           marginalia--separator
                           (16 (:propertize mode-name face marginalia-mode)))
                         nil nil buffer))
