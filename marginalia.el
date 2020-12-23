@@ -514,26 +514,16 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   "Annotate coding system CAND with its description."
   (marginalia--documentation (coding-system-doc-string (intern cand))))
 
-(defun marginalia--buffer-bytes (buf)
-  "Return byte size of BUF."
-  (with-current-buffer buf
-    (position-bytes (let ((max (point-max)))
-                      (if (= (buffer-size) (- max (point-min)))
-                          max ;; Buffer not narrowed
-                        (save-restriction
-                          (widen)
-                          (point-max)))))))
-
 (defun marginalia-annotate-buffer (cand)
   "Annotate buffer CAND with modification status, file name and major mode."
   (when-let (buffer (get-buffer cand))
     (marginalia--fields
-     ((file-size-human-readable (marginalia--buffer-bytes buffer)) :width 7 :face 'marginalia-size)
+     ((format-mode-line "%I" nil nil buffer) :width 7 :face 'marginalia-size)
      ((concat
        (if (buffer-modified-p buffer) "*" " ")
        (if (buffer-local-value 'buffer-read-only buffer) "%" " "))
       :face 'marginalia-modified)
-     ((format-mode-line (buffer-local-value 'mode-name buffer))
+     ((format-mode-line 'mode-name nil nil buffer)
       :width 20 :face 'marginalia-mode)
      ((when-let (file (buffer-file-name buffer))
         (abbreviate-file-name file))
