@@ -320,7 +320,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 (defun marginalia-annotate-virtual-buffer-class (cand)
   "Annotate virtual-buffer CAND with the buffer class."
   (marginalia--fields
-   ((pcase (elt cand 0)
+   ((pcase (- (elt cand 0) #x100000)
       (?b "Buffer")
       (?f "File")
       (?m "Bookmark")
@@ -330,12 +330,10 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-virtual-buffer-full (cand)
   "Annotate virtual-buffer CAND with the buffer class."
-  ;; Strip consult narrowing prefix
-  (let ((cand-without-prefix (replace-regexp-in-string "^.[[:nonascii:]] " "" cand)))
-    (pcase (elt cand 0)
-      (?b (marginalia-annotate-buffer cand-without-prefix))
-      (?f (marginalia-annotate-file cand-without-prefix))
-      (_ (marginalia-annotate-virtual-buffer-class cand)))))
+  (pcase (- (elt cand 0) #x100000)
+    (?b (marginalia-annotate-buffer (substring cand 1)))
+    (?f (marginalia-annotate-file (substring cand 1)))
+    (_ (marginalia-annotate-virtual-buffer-class cand))))
 
 (defconst marginalia--advice-regexp
   (rx bos
@@ -467,8 +465,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
-  (let* ((cand (replace-regexp-in-string "^\\(.[[:nonascii:]] \\)+" "" cand)) ;; Strip consult narrowing prefix
-         (sym (intern-soft cand))
+  (let* ((sym (intern-soft cand))
          (mode (if (and sym (boundp sym))
                    sym
                  (lookup-minor-mode-from-indicator cand)))
