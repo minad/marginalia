@@ -423,6 +423,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
   (when (derived-mode-p 'emacs-lisp-mode)
+    ;; Strip until the last whitespace in order to support flat imenu
     (marginalia-annotate-symbol (replace-regexp-in-string "^.* " "" cand))))
 
 (defun marginalia-annotate-variable (cand)
