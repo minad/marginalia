@@ -606,15 +606,14 @@ looking for a regexp that matches the prompt."
              when (string-match-p regexp prompt)
              return category)))
 
-;; We generally run the annotators in the original window.
-;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'.
-;; Otherwise it would probably suffice to only change the current buffer.
 (defmacro marginalia--context (&rest body)
   "Setup annotator context around BODY."
   (let ((w (make-symbol "w")))
     ;; Take the window width of the current window (minibuffer window!)
     `(let ((,w (window-width)))
-       ;; Switch to the originally selected window before entering the minibuffer
+       ;; We generally run the annotators in the original window.
+       ;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'.
+       ;; Otherwise it would probably suffice to only change the current buffer.
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
