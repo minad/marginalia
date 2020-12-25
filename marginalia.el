@@ -27,6 +27,8 @@
 
 ;; Enrich existing commands with completion annotations
 
+;; Merry Christmas!
+
 ;;; Code:
 
 (require 'subr-x)
