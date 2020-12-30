@@ -333,8 +333,8 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 (defun marginalia-annotate-virtual-buffer-full (cand)
   "Annotate virtual-buffer CAND with the buffer class."
   (pcase (- (elt cand 0) #x100000)
-    (?b (marginalia-annotate-buffer (substring cand 1)))
-    (?f (marginalia-annotate-file (substring cand 1)))
+    ((or ?b ?p) (marginalia-annotate-buffer (substring cand 1)))
+    ((or ?f ?q) (marginalia-annotate-file (substring cand 1)))
     (_ (marginalia-annotate-virtual-buffer-class cand))))
 
 (defconst marginalia--advice-regexp
