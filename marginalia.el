@@ -27,8 +27,6 @@
 
 ;; Enrich existing commands with completion annotations
 
-;; Merry Christmas!
-
 ;;; Code:
 
 (require 'subr-x)
@@ -325,6 +323,8 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
    ((pcase (- (elt cand 0) #x100000)
       (?b "Buffer")
       (?f "File")
+      (?p "Project Buffer")
+      (?q "Project File")
       (?m "Bookmark")
       (?v "View"))
     :width -8 :face 'marginalia-documentation)))
@@ -524,8 +524,18 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
                           marginalia--separator
                           (16 (:propertize mode-name face marginalia-mode)))
                         nil nil buffer))
-     ((when-let (file (buffer-file-name buffer))
-        (abbreviate-file-name file))
+     ((cond
+       ;; see ibuffer-buffer-file-name
+       ((when-let (file (buffer-file-name buffer))
+          (abbreviate-file-name file)))
+       ((when-let (proc (get-buffer-process buffer))
+          (format "(%s %s)" proc (process-status proc))))
+       ((local-variable-p 'list-buffers-directory buffer)
+        (buffer-local-value 'list-buffers-directory buffer))
+       ((when-let (dir (and (local-variable-p 'dired-directory buffer)
+                            (buffer-local-value 'dired-directory buffer)))
+	  (expand-file-name (if (stringp dir) dir (car dir))
+                            (buffer-local-value 'default-directory buffer)))))
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
