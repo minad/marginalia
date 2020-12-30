@@ -221,7 +221,6 @@ determine it."
 ;;;; Pre-declarations for external packages
 
 (defvar package--builtins)
-(defvar package-alist)
 (defvar package-archive-contents)
 (declare-function package--from-builtin "package")
 (declare-function package-desc-archive "package")
@@ -485,9 +484,10 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
-  (when-let* ((pkg (intern (replace-regexp-in-string "-[[:digit:]\\.-]+$" "" cand)))
+  (when-let* ((pkg-alist (and (bound-and-true-p package-alist) package-alist))
+              (pkg (intern-soft (replace-regexp-in-string "-[[:digit:]\\.-]+$" "" cand)))
               ;; taken from `describe-package-1'
-              (desc (or (car (alist-get pkg package-alist))
+              (desc (or (car (alist-get pkg pkg-alist))
                         (if-let (built-in (assq pkg package--builtins))
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
