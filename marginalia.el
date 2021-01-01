@@ -524,21 +524,21 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
                           marginalia--separator
                           (16 (:propertize mode-name face marginalia-mode)))
                         nil nil buffer))
-     ((cond
-       ;; see ibuffer-buffer-file-name
-       ((when-let (file (buffer-file-name buffer))
-          (abbreviate-file-name file)))
-       ((when-let (proc (get-buffer-process buffer))
+     ((if-let (proc (get-buffer-process buffer))
           (format "(%s %s) %s"
                   proc (process-status proc)
-                  (abbreviate-file-name (buffer-local-value 'default-directory buffer)))))
-       ((local-variable-p 'list-buffers-directory buffer)
-       (buffer-local-value 'list-buffers-directory buffer))
-       ((when-let (dir (and (local-variable-p 'dired-directory buffer)
-                            (buffer-local-value 'dired-directory buffer)))
-          (abbreviate-file-name
-	   (expand-file-name (if (stringp dir) dir (car dir))
-                             (buffer-local-value 'default-directory buffer))))))
+                  (abbreviate-file-name (buffer-local-value 'default-directory buffer)))
+        (abbreviate-file-name
+         (or (cond
+              ;; see ibuffer-buffer-file-name
+              ((buffer-file-name buffer))
+              ((when-let (dir (and (local-variable-p 'dired-directory buffer)
+                                   (buffer-local-value 'dired-directory buffer)))
+                 (expand-file-name (if (stringp dir) dir (car dir))
+                                   (buffer-local-value 'default-directory buffer))))
+              ((local-variable-p 'list-buffers-directory buffer)
+               (buffer-local-value 'list-buffers-directory buffer)))
+             "")))
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
