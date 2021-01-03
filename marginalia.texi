@@ -1,21 +1,27 @@
 \input texinfo    @c -*- texinfo -*-
 @c %**start of header
 @setfilename marginalia.info
-@settitle
+@settitle marginalia.el - Marginalia in the minibuffer
 @documentencoding UTF-8
 @documentlanguage en
 @c %**end of header
 
+@dircategory Emacs
+@direntry
+* Marginalia: (marginalia). Marginalia in the minibuffer.
+@end direntry
+
 @finalout
 @titlepage
-@title
+@title marginalia.el - Marginalia in the minibuffer
+@author Omar Antolín Camarena, Daniel Mendler
 @end titlepage
 
 @contents
 
 @ifnottex
 @node Top
-@top
+@top marginalia.el - Marginalia in the minibuffer
 @end ifnottex
 
 @menu
