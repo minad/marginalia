@@ -1,3 +1,4 @@
+#+EXPORT_FILE_NAME: marginalia.texi
 * marginalia.el - Marginalia in the minibuffer
 
 [[https://melpa.org/#/marginalia][file:https://melpa.org/packages/marginalia-badge.svg]]
