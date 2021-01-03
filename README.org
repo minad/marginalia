@@ -6,8 +6,6 @@
 #+TEXINFO_DIR_TITLE: Marginalia: (marginalia).
 #+TEXINFO_DIR_DESC: Marginalia in the minibuffer
 
-* marginalia.el - Marginalia in the minibuffer
-
 [[https://melpa.org/#/marginalia][file:https://melpa.org/packages/marginalia-badge.svg]]
 
 This package provides =marginalia-mode= which adds marginalia to the

@@ -22,23 +22,6 @@
 @ifnottex
 @node Top
 @top marginalia.el - Marginalia in the minibuffer
-@end ifnottex
-
-@menu
-* marginalia.el - Marginalia in the minibuffer: marginaliael - Marginalia in the minibuffer.
-
-@detailmenu
---- The Detailed Node Listing ---
-
-marginalia.el - Marginalia in the minibuffer
-
-* Configuration::
-
-@end detailmenu
-@end menu
-
-@node marginaliael - Marginalia in the minibuffer
-@chapter marginalia.el - Marginalia in the minibuffer
 
 @uref{https://melpa.org/#/marginalia, file:https://melpa.org/packages/marginalia-badge.svg}
 
@@ -69,13 +52,14 @@ category with the completion initiated by the command (see the variable
 specified by the variable @samp{marginalia-classifiers}.
 
 @uref{https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true}
+@end ifnottex
 
 @menu
 * Configuration::
 @end menu
 
 @node Configuration
-@section Configuration
+@chapter Configuration
 
 It is recommended to use Marginalia together with either the
 @uref{https://github.com/raxod502/selectrum, Selectrum} or the
