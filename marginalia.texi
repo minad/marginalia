@@ -1,0 +1,112 @@
+\input texinfo    @c -*- texinfo -*-
+@c %**start of header
+@setfilename README.info
+@settitle
+@documentencoding UTF-8
+@documentlanguage en
+@c %**end of header
+
+@finalout
+@titlepage
+@title
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top
+@end ifnottex
+
+@menu
+* marginalia.el - Marginalia in the minibuffer: marginaliael - Marginalia in the minibuffer.
+
+@detailmenu
+--- The Detailed Node Listing ---
+
+marginalia.el - Marginalia in the minibuffer
+
+* Configuration::
+
+@end detailmenu
+@end menu
+
+@node marginaliael - Marginalia in the minibuffer
+@chapter marginalia.el - Marginalia in the minibuffer
+
+@uref{https://melpa.org/#/marginalia, file:https://melpa.org/packages/marginalia-badge.svg}
+
+This package provides @samp{marginalia-mode} which adds marginalia to the
+minibuffer completions.
+@uref{https://en.wikipedia.org/wiki/Marginalia, Marginalia} are marks or
+annotations placed at the margin of the page of a book or in this case
+helpful colorful annotations placed at the margin of the minibuffer for
+your completion candidates. Marginalia can only add annotations to be
+displayed with the completion candidates. It cannot modify the
+appearance of the candidates themselves, which are shown as supplied by
+the original commands.
+
+The annotations are added based on the completion category. For example
+@samp{find-file} reports the @samp{file} category and @samp{M-x} reports the @samp{command}
+category. You can choose between more or less detailed annotators, by
+setting the variable @samp{marginalia-annotators} or by invoking the command
+@samp{marginalia-cycle}.
+
+Since many commands do not report a completion category themselves,
+Marginalia provides a classifier system, which tries to guess the
+correct category based for example on the prompt (see the variable
+@samp{marginalia-prompt-categories}). Usually these heuristic classifiers
+work well, but if they do not there is always the possibility to
+overwrite categories by command name. This way you can associate a fixed
+category with the completion initiated by the command (see the variable
+@samp{marginalia-command-categories}). The list of available classifiers is
+specified by the variable @samp{marginalia-classifiers}.
+
+@uref{https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true}
+
+@menu
+* Configuration::
+@end menu
+
+@node Configuration
+@section Configuration
+
+It is recommended to use Marginalia together with either the
+@uref{https://github.com/raxod502/selectrum, Selectrum} or the
+@uref{https://github.com/oantolin/icomplete-vertical, Icomplete-vertical}
+completion system. Furthermore Marginalia can be combined with
+@uref{https://github.com/oantolin/embark, Embark} for action support and
+@uref{https://github.com/minad/consult, Consult}, which provides many
+useful commands.
+
+@lisp
+;; Enable richer annotations using the Marginalia package
+(use-package marginalia
+  :bind (:map minibuffer-local-map
+              ("C-M-a" . marginalia-cycle)
+         ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
+         ;;:map embark-general-map
+         ;;     ("A" . marginalia-cycle)
+        )
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (marginalia-mode)
+
+  ;; When using Selectrum, ensure that Selectrum is refreshed when cycling annotations.
+  (advice-add #'marginalia-cycle :after
+              (lambda () (when (bound-and-true-p selectrum-mode) (selectrum-exhibit))))
+
+  ;; Prefer richer, more heavy, annotations over the lighter default variant.
+  ;; E.g. M-x will show the documentation string additional to the keybinding.
+  ;; By default only the keybinding is shown as annotation.
+  ;; Note that there is the command `marginalia-cycle' to
+  ;; switch between the annotators.
+  ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+)
+@end lisp
+
+@bye
