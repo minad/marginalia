@@ -24,6 +24,15 @@
 @top marginalia.el - Marginalia in the minibuffer
 
 @uref{https://melpa.org/#/marginalia, file:https://melpa.org/packages/marginalia-badge.svg}
+@end ifnottex
+
+@menu
+* Introduction::
+* Configuration::
+@end menu
+
+@node Introduction
+@chapter Introduction
 
 This package provides @samp{marginalia-mode} which adds marginalia to the
 minibuffer completions.
@@ -52,11 +61,6 @@ category with the completion initiated by the command (see the variable
 specified by the variable @samp{marginalia-classifiers}.
 
 @uref{https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true}
-@end ifnottex
-
-@menu
-* Configuration::
-@end menu
 
 @node Configuration
 @chapter Configuration

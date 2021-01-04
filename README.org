@@ -8,6 +8,8 @@
 
 [[https://melpa.org/#/marginalia][file:https://melpa.org/packages/marginalia-badge.svg]]
 
+* Introduction
+
 This package provides =marginalia-mode= which adds marginalia to the
 minibuffer completions.
 [[https://en.wikipedia.org/wiki/Marginalia][Marginalia]] are marks or
@@ -37,7 +39,7 @@ specified by the variable =marginalia-classifiers=.
 #+CAPTION: marginalia-mode with Selectrum
 [[https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true]]
 
-** Configuration
+* Configuration
 
 It is recommended to use Marginalia together with either the
 [[https://github.com/raxod502/selectrum][Selectrum]] or the
