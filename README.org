@@ -5,8 +5,11 @@
 #+TEXINFO_DIR_CATEGORY: Emacs
 #+TEXINFO_DIR_TITLE: Marginalia: (marginalia).
 #+TEXINFO_DIR_DESC: Marginalia in the minibuffer
+#+OPTIONS: d:nil
 
+:BADGE:
 [[https://melpa.org/#/marginalia][file:https://melpa.org/packages/marginalia-badge.svg]]
+:END:
 
 * Introduction
 
@@ -36,8 +39,10 @@ category with the completion initiated by the command (see the variable
 =marginalia-command-categories=). The list of available classifiers is
 specified by the variable =marginalia-classifiers=.
 
+:SCREENSHOT:
 #+CAPTION: marginalia-mode with Selectrum
 [[https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true]]
+:END:
 
 * Configuration
 

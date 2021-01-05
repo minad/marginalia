@@ -22,8 +22,6 @@
 @ifnottex
 @node Top
 @top marginalia.el - Marginalia in the minibuffer
-
-@uref{https://melpa.org/#/marginalia, file:https://melpa.org/packages/marginalia-badge.svg}
 @end ifnottex
 
 @menu
@@ -59,8 +57,6 @@ overwrite categories by command name. This way you can associate a fixed
 category with the completion initiated by the command (see the variable
 @samp{marginalia-command-categories}). The list of available classifiers is
 specified by the variable @samp{marginalia-classifiers}.
-
-@uref{https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true}
 
 @node Configuration
 @chapter Configuration
