@@ -321,6 +321,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
   (marginalia--fields
    ((pcase (- (elt cand 0) #x100000)
       (?b "Buffer")
+      (?h "Hidden Buffer")
       (?f "File")
       (?p "Project Buffer")
       (?q "Project File")
@@ -332,7 +333,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 (defun marginalia-annotate-virtual-buffer-full (cand)
   "Annotate virtual-buffer CAND with the buffer class."
   (pcase (- (elt cand 0) #x100000)
-    ((or ?b ?p) (marginalia-annotate-buffer (substring cand 1)))
+    ((or ?b ?h ?p) (marginalia-annotate-buffer (substring cand 1)))
     ((or ?f ?q) (marginalia-annotate-file (substring cand 1)))
     (_ (marginalia-annotate-virtual-buffer-class cand))))
 
@@ -522,7 +523,8 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
                           marginalia--separator
                           (7 (:propertize "%I" face marginalia-size))
                           marginalia--separator
-                          (16 (:propertize mode-name face marginalia-mode)))
+                          ;; InactiveMinibuffer has 18 letters
+                          (18 (:propertize mode-name face marginalia-mode)))
                         nil nil buffer))
      ((if-let (proc (get-buffer-process buffer))
           (format "(%s %s) %s"
