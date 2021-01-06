@@ -87,6 +87,7 @@ only with the annotations that come with Emacs) without disabling
     (charset . marginalia-annotate-charset)
     (package . marginalia-annotate-package)
     (imenu . marginalia-annotate-imenu)
+    (bookmark . marginalia-annotate-bookmark)
     (virtual-buffer . marginalia-annotate-virtual-buffer-class))
   "Lightweight annotator functions.
 Associates completion categories with annotation functions.
@@ -126,6 +127,7 @@ determine it."
   '(("\\<group\\>" . customize-group)
     ("\\<M-x\\>" . command)
     ("\\<package\\>" . package)
+    ("\\<bookmark\\>" . bookmark)
     ("\\<face\\>" . face)
     ("\\<environment variable\\>" . environment-variable)
     ("\\<variable\\>" . variable)
@@ -335,6 +337,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
   (pcase (- (elt cand 0) #x100000)
     ((or ?b ?h ?p) (marginalia-annotate-buffer (substring cand 1)))
     ((or ?f ?q) (marginalia-annotate-file (substring cand 1)))
+    (?m (marginalia-annotate-bookmark (substring cand 1)))
     (_ (marginalia-annotate-virtual-buffer-class cand))))
 
 (defconst marginalia--advice-regexp
@@ -498,6 +501,14 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
        ((package-desc-archive desc) (propertize (package-desc-archive desc) 'face 'marginalia-archive))
        (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
      ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+
+(defun marginalia-annotate-bookmark (cand)
+  "Annotate bookmark CAND with its file name and front context string."
+  (let ((front (bookmark-get-front-context-string cand)))
+    (marginalia--fields
+     ((bookmark-get-filename cand) :width 40 :face 'marginalia-file-name)
+     ((if (or (not front) (string= front "")) "" (concat front "…"))
+      :width 20 :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
