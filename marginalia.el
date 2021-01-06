@@ -507,7 +507,9 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   (let ((front (bookmark-get-front-context-string cand)))
     (marginalia--fields
      ((bookmark-get-filename cand) :width 40 :face 'marginalia-file-name)
-     ((if (or (not front) (string= front "")) "" (concat front "…"))
+     ((if (or (not front) (string= front ""))
+          ""
+        (concat (replace-regexp-in-string "\n" "\\\\n" front) "…"))
       :width 20 :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-customize-group (cand)
