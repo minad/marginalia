@@ -222,8 +222,8 @@ determine it."
 
 ;;;; Pre-declarations for external packages
 
-(declare-function bookmark-get-front-context-string "bookmark")
-(declare-function bookmark-get-filename "bookmark")
+(defvar bookmark-alist)
+(declare-function bookmark-get-bookmark-record "bookmark")
 
 (defvar package--builtins)
 (defvar package-archive-contents)
@@ -506,9 +506,10 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
-  (let ((front (bookmark-get-front-context-string cand)))
+  (when-let ((bm (bookmark-get-bookmark-record (assoc cand bookmark-alist)))
+             (front (alist-get 'front-context-string bm)))
     (marginalia--fields
-     ((bookmark-get-filename cand) :width 40 :face 'marginalia-file-name)
+     ((alist-get 'filename bm) :width 40 :face 'marginalia-file-name)
      ((if (or (not front) (string= front ""))
           ""
         (concat (replace-regexp-in-string "\n" "\\\\n" front) "…"))
