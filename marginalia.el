@@ -222,15 +222,17 @@ determine it."
 
 ;;;; Pre-declarations for external packages
 
+(declare-function bookmark-get-front-context-string "bookmark")
+(declare-function bookmark-get-filename "bookmark")
+
 (defvar package--builtins)
 (defvar package-archive-contents)
 (declare-function package--from-builtin "package")
 (declare-function package-desc-archive "package")
+(declare-function package-desc-status "package")
 (declare-function package-desc-summary "package")
 (declare-function package-desc-version "package")
-(declare-function package-desc-status "package")
 (declare-function package-version-join "package")
-
 (declare-function project-current "project")
 (declare-function project-root "project")
 
