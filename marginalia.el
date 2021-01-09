@@ -88,7 +88,7 @@ only with the annotations that come with Emacs) without disabling
     (package . marginalia-annotate-package)
     (imenu . marginalia-annotate-imenu)
     (bookmark . marginalia-annotate-bookmark)
-    (virtual-buffer . marginalia-annotate-virtual-buffer-class))
+    (consult-buffer . marginalia-annotate-consult-buffer-class))
   "Lightweight annotator functions.
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
@@ -101,7 +101,7 @@ See also `marginalia-annotators-heavy'."
    '((file . marginalia-annotate-file)
      (project-file . marginalia-annotate-project-file)
      (buffer . marginalia-annotate-buffer)
-     (virtual-buffer . marginalia-annotate-virtual-buffer-full)
+     (consult-buffer . marginalia-annotate-consult-buffer-full)
      (command . marginalia-annotate-command))
    marginalia-annotators-light)
   "Heavy annotator functions.
@@ -320,8 +320,8 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
     (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key)))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
-(defun marginalia-annotate-virtual-buffer-class (cand)
-  "Annotate virtual-buffer CAND with the buffer class."
+(defun marginalia-annotate-consult-buffer-class (cand)
+  "Annotate consult-buffer CAND with the buffer class."
   (marginalia--fields
    ((pcase (- (elt cand 0) #x100000)
       (?b "Buffer")
@@ -334,13 +334,13 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
     :width -8 :face 'marginalia-documentation)))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
-(defun marginalia-annotate-virtual-buffer-full (cand)
-  "Annotate virtual-buffer CAND with the buffer class."
+(defun marginalia-annotate-consult-buffer-full (cand)
+  "Annotate consult-buffer CAND with the buffer class."
   (pcase (- (elt cand 0) #x100000)
     ((or ?b ?h ?p) (marginalia-annotate-buffer (substring cand 1)))
     ((or ?f ?q) (marginalia-annotate-file (substring cand 1)))
     (?m (marginalia-annotate-bookmark (substring cand 1)))
-    (_ (marginalia-annotate-virtual-buffer-class cand))))
+    (_ (marginalia-annotate-consult-buffer-class cand))))
 
 (defconst marginalia--advice-regexp
   (rx bos
