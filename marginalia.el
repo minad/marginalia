@@ -674,7 +674,7 @@ PROP is the property which is looked up."
                  (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
        (lambda (cands)
          (marginalia--context
-          (mapcar (lambda (x) (list x (funcall annotate x))) cands)))))
+          (mapcar (lambda (x) (list x (or (funcall annotate x) ""))) cands)))))
     ('category
      ;; using alist-get bypasses any advice on completion-metadata-get
      ;; to avoid infinite recursion
