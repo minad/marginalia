@@ -49,6 +49,15 @@ This value is adjusted in the `minibuffer-setup-hook' depending on the `window-w
   "Use wider separator for window widths larger than this value."
   :type 'integer)
 
+;; See https://github.com/minad/marginalia/issues/42 for the discussion
+;; regarding the alignment.
+(defcustom marginalia-align-offset 0
+  "Additional offset at the right margin used by `marginalia--align'.
+
+This value should be set to 1 or a larger value if the annotations
+wrap at the right margin."
+  :type 'integer)
+
 (defcustom marginalia-margin-min 8
   "Minimum whitespace margin at the right side."
   :type 'integer)
@@ -267,9 +276,7 @@ determine it."
             (propertize
              " "
              'display
-             ;; See https://github.com/minad/marginalia/issues/42 for the discussion
-             ;; regarding the alignment expression.
-             `(space :align-to (- right ,(if (eq right-fringe-width 0) 1 0) ,(length str))))
+             `(space :align-to (- right ,marginalia-align-offset ,(length str))))
             str)))
 
 (cl-defmacro marginalia--field (field &key truncate format face width)
