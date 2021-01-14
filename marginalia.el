@@ -51,12 +51,12 @@ This value is adjusted in the `minibuffer-setup-hook' depending on the `window-w
 
 ;; See https://github.com/minad/marginalia/issues/42 for the discussion
 ;; regarding the alignment.
-(defcustom marginalia-align-offset 0
+(defcustom marginalia-align-offset nil
   "Additional offset at the right margin used by `marginalia--align'.
 
-This value should be set to 1 or a larger value if the annotations
-wrap at the right margin."
-  :type 'integer)
+This value should be set to nil to enable auto-configuration.
+It can also be set to an integer value of 1 or larger to force an offset."
+  :type '(choice (const nil) integer))
 
 (defcustom marginalia-margin-min 8
   "Minimum whitespace margin at the right side."
@@ -650,15 +650,22 @@ looking for a regexp that matches the prompt."
 
 (defmacro marginalia--context (&rest body)
   "Setup annotator context around BODY."
-  (let ((w (make-symbol "w")))
+  (let ((w (make-symbol "w"))
+        (o (make-symbol "o")))
     ;; Take the window width of the current window (minibuffer window!)
-    `(let ((,w (window-width)))
+    `(let ((,w (window-width))
+           ;; Compute marginalia-align-offset. If the right-fringe-width is
+           ;; zero, use an additional offset of 1 by default! See
+           ;; https://github.com/minad/marginalia/issues/42 for the discussion
+           ;; regarding the alignment.
+           (,o (if (eq 0 (nth 1 (window-fringes))) 1 0)))
        ;; We generally run the annotators in the original window.
        ;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'.
        ;; Otherwise it would probably suffice to only change the current buffer.
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
+               (marginalia-align-offset (or marginalia-align-offset ,o))
                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
                (marginalia--margin (when (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
                                      (make-string (- ,w marginalia-margin-threshold) 32))))
