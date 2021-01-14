@@ -332,7 +332,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 (defun marginalia-annotate-consult-buffer-class (cand)
   "Annotate consult-buffer CAND with the buffer class."
   (marginalia--fields
-   ((pcase (- (elt cand 0) #x100000)
+   ((pcase (- (aref cand 0) #x100000)
       (?b "Buffer")
       (?h "Hidden Buffer")
       (?f "File")
@@ -345,7 +345,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-consult-buffer-full (cand)
   "Annotate consult-buffer CAND with the buffer class."
-  (pcase (- (elt cand 0) #x100000)
+  (pcase (- (aref cand 0) #x100000)
     ((or ?b ?h ?p) (marginalia-annotate-buffer (substring cand 1)))
     ((or ?f ?q) (marginalia-annotate-file (substring cand 1)))
     (?m (marginalia-annotate-bookmark (substring cand 1)))
