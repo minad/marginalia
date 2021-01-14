@@ -267,7 +267,7 @@ determine it."
             (propertize
              " "
              'display
-             `(space :align-to (- right-fringe ,(length str))))
+             `(space :align-to (- right ,(if (= right-fringe-width 0) 1 0) ,(length str))))
             str)))
 
 (cl-defmacro marginalia--field (field &key truncate format face width)
