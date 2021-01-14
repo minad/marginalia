@@ -267,6 +267,8 @@ determine it."
             (propertize
              " "
              'display
+             ;; See https://github.com/minad/marginalia/issues/42 for the discussion
+             ;; regarding the alignment expression.
              `(space :align-to (- right ,(if (eq right-fringe-width 0) 1 0) ,(length str))))
             str)))
 
