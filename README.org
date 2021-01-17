@@ -1,15 +1,16 @@
-#+TITLE: marginalia.el - Marginalia in the minibuffer
-#+AUTHOR: Omar Antolín Camarena, Daniel Mendler
-#+LANGUAGE: en
-#+EXPORT_FILE_NAME: marginalia.texi
-#+TEXINFO_DIR_CATEGORY: Emacs
-#+TEXINFO_DIR_TITLE: Marginalia: (marginalia).
-#+TEXINFO_DIR_DESC: Marginalia in the minibuffer
-#+OPTIONS: d:nil
+#+title: marginalia.el - Marginalia in the minibuffer
+#+author: Omar Antolín Camarena, Daniel Mendler
+#+language: en
+#+export_file_name: marginalia.texi
+#+texinfo_dir_category: Emacs
+#+texinfo_dir_title: Marginalia: (marginalia).
+#+texinfo_dir_desc: Marginalia in the minibuffer
+#+options: d:nil
 
-:BADGE:
+:badge:
 [[https://melpa.org/#/marginalia][file:https://melpa.org/packages/marginalia-badge.svg]]
-:END:
+[[https://stable.melpa.org/#/marginalia][file:https://stable.melpa.org/packages/marginalia-badge.svg]]
+:end:
 
 * Introduction
 
@@ -39,10 +40,10 @@ category with the completion initiated by the command (see the variable
 =marginalia-command-categories=). The list of available classifiers is
 specified by the variable =marginalia-classifiers=.
 
-:SCREENSHOT:
-#+CAPTION: marginalia-mode with Selectrum
+:screenshot:
+#+caption: marginalia-mode with Selectrum
 [[https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true]]
-:END:
+:end:
 
 * Configuration
 
@@ -54,7 +55,7 @@ completion system. Furthermore Marginalia can be combined with
 [[https://github.com/minad/consult][Consult]], which provides many
 useful commands.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
   :bind (:map minibuffer-local-map
@@ -82,4 +83,4 @@ useful commands.
   ;; switch between the annotators.
   ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
 )
-#+END_SRC
+#+end_src
