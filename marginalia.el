@@ -340,7 +340,7 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
       (?q "Project File")
       (?m "Bookmark")
       (?v "View"))
-    :width -8 :face 'marginalia-documentation)))
+    :face 'marginalia-documentation)))
 
 ;; This annotator is consult-specific, it will annotate the `consult-buffer' command.
 (defun marginalia-annotate-consult-buffer-full (cand)
