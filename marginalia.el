@@ -152,6 +152,10 @@ determine it."
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
+(defcustom marginalia-date-format "%b %d %H:%M"
+  "String specifying format for displaying the time."
+  :type 'string)
+
 (defgroup marginalia-faces nil
   "Faces used by `marginalia-mode'."
   :group 'marginalia
@@ -614,7 +618,7 @@ using `minibuffer-force-complete' on the candidate CAND."
       :width 12 :face 'marginalia-file-owner)
      ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
      ((format-time-string
-       "%b %d %H:%M"
+       marginalia-date-format
        (file-attribute-modification-time attributes)) :face 'marginalia-date))))
 
 (defun marginalia-annotate-project-file (cand)
