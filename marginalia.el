@@ -712,20 +712,10 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 ;; the discussion in https://github.com/minad/marginalia/issues/10 for reference.
 ;;;###autoload
 (defun marginalia-cycle ()
-  "Cycle between annotators in `marginalia-annotators'.
-If called from the minibuffer the annotator cycling is local,
-that it is, it does not affect subsequent minibuffers.  When called
-from a regular buffer the effect is global."
+  "Cycle between annotators in `marginalia-annotators'."
   (interactive)
-  ;; If `marginalia-cycle' has been invoked from inside the minibuffer, only change the annotators
-  ;; locally. This is useful if the command is used as an action. If the command is not triggered
-  ;; from inside the minibuffer, cycle the annotator globally. Hopefully this is not too confusing.
-  (if-let* ((win (active-minibuffer-window))
-            (buf (window-buffer win)))
-      (let ((a (buffer-local-value 'marginalia-annotators buf)))
-        (setf (buffer-local-value 'marginalia-annotators buf) (append (cdr a) (list (car a)))))
-    (let ((a marginalia-annotators))
-      (setq marginalia-annotators (append (cdr a) (list (car a)))))))
+  (setq marginalia-annotators (append (cdr marginalia-annotators)
+                                      (list (car marginalia-annotators)))))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
