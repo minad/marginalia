@@ -58,12 +58,10 @@ useful commands.
 #+begin_src emacs-lisp
 ;; Enable richer annotations using the Marginalia package
 (use-package marginalia
-  :bind (:map minibuffer-local-map
-              ("C-M-a" . marginalia-cycle)
-         ;; When using the Embark package, you can bind `marginalia-cycle' as an Embark action!
-         ;;:map embark-general-map
-         ;;     ("A" . marginalia-cycle)
-        )
+  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
 
   ;; The :init configuration is always executed (Not lazy!)
   :init
