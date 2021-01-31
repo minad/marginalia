@@ -266,7 +266,7 @@ determine it."
      str)
    width 0 32 "…"))
 
-(defsubst marginalia--align (str)
+(defun marginalia--align (str)
   "Align STR at the right margin."
   (unless (string-blank-p str)
     (when marginalia--margin
