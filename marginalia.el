@@ -330,9 +330,9 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; This annotator is consult-specific, it will annotate commands with `consult-multi' category
 (defun marginalia-annotate-consult-multi (cand)
   "Annotate consult-multi CAND with the buffer class."
-  (when-let (annotate (alist-get (get-text-property 0 'consult-multi cand)
-                                 (symbol-value (car marginalia-annotators))))
-    (funcall annotate (substring cand 1))))
+  (when-let* ((multi (get-text-property 0 'consult-multi cand))
+              (annotate (alist-get (car multi) (symbol-value (car marginalia-annotators)))))
+    (funcall annotate (cdr multi))))
 
 (defconst marginalia--advice-regexp
   (rx bos
