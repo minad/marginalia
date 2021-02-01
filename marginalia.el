@@ -151,6 +151,14 @@ determine it."
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
+(defcustom marginalia-bookmark-type-transformers
+  `(("^bookmark-\\(.*?\\)-handler$" . "\\1")
+    ("default" . "File")
+    ("^\\(.*?\\)-bookmark-jump\\(?:-handler\\)?$" . "\\1")
+    (".*" . ,#'capitalize))
+  "List of bookmark type transformers."
+  :type 'alist)
+
 (defgroup marginalia-faces nil
   "Faces used by `marginalia-mode'."
   :group 'marginalia
@@ -159,6 +167,10 @@ determine it."
 (defface marginalia-key
   '((t :inherit font-lock-keyword-face))
   "Face used to highlight keys in `marginalia-mode'.")
+
+(defface marginalia-type
+  '((t :inherit marginalia-key))
+  "Face used to highlight types in `marginalia-mode'.")
 
 (defface marginalia-char
   '((t :inherit marginalia-key))
@@ -406,7 +418,7 @@ t cl-type"
     (concat
      (marginalia-annotate-binding cand)
      (marginalia--fields
-      ((marginalia--symbol-class sym) :face 'marginalia-modified)
+      ((marginalia--symbol-class sym) :face 'marginalia-type)
       ((cond
         ((fboundp sym) (marginalia--function-doc sym))
         ((facep sym) (documentation-property sym 'face-documentation))
@@ -431,7 +443,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   "Annotate variable CAND with its documentation string."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
-     ((marginalia--symbol-class sym) :face 'marginalia-modified)
+     ((marginalia--symbol-class sym) :face 'marginalia-type)
      ((let ((print-escape-newlines t)
             (print-escape-control-characters t)
             (print-escape-multibyte t))
@@ -479,7 +491,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
       ((if (and (boundp mode) (symbol-value mode))
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
-      ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-modified)
+      ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-type)
       (lighter-str :width 14 :face 'marginalia-lighter)
       ((marginalia--function-doc mode)
        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
@@ -500,11 +512,25 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
        (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
      ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
+(defun marginalia--bookmark-type (bm)
+  "Return bookmark type string of BM.
+
+The string is transformed according to `marginalia-bookmark-type-transformers'."
+  (let ((str (symbol-name (or (alist-get 'handler bm)
+                              'bookmark-default-handler))))
+    (dolist (transformer marginalia-bookmark-type-transformers str)
+      (when (string-match-p (car transformer) str)
+        (setq str
+              (if (stringp (cdr transformer))
+                  (replace-regexp-in-string (car transformer) (cdr transformer) str)
+                (funcall (cdr transformer) str)))))))
+
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
   (when-let ((bm (bookmark-get-bookmark-record (assoc cand bookmark-alist))))
     (let ((front (alist-get 'front-context-string bm)))
       (marginalia--fields
+       ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
        ((alist-get 'filename bm) :width 40 :face 'marginalia-file-name)
        ((if (or (not front) (string= front ""))
             ""
