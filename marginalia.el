@@ -132,7 +132,7 @@ determine it."
   :type 'hook)
 
 (defcustom marginalia-prompt-categories
-  '(("\\<group\\>" . customize-group)
+  '(("\\<customize group\\>" . customize-group)
     ("\\<M-x\\>" . command)
     ("\\<package\\>" . package)
     ("\\<bookmark\\>" . bookmark)
