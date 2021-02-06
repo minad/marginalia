@@ -152,9 +152,9 @@ determine it."
   :type '(alist :key-type symbol :value-type symbol))
 
 (defcustom marginalia-bookmark-type-transformers
-  `(("^bookmark-\\(.*?\\)-handler$" . "\\1")
+  `(("\\`bookmark-\\(.*?\\)-handler\\'" . "\\1")
     ("default" . "File")
-    ("^\\(.*?\\)-bookmark-jump\\(?:-handler\\)?$" . "\\1")
+    ("\\`\\(.*?\\)-bookmark-jump\\(?:-handler\\)?\\'" . "\\1")
     (".*" . ,#'capitalize))
   "List of bookmark type transformers."
   :type 'alist)
@@ -499,7 +499,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
   (when-let* ((pkg-alist (and (bound-and-true-p package-alist) package-alist))
-              (pkg (intern-soft (replace-regexp-in-string "-[[:digit:]\\.-]+$" "" cand)))
+              (pkg (intern-soft (replace-regexp-in-string "-[[:digit:]\\.-]+\\'" "" cand)))
               ;; taken from `describe-package-1'
               (desc (or (car (alist-get pkg pkg-alist))
                         (if-let (built-in (assq pkg package--builtins))
