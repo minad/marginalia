@@ -267,8 +267,8 @@ determine it."
 (defvar marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
 
-(defvar marginalia--original-category nil
-  "Original category reported by completion metadata.")
+(defvar marginalia--metadata nil
+  "Completion metadata from the current completion.")
 
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
@@ -342,9 +342,15 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
 ;; This annotator is consult-specific, it will annotate commands with `consult-multi' category
 (defun marginalia-annotate-consult-multi (cand)
   "Annotate consult-multi CAND with the buffer class."
-  (when-let* ((multi (get-text-property 0 'consult-multi cand))
-              (annotate (alist-get (car multi) (symbol-value (car marginalia-annotators)))))
-    (funcall annotate (cdr multi))))
+  (if-let* ((multi (get-text-property 0 'consult-multi cand))
+            (annotate (alist-get (car multi) (symbol-value (car marginalia-annotators)))))
+      ;; Use the Marginalia annotator corresponding to the consult-multi category.
+      (funcall annotate (cdr multi))
+    ;; Apply the original annotation function on the original candidate, if there is one.
+    ;; NOTE: Use `alist-get' instead of `completion-metadata-get' to bypass our
+    ;; `marginalia--completion-metadata-get' advice!
+    (when-let (annotate (alist-get 'annotation-function marginalia--metadata))
+      (funcall annotate cand))))
 
 (defconst marginalia--advice-regexp
   (rx bos
@@ -640,7 +646,9 @@ using `minibuffer-force-complete' on the candidate CAND."
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
-  marginalia--original-category)
+  ;; NOTE: Use `alist-get' instead of `completion-metadata-get' to bypass our
+  ;; `marginalia--completion-metadata-get' advice!
+  (alist-get 'category marginalia--metadata))
 
 (defun marginalia-classify-symbol ()
   "Determine if currently completing symbols."
@@ -661,12 +669,14 @@ looking for a regexp that matches the prompt."
              when (string-match-p regexp prompt)
              return category)))
 
-(defmacro marginalia--context (&rest body)
-  "Setup annotator context around BODY."
+(defmacro marginalia--context (metadata &rest body)
+  "Setup annotator context with completion METADATA around BODY."
+  (declare (indent 1))
   (let ((w (make-symbol "w"))
         (o (make-symbol "o")))
     ;; Take the window width of the current window (minibuffer window!)
-    `(let ((,w (window-width))
+    `(let ((marginalia--metadata ,metadata)
+           (,w (window-width))
            ;; Compute marginalia-align-offset. If the right-fringe-width is
            ;; zero, use an additional offset of 1 by default! See
            ;; https://github.com/minad/marginalia/issues/42 for the discussion
@@ -694,20 +704,20 @@ PROP is the property which is looked up."
      (when-let* ((cat (completion-metadata-get metadata 'category))
                  (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
        (lambda (cand)
-         (marginalia--context
-          (funcall annotate cand)))))
+         (marginalia--context metadata
+           (funcall annotate cand)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
      ;; Return wrapper around `annotation-function'.
      (when-let* ((cat (completion-metadata-get metadata 'category))
                  (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
        (lambda (cands)
-         (marginalia--context
-          (mapcar (lambda (x) (list x (funcall annotate x))) cands)))))
+         (marginalia--context metadata
+           (mapcar (lambda (x) (list x (funcall annotate x))) cands)))))
     ('category
-     ;; using alist-get bypasses any advice on completion-metadata-get
-     ;; to avoid infinite recursion
-     (let ((marginalia--original-category (alist-get 'category metadata)))
+     ;; Find the completion category by trying each of our classifiers.
+     ;; Store the metadata for `marginalia-classify-original-category'.
+     (let ((marginalia--metadata metadata))
        (run-hook-with-args-until-success 'marginalia-classifiers)))))
 
 (defun marginalia--minibuffer-setup ()
