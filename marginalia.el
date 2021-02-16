@@ -522,14 +522,18 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   "Return bookmark type string of BM.
 
 The string is transformed according to `marginalia-bookmark-type-transformers'."
-  (let ((str (symbol-name (or (alist-get 'handler bm)
-                              'bookmark-default-handler))))
-    (dolist (transformer marginalia-bookmark-type-transformers str)
-      (when (string-match-p (car transformer) str)
-        (setq str
-              (if (stringp (cdr transformer))
-                  (replace-regexp-in-string (car transformer) (cdr transformer) str)
-                (funcall (cdr transformer) str)))))))
+  (let ((handler (or (alist-get 'handler bm) 'bookmark-default-handler)))
+    ;; Some libraries use lambda handlers instead of symbols. For
+    ;; example the function `xwidget-webkit-bookmark-make-record' is
+    ;; affected. I consider this bad style since then the lambda is
+    ;; persisted.
+    (when-let (str (and (symbolp handler) (symbol-name handler)))
+      (dolist (transformer marginalia-bookmark-type-transformers str)
+        (when (string-match-p (car transformer) str)
+          (setq str
+                (if (stringp (cdr transformer))
+                    (replace-regexp-in-string (car transformer) (cdr transformer) str)
+                  (funcall (cdr transformer) str))))))))
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
