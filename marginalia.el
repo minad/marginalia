@@ -498,7 +498,7 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
            (propertize "On" 'face 'marginalia-on)
          (propertize "Off" 'face 'marginalia-off)) :width 3)
       ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-type)
-      (lighter-str :width 14 :face 'marginalia-lighter)
+      (lighter-str :width 20 :face 'marginalia-lighter)
       ((marginalia--function-doc mode)
        :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
 
