@@ -624,17 +624,19 @@ using `minibuffer-force-complete' on the candidate CAND."
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
-  (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
-    (marginalia--fields
-     ((file-attribute-modes attributes) :face 'marginalia-file-modes)
-     ((format "%s:%s"
-              (file-attribute-user-id attributes)
-              (file-attribute-group-id attributes))
-      :width 12 :face 'marginalia-file-owner)
-     ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
-     ((format-time-string
-       "%b %d %H:%M"
-       (file-attribute-modification-time attributes)) :face 'marginalia-date))))
+  (if (file-remote-p (marginalia--full-candidate cand))
+      (marginalia--documentation "*tramp*")
+    (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
+      (marginalia--fields
+       ((file-attribute-modes attributes) :face 'marginalia-file-modes)
+       ((format "%s:%s"
+                (file-attribute-user-id attributes)
+                (file-attribute-group-id attributes))
+        :width 12 :face 'marginalia-file-owner)
+       ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
+       ((format-time-string
+         "%b %d %H:%M"
+         (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
