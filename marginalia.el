@@ -607,7 +607,7 @@ component of a full file path.
 This function returns what would be the minibuffer contents after
 using `minibuffer-force-complete' on the candidate CAND."
   (if-let (win (active-minibuffer-window))
-      (with-selected-window win
+      (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents))
                (pt (- (point) (minibuffer-prompt-end)))
                (bounds (completion-boundaries
@@ -624,19 +624,21 @@ using `minibuffer-force-complete' on the candidate CAND."
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
-  (if (file-remote-p (marginalia--full-candidate cand))
-      (marginalia--documentation "*tramp*")
-    (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
-      (marginalia--fields
-       ((file-attribute-modes attributes) :face 'marginalia-file-modes)
-       ((format "%s:%s"
-                (file-attribute-user-id attributes)
-                (file-attribute-group-id attributes))
-        :width 12 :face 'marginalia-file-owner)
-       ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
-       ((format-time-string
-         "%b %d %H:%M"
-         (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
+  (let ((win (active-minibuffer-window)))
+    (if (and win (file-remote-p (with-current-buffer (window-buffer win)
+                                  (minibuffer-contents))))
+        (marginalia--documentation "*tramp*")
+      (when-let ((attributes (file-attributes (marginalia--full-candidate cand) 'string)))
+        (marginalia--fields
+         ((file-attribute-modes attributes) :face 'marginalia-file-modes)
+         ((format "%s:%s"
+                  (file-attribute-user-id attributes)
+                  (file-attribute-group-id attributes))
+          :width 12 :face 'marginalia-file-owner)
+         ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
+         ((format-time-string
+           "%b %d %H:%M"
+           (file-attribute-modification-time attributes)) :face 'marginalia-date))))))
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
