@@ -698,6 +698,18 @@ looking for a regexp that matches the prompt."
                                      (make-string (- ,w marginalia-margin-threshold) 32))))
            ,@body)))))
 
+(defun marginalia--get-annotator (metadata)
+  "Get annotator for METADATA."
+  (let* ((cat (completion-metadata-get metadata 'category))
+         (path (and (memq cat '(file project-file))
+                    (substitute-in-file-name (minibuffer-contents)))))
+    (unless (and path
+                 (or ;; Catch hosts completion
+                  (and (string-match ":" path)
+                       (equal (file-name-directory path) "/"))
+                  (file-remote-p path)))
+      (alist-get cat (symbol-value (car marginalia-annotators))))))
+
 (defun marginalia--completion-metadata-get (metadata prop)
   "Meant as :before-until advice for `completion-metadata-get'.
 METADATA is the metadata.
@@ -705,16 +717,14 @@ PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
      ;; we do want the advice triggered for completion-metadata-get
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+     (when-let (annotate (marginalia--get-annotator metadata))
        (lambda (cand)
          (marginalia--context metadata
            (funcall annotate cand)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
      ;; Return wrapper around `annotation-function'.
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+     (when-let (annotate (marginalia--get-annotator metadata))
        (lambda (cands)
          (marginalia--context metadata
            (mapcar (lambda (x) (list x (funcall annotate x))) cands)))))
