@@ -254,7 +254,7 @@ determine it."
 (declare-function package-desc-version "package")
 (declare-function package-version-join "package")
 (declare-function project-current "project")
-(declare-function project-root "project")
+(declare-function project-roots "project")
 
 ;;;; Marginalia mode
 
@@ -608,7 +608,7 @@ This function returns what would be the minibuffer contents after
 using `minibuffer-force-complete' on the candidate CAND."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
-        (let* ((contents (minibuffer-contents))
+        (let* ((contents (minibuffer-contents-no-properties))
                (pt (- (point) (minibuffer-prompt-end)))
                (bounds (completion-boundaries
                         (substring contents 0 pt)
@@ -650,7 +650,7 @@ These annotations are skipped for Tramp paths."
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
   (when-let ((project (project-current))
-             (root (project-root project))
+             (root (car (project-roots project)))
              (file (expand-file-name cand root)))
     (marginalia-annotate-file file)))
 
