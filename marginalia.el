@@ -607,7 +607,7 @@ component of a full file path.
 This function returns what would be the minibuffer contents after
 using `minibuffer-force-complete' on the candidate CAND."
   (if-let (win (active-minibuffer-window))
-      (with-selected-window win
+      (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents))
                (pt (- (point) (minibuffer-prompt-end)))
                (bounds (completion-boundaries
