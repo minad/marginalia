@@ -624,7 +624,7 @@ using `minibuffer-force-complete' on the candidate CAND."
 
 (defun marginalia--remote-p (path)
   "Return t if PATH is a remote path."
-  (string-match-p "\\`/[^:]+:" path))
+  (string-match-p "/[^:]+:" path))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
@@ -633,7 +633,7 @@ These annotations are skipped for remote paths."
           (when-let (win (active-minibuffer-window))
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
-      (marginalia--documentation "*Remote*")
+      (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
     (when-let (attributes (file-attributes (marginalia--full-candidate cand) 'string))
       (marginalia--fields
        ((file-attribute-modes attributes) :face 'marginalia-file-modes)
