@@ -62,7 +62,7 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Minimum whitespace margin at the right side."
   :type 'integer)
 
-(defcustom marginalia-margin-threshold 160
+(defcustom marginalia-margin-threshold 200
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
