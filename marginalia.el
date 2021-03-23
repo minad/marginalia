@@ -571,8 +571,10 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
                           marginalia--separator
                           (7 (:propertize "%I" face marginalia-size))
                           marginalia--separator
-                          ;; InactiveMinibuffer has 18 letters
-                          (18 (:propertize mode-name face marginalia-mode)))
+                          ;; InactiveMinibuffer has 18 letters, but there are longer names.
+                          ;; For example Org-Agenda produces very long mode names.
+                          ;; Therefore we have to truncate.
+                          (20 (-20 (:propertize mode-name face marginalia-mode))))
                         nil nil buffer))
      ((if-let (proc (get-buffer-process buffer))
           (format "(%s %s) %s"
