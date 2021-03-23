@@ -42,7 +42,8 @@
 (defcustom marginalia-truncate-width 80
   "Maximum truncation width of annotation fields.
 
-This value is adjusted in the `minibuffer-setup-hook' depending on the `window-width'."
+This value is adjusted in the `minibuffer-setup-hook' depending
+on the `window-width'."
   :type 'integer)
 
 (defcustom marginalia-separator-threshold 120
