@@ -110,6 +110,7 @@ See also `marginalia-annotators-heavy'."
      (project-file . marginalia-annotate-project-file)
      (buffer . marginalia-annotate-buffer)
      (command . marginalia-annotate-command)
+     (embark-keybinding . marginalia-annotate-embark-keybinding)
      (consult-multi . marginalia-annotate-consult-multi))
    marginalia-annotators-light)
   "Heavy annotator functions.
@@ -438,6 +439,13 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
     (concat
      (marginalia-annotate-binding cand)
      (marginalia--documentation (marginalia--function-doc sym)))))
+
+(defun marginalia-annotate-embark-keybinding (cand)
+  "Annotate Embark keybinding CAND with its documentation string.
+Similar to `marginalia-annotate-command', but does not show the
+keybinding since CAND includes it."
+  (when-let (cmd (get-text-property 0 'embark-command cand))
+    (marginalia--documentation (marginalia--function-doc cmd))))
 
 (defun marginalia-annotate-imenu (cand)
   "Annotate imenu CAND with its documentation string."
