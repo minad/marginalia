@@ -87,6 +87,7 @@ only with the annotations that come with Emacs) without disabling
     (customize-group . marginalia-annotate-customize-group)
     (variable . marginalia-annotate-variable)
     (face . marginalia-annotate-face)
+    (color . marginalia-annotate-color)
     (unicode-name . marginalia-annotate-char)
     (minor-mode . marginalia-annotate-minor-mode)
     (symbol . marginalia-annotate-symbol)
@@ -139,6 +140,7 @@ determine it."
     ("\\<package\\>" . package)
     ("\\<bookmark\\>" . bookmark)
     ("\\<face\\>" . face)
+    ("\\<color\\>" . color)
     ("\\<environment variable\\>" . environment-variable)
     ("\\<variable\\>" . variable)
     ("\\<input method\\>" . input-method)
@@ -480,6 +482,26 @@ keybinding since CAND includes it."
      ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
      ((documentation-property sym 'face-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+
+(defun marginalia-annotate-color (cand)
+  "Annotate face CAND with its documentation string and face example."
+  (when-let (rgb (color-name-to-rgb cand))
+    (pcase-let ((`(,r ,g ,b) rgb)
+                (`(,h ,s ,l) (apply #'color-rgb-to-hsl rgb)))
+      (marginalia--fields
+       ("      " :face `(:background ,(apply #'color-rgb-to-hex rgb)))
+       ((format "%s%s%s %s"
+         (propertize " " 'face `(:background ,(color-rgb-to-hex r 0 0)))
+         (propertize " " 'face `(:background ,(color-rgb-to-hex 0 g 0)))
+         (propertize " " 'face `(:background ,(color-rgb-to-hex 0 0 b)))
+         (color-rgb-to-hex r g b 2)))
+       ((format "%s%s%s %3s° %3s%% %3s%%"
+         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 0.5))))
+         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h s 0.5))))
+         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 l))))
+         (round (* 360 h))
+         (round (* 100 s))
+         (round (* 100 l))))))))
 
 (defun marginalia-annotate-char (cand)
   "Annotate character CAND with its general character category and character code."
