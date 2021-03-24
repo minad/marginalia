@@ -491,14 +491,14 @@ keybinding since CAND includes it."
       (marginalia--fields
        ("      " :face `(:background ,(apply #'color-rgb-to-hex rgb)))
        ((format "%s%s%s %s"
-         (propertize " " 'face `(:background ,(color-rgb-to-hex r 0 0)))
-         (propertize " " 'face `(:background ,(color-rgb-to-hex 0 g 0)))
-         (propertize " " 'face `(:background ,(color-rgb-to-hex 0 0 b)))
+         (propertize "r" 'face `(:background ,(color-rgb-to-hex r 0 0)))
+         (propertize "g" 'face `(:background ,(color-rgb-to-hex 0 g 0)))
+         (propertize "b" 'face `(:background ,(color-rgb-to-hex 0 0 b)))
          (color-rgb-to-hex r g b 2)))
        ((format "%s%s%s %3s° %3s%% %3s%%"
-         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 0.5))))
-         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h s 0.5))))
-         (propertize " " 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 l))))
+         (propertize "h" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 0.5))))
+         (propertize "s" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h s 0.5))))
+         (propertize "l" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb 0 0 l))))
          (round (* 360 h))
          (round (* 100 s))
          (round (* 100 l))))))))
