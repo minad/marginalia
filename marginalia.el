@@ -260,6 +260,10 @@ determine it."
 (declare-function project-current "project")
 (declare-function project-roots "project")
 
+(declare-function color-rgb-to-hex "color")
+(declare-function color-rgb-to-hsl "color")
+(declare-function color-hsl-to-rgb "color")
+
 ;;;; Marginalia mode
 
 (defvar marginalia--separator "    "
@@ -486,22 +490,28 @@ keybinding since CAND includes it."
 (defun marginalia-annotate-color (cand)
   "Annotate face CAND with its documentation string and face example."
   (when-let (rgb (color-name-to-rgb cand))
-    (pcase-let ((`(,r ,g ,b) rgb)
-                (`(,h ,s ,l) (apply #'color-rgb-to-hsl rgb)))
+    (pcase-let* ((`(,r ,g ,b) rgb)
+                 (`(,h ,s ,l) (apply #'color-rgb-to-hsl rgb))
+                 (cr (color-rgb-to-hex r 0 0))
+                 (cg (color-rgb-to-hex 0 g 0))
+                 (cb (color-rgb-to-hex 0 0 b))
+                 (ch (apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 0.5)))
+                 (cs (apply #'color-rgb-to-hex (color-hsl-to-rgb h s 0.5)))
+                 (cl (apply #'color-rgb-to-hex (color-hsl-to-rgb 0 0 l))))
       (marginalia--fields
        ("      " :face `(:background ,(apply #'color-rgb-to-hex rgb)))
        ((format "%s%s%s %s"
-         (propertize "r" 'face `(:background ,(color-rgb-to-hex r 0 0)))
-         (propertize "g" 'face `(:background ,(color-rgb-to-hex 0 g 0)))
-         (propertize "b" 'face `(:background ,(color-rgb-to-hex 0 0 b)))
-         (color-rgb-to-hex r g b 2)))
+                (propertize "r" 'face `(:background ,cr :foreground ,(readable-foreground-color cr)))
+                (propertize "g" 'face `(:background ,cg :foreground ,(readable-foreground-color cg)))
+                (propertize "b" 'face `(:background ,cb :foreground ,(readable-foreground-color cb)))
+                (color-rgb-to-hex r g b 2)))
        ((format "%s%s%s %3s° %3s%% %3s%%"
-         (propertize "h" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h 1 0.5))))
-         (propertize "s" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb h s 0.5))))
-         (propertize "l" 'face `(:background ,(apply #'color-rgb-to-hex (color-hsl-to-rgb 0 0 l))))
-         (round (* 360 h))
-         (round (* 100 s))
-         (round (* 100 l))))))))
+                (propertize "h" 'face `(:background ,ch :foreground ,(readable-foreground-color ch)))
+                (propertize "s" 'face `(:background ,cs :foreground ,(readable-foreground-color cs)))
+                (propertize "l" 'face `(:background ,cl :foreground ,(readable-foreground-color cl)))
+                (round (* 360 h))
+                (round (* 100 s))
+                (round (* 100 l))))))))
 
 (defun marginalia-annotate-char (cand)
   "Annotate character CAND with its general character category and character code."
