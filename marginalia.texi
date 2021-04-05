@@ -61,13 +61,10 @@ specified by the variable @samp{marginalia-classifiers}.
 @node Configuration
 @chapter Configuration
 
-It is recommended to use Marginalia together with either the
-@uref{https://github.com/raxod502/selectrum, Selectrum} or the
-@uref{https://github.com/oantolin/icomplete-vertical, Icomplete-vertical}
-completion system. Furthermore Marginalia can be combined with
-@uref{https://github.com/oantolin/embark, Embark} for action support and
-@uref{https://github.com/minad/consult, Consult}, which provides many
-useful commands.
+It is recommended to use Marginalia together with either the @uref{https://github.com/raxod502/selectrum, Selectrum}, @uref{https://github.com/minad/vertico, Vertico}
+or the @uref{https://github.com/oantolin/icomplete-vertical, Icomplete-vertical} completion system. Furthermore Marginalia can be
+combined with @uref{https://github.com/oantolin/embark, Embark} for action support and @uref{https://github.com/minad/consult, Consult}, which provides many useful
+commands.
 
 @lisp
 ;; Enable richer annotations using the Marginalia package
