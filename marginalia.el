@@ -635,39 +635,42 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
-;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
-;; more direct way to implement it. While Emacs does not use the notion of "full candidate", there
-;; is a function `completion-boundaries' to compute them, and in (info "(elisp)Programmed
-;; Completion") it is documented how a completion table should respond to boundaries requests.
-;; See the discussion at https://github.com/minad/marginalia/commit/4ba98045dd33bcf1396a888dbbae2dc801dce7c5
-(defun marginalia--full-file (cand)
-  "Return completion candidate CAND in full.
-For some completion tables, the completion candidates offered are
-meant to be only a part of the full minibuffer contents. For
-example, during file name completion the candidates are one path
-component of a full file path.
-
-This function returns what would be the minibuffer contents after
-using `minibuffer-force-complete' on the candidate CAND."
+;; This function is only used for file candidates and is necessary
+;; because otherwise file-attributes won't find the file. It is
+;; complicated by the partial-completion completion style, which can
+;; complete /u/s/d/w to /usr/share/dict/words. This means that we need
+;; to replace some of the path components in the minibuffer contents
+;; with those from the completion candidate.
+(defun marginalia--full-file (file)
+  "Return full path to completion candidate FILE."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents-no-properties))
+               (pt (- (point) (minibuffer-prompt-end)))
+               (before (substring contents 0 pt))
+               (after (substring contents pt))
                (bounds (completion-boundaries
-                        contents
+                        before
                         minibuffer-completion-table
                         minibuffer-completion-predicate
-                        ""))
-               (components (split-string (substring contents 0 (car bounds)) "/")))
-          (string-join (append
-                        (cl-subseq components 0 (max 0
-                                                     (- (length components)
-                                                        (if (string-suffix-p "/" cand)
-                                                            (cl-count ?/ cand)
-                                                          (1+ (cl-count ?/ cand))))))
-                                      (list cand)) "/")))
-    ;; no minibuffer is active, trust that cand already conveys all
+                        after))
+               (components (split-string (substring before 0 (car bounds)) "/"))
+               (num-replace (if (string-suffix-p "/" file)
+                                (cl-count ?/ file)
+                              (1+ (cl-count ?/ file))) ))
+          ;; use expand-file-name in case path is relative, to get the
+          ;; correct default-directory from the minibuffer (normally,
+          ;; say for find-file, the path is only relative if the user
+          ;; deletes the initial / or ~/)
+          (expand-file-name
+           (string-join
+            (append
+             (cl-subseq components 0 (max 0 (- (length components) num-replace)))
+             (list file))
+            "/"))))
+    ;; no minibuffer is active, trust that FILE already conveys all
     ;; necessary information (there's not much else we can do)
-    cand))
+    file))
 
 (defun marginalia--remote-p (path)
   "Return t if PATH is a remote path."
