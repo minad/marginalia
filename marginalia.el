@@ -30,7 +30,7 @@
 ;;; Code:
 
 (require 'subr-x)
-(eval-when-compile (require 'cl-lib))
+(require 'cl-lib)
 
 ;;;; Customization
 
@@ -640,7 +640,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 ;; is a function `completion-boundaries' to compute them, and in (info "(elisp)Programmed
 ;; Completion") it is documented how a completion table should respond to boundaries requests.
 ;; See the discussion at https://github.com/minad/marginalia/commit/4ba98045dd33bcf1396a888dbbae2dc801dce7c5
-(defun marginalia--full-candidate (cand)
+(defun marginalia--full-file (cand)
   "Return completion candidate CAND in full.
 For some completion tables, the completion candidates offered are
 meant to be only a part of the full minibuffer contents. For
@@ -652,15 +652,19 @@ using `minibuffer-force-complete' on the candidate CAND."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents-no-properties))
-               (pt (- (point) (minibuffer-prompt-end)))
                (bounds (completion-boundaries
-                        (substring contents 0 pt)
+                        contents
                         minibuffer-completion-table
                         minibuffer-completion-predicate
-                        (substring contents pt))))
-          (concat (substring contents 0 (car bounds))
-                  cand
-                  (substring contents (+ pt (cdr bounds))))))
+                        ""))
+               (components (split-string (substring contents 0 (car bounds)) "/")))
+          (string-join (append
+                        (cl-subseq components 0 (max 0
+                                                     (- (length components)
+                                                        (if (string-suffix-p "/" cand)
+                                                            (cl-count ?/ cand)
+                                                          (1+ (cl-count ?/ cand))))))
+                                      (list cand)) "/")))
     ;; no minibuffer is active, trust that cand already conveys all
     ;; necessary information (there's not much else we can do)
     cand))
@@ -677,7 +681,7 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'string))
+    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-file cand)) 'string))
       (marginalia--fields
        ((file-attribute-modes attributes) :face 'marginalia-file-modes)
        ((format "%s:%s"
@@ -720,11 +724,8 @@ These annotations are skipped for remote paths."
 This runs through the `marginalia-prompt-categories' alist
 looking for a regexp that matches the prompt."
   (when-let (prompt (minibuffer-prompt))
-    (setq prompt
-          (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
-    (cl-loop for (regexp . category) in marginalia-prompt-categories
-             when (string-match-p regexp prompt)
-             return category)))
+    (setq prompt (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
+    (cdr (cl-find-if (lambda (x) (string-match-p (car x) prompt)) marginalia-prompt-categories))))
 
 (defmacro marginalia--context (metadata &rest body)
   "Setup annotator context with completion METADATA around BODY."
