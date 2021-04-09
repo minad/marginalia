@@ -30,7 +30,7 @@
 ;;; Code:
 
 (require 'subr-x)
-(require 'cl-lib)
+(eval-when-compile (require 'cl-lib))
 
 ;;;; Customization
 
@@ -635,14 +635,20 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
-;; This function is only used for file candidates and is necessary
-;; because otherwise file-attributes won't find the file. It is
-;; complicated by the partial-completion completion style, which can
-;; complete /u/s/d/w to /usr/share/dict/words. This means that we need
-;; to replace some of the path components in the minibuffer contents
-;; with those from the completion candidate.
-(defun marginalia--full-file (file)
-  "Return full path to completion candidate FILE."
+;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
+;; more direct way to implement it. While Emacs does not use the notion of "full candidate", there
+;; is a function `completion-boundaries' to compute them, and in (info "(elisp)Programmed
+;; Completion") it is documented how a completion table should respond to boundaries requests.
+;; See the discussion at https://github.com/minad/marginalia/commit/4ba98045dd33bcf1396a888dbbae2dc801dce7c5
+(defun marginalia--full-candidate (cand)
+  "Return completion candidate CAND in full.
+For some completion tables, the completion candidates offered are
+meant to be only a part of the full minibuffer contents. For
+example, during file name completion the candidates are one path
+component of a full file path.
+
+This function returns what would be the minibuffer contents after
+using `minibuffer-force-complete' on the candidate CAND."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents-no-properties))
@@ -658,24 +664,13 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
                                                       minibuffer-completion-table
                                                       minibuffer-completion-predicate
                                                       after)
-                             (t (cons 0 (length after))))))
-               (components (split-string (substring before 0 (car bounds)) "/"))
-               (num-replace (if (string-suffix-p "/" file)
-                                (cl-count ?/ file)
-                              (1+ (cl-count ?/ file))) ))
-          ;; use expand-file-name in case path is relative, to get the
-          ;; correct default-directory from the minibuffer (normally,
-          ;; say for find-file, the path is only relative if the user
-          ;; deletes the initial / or ~/)
-          (expand-file-name
-           (string-join
-            (append
-             (cl-subseq components 0 (max 0 (- (length components) num-replace)))
-             (list file))
-            "/"))))
-    ;; no minibuffer is active, trust that FILE already conveys all
+                             (t (cons 0 (length after)))))))
+          (concat (substring contents 0 (car bounds))
+                  cand
+                  (substring contents (+ pt (cdr bounds))))))
+    ;; no minibuffer is active, trust that cand already conveys all
     ;; necessary information (there's not much else we can do)
-    file))
+    cand))
 
 (defun marginalia--remote-p (path)
   "Return t if PATH is a remote path."
@@ -689,7 +684,7 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-file cand)) 'string))
+    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'string))
       (marginalia--fields
        ((file-attribute-modes attributes) :face 'marginalia-file-modes)
        ((format "%s:%s"
@@ -732,8 +727,11 @@ These annotations are skipped for remote paths."
 This runs through the `marginalia-prompt-categories' alist
 looking for a regexp that matches the prompt."
   (when-let (prompt (minibuffer-prompt))
-    (setq prompt (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
-    (cdr (cl-find-if (lambda (x) (string-match-p (car x) prompt)) marginalia-prompt-categories))))
+    (setq prompt
+          (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
+    (cl-loop for (regexp . category) in marginalia-prompt-categories
+             when (string-match-p regexp prompt)
+             return category)))
 
 (defmacro marginalia--context (metadata &rest body)
   "Setup annotator context with completion METADATA around BODY."
