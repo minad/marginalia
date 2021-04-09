@@ -649,11 +649,15 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
                (pt (- (point) (minibuffer-prompt-end)))
                (before (substring contents 0 pt))
                (after (substring contents pt))
-               (bounds (completion-boundaries
-                        before
-                        minibuffer-completion-table
-                        minibuffer-completion-predicate
-                        after))
+               ;; BUG: `completion-boundaries` fails for `partial-completion`
+               ;; if the cursor is moved between the slashes of "~//".
+               ;; See also vertico.el.
+               (bounds (or (condition-case nil
+                               (completion-boundaries before
+                                                      minibuffer-completion-table
+                                                      minibuffer-completion-predicate
+                                                      after)
+                             (t (cons 0 (length after))))))
                (components (split-string (substring before 0 (car bounds)) "/"))
                (num-replace (if (string-suffix-p "/" file)
                                 (cl-count ?/ file)
