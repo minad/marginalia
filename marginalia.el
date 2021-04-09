@@ -793,18 +793,14 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 (define-minor-mode marginalia-mode
   "Annotate completion candidates with richer information."
   :global t
-
-  ;; Reset first to get a clean slate.
-  (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
-  (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
-
-  ;; Now add our tweaks.
-  (when marginalia-mode
-    ;; Ensure that we remember this-command in order to select the annotation function.
-    (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
-
-    ;; Replace the metadata function.
-    (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)))
+  (if marginalia-mode
+      (progn
+        ;; Ensure that we remember this-command in order to select the annotation function.
+        (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
+        ;; Replace the metadata function.
+        (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get))
+    (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
+    (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)))
 
 ;; If you want to cycle between annotators while being in the minibuffer, the completion-system
 ;; should refresh the candidate list. Currently there is no support for this in marginalia, but it
