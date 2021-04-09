@@ -651,7 +651,8 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
                (after (substring contents pt))
                ;; BUG: `completion-boundaries` fails for `partial-completion`
                ;; if the cursor is moved between the slashes of "~//".
-               ;; See also vertico.el.
+               ;; See also vertico.el which has the same issue.
+               ;; Upstream bug: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=47678
                (bounds (or (condition-case nil
                                (completion-boundaries before
                                                       minibuffer-completion-table
