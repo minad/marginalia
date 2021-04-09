@@ -646,12 +646,15 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents-no-properties))
+               (pt (- (point) (minibuffer-prompt-end)))
+               (before (substring contents 0 pt))
+               (after (substring contents pt))
                (bounds (completion-boundaries
-                        contents
+                        before
                         minibuffer-completion-table
                         minibuffer-completion-predicate
-                        ""))
-               (components (split-string (substring contents 0 (car bounds)) "/"))
+                        after))
+               (components (split-string (substring before 0 (car bounds)) "/"))
                (num-replace (if (string-suffix-p "/" file)
                                 (cl-count ?/ file)
                               (1+ (cl-count ?/ file))) ))
