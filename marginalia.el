@@ -646,7 +646,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
         (let* ((contents (minibuffer-contents-no-properties))
-               (pt (- (point) (minibuffer-prompt-end)))
+               (pt (max 0 (- (point) (minibuffer-prompt-end))))
                (before (substring contents 0 pt))
                (after (substring contents pt))
                ;; BUG: `completion-boundaries` fails for `partial-completion`
