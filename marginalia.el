@@ -275,6 +275,9 @@ determine it."
 (defvar marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
 
+(defvar marginalia--base-position nil
+  "Last completion base position saved to get full file paths.")
+
 (defvar marginalia--metadata nil
   "Completion metadata from the current completion.")
 
@@ -635,39 +638,17 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
-;; At some point we might want to revisit how this function is implemented. Maybe we come up with a
-;; more direct way to implement it. While Emacs does not use the notion of "full candidate", there
-;; is a function `completion-boundaries' to compute them, and in (info "(elisp)Programmed
-;; Completion") it is documented how a completion table should respond to boundaries requests.
-;; See the discussion at https://github.com/minad/marginalia/commit/4ba98045dd33bcf1396a888dbbae2dc801dce7c5
 (defun marginalia--full-candidate (cand)
   "Return completion candidate CAND in full.
 For some completion tables, the completion candidates offered are
 meant to be only a part of the full minibuffer contents. For
 example, during file name completion the candidates are one path
-component of a full file path.
-
-This function returns what would be the minibuffer contents after
-using `minibuffer-force-complete' on the candidate CAND."
+component of a full file path."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
-        (let* ((contents (minibuffer-contents-no-properties))
-               (pt (max 0 (- (point) (minibuffer-prompt-end))))
-               (before (substring contents 0 pt))
-               (after (substring contents pt))
-               ;; BUG: `completion-boundaries` fails for `partial-completion`
-               ;; if the cursor is moved between the slashes of "~//".
-               ;; See also vertico.el which has the same issue.
-               ;; Upstream bug: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=47678
-               (bounds (or (condition-case nil
-                               (completion-boundaries before
-                                                      minibuffer-completion-table
-                                                      minibuffer-completion-predicate
-                                                      after)
-                             (t (cons 0 (length after)))))))
-          (concat (substring contents 0 (car bounds))
-                  cand
-                  (substring contents (+ pt (cdr bounds))))))
+        (concat (substring (minibuffer-contents-no-properties)
+                           0 marginalia--base-position)
+                cand))
     ;; no minibuffer is active, trust that cand already conveys all
     ;; necessary information (there's not much else we can do)
     cand))
@@ -789,6 +770,11 @@ PROP is the property which is looked up."
 Remember `this-command' for `marginalia-classify-by-command-name'."
   (setq-local marginalia--this-command this-command))
 
+(defun marginalia--base-position (completions)
+  "Record the completion base position."
+  (setq-local marginalia--base-position (cdr (last completions)))
+  completions)
+
 ;;;###autoload
 (define-minor-mode marginalia-mode
   "Annotate completion candidates with richer information."
@@ -798,7 +784,10 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
         ;; Ensure that we remember this-command in order to select the annotation function.
         (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
         ;; Replace the metadata function.
-        (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get))
+        (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)
+        ;; Record completion base position, for marginalia--full-candidate
+        (advice-add #'completion-all-completions :filter-return #'marginalia--base-position))
+    (advice-remove #'completion-all-completions #'marginalia--base-position)
     (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
     (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)))
 
