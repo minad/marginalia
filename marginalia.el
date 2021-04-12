@@ -272,10 +272,10 @@ determine it."
 (defvar marginalia--margin nil
   "Right margin.")
 
-(defvar marginalia--this-command nil
+(defvar-local marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
 
-(defvar marginalia--base-position nil
+(defvar-local marginalia--base-position 0
   "Last completion base position saved to get full file paths.")
 
 (defvar marginalia--metadata nil
@@ -768,11 +768,14 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
 Remember `this-command' for `marginalia-classify-by-command-name'."
-  (setq-local marginalia--this-command this-command))
+  (setq marginalia--this-command this-command))
 
 (defun marginalia--base-position (completions)
-  "Record the completion base position."
-  (setq-local marginalia--base-position (cdr (last completions)))
+  "Record the base position of COMPLETIONS."
+  ;; NOTE: As a small optimization track the base position only for file completions,
+  ;; since `marginalia--full-candidate' is only used for files as of now.
+  (when minibuffer-completing-file-name
+    (setq marginalia--base-position (cdr (last completions))))
   completions)
 
 ;;;###autoload
