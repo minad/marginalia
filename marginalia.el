@@ -585,11 +585,14 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
     (let ((front (alist-get 'front-context-string bm)))
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
-       ((alist-get 'filename bm) :width 40 :face 'marginalia-file-name)
+       ((alist-get 'filename bm) :truncate 40 :face 'marginalia-file-name)
        ((if (or (not front) (string= front ""))
             ""
-          (concat (replace-regexp-in-string "\n" "\\\\n" front) "…"))
-        :width 20 :face 'marginalia-documentation)))))
+          (concat (string-trim
+                   (replace-regexp-in-string
+                    "[ \t]+" " "
+                    (replace-regexp-in-string "\n" "\\\\n" front))) "…"))
+        :truncate 20 :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
