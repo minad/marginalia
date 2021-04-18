@@ -778,7 +778,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   ;; NOTE: As a small optimization track the base position only for file completions,
   ;; since `marginalia--full-candidate' is only used for files as of now.
   (when minibuffer-completing-file-name
-    (setq marginalia--base-position (cdr (last completions))))
+    (setq marginalia--base-position (or (cdr (last completions)) 0)))
   completions)
 
 ;;;###autoload
