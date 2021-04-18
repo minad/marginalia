@@ -1,7 +1,7 @@
 ;;; marginalia.el --- Enrich existing commands with completion annotations -*- lexical-binding: t -*-
 
-;; Author: Omar Antolín Camarena, Daniel Mendler
-;; Maintainer: Omar Antolín Camarena, Daniel Mendler
+;; Author: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
+;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; License: GPL-3.0-or-later
 ;; Version: 0.4
