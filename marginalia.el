@@ -264,6 +264,8 @@ determine it."
 (declare-function color-rgb-to-hsl "color")
 (declare-function color-hsl-to-rgb "color")
 
+(declare-function selectrum--get-full "ext:selectrum")
+
 ;;;; Marginalia mode
 
 (defvar marginalia--separator "    "
@@ -640,8 +642,6 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
              "")))
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
-
-(declare-function 'selectrum--get-full "ext:selectrum")
 
 (defun marginalia--full-candidate (cand)
   "Return completion candidate CAND in full.
