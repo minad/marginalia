@@ -765,7 +765,7 @@ PROP is the property which is looked up."
                  (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
        (lambda (cands)
          (marginalia--context metadata
-           (mapcar (lambda (x) (list x (or (funcall annotate x) ""))) cands)))))
+           (mapcar (lambda (x) (list x "" (or (funcall annotate x) ""))) cands)))))
     ('category
      ;; Find the completion category by trying each of our classifiers.
      ;; Store the metadata for `marginalia-classify-original-category'.
