@@ -801,10 +801,6 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
     (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
     (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)))
 
-;; If you want to cycle between annotators while being in the minibuffer, the completion-system
-;; should refresh the candidate list. Currently there is no support for this in marginalia, but it
-;; is possible to advise the `marginalia-cycle' function with the necessary refreshing logic. See
-;; the discussion in https://github.com/minad/marginalia/issues/10 for reference.
 ;;;###autoload
 (defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotators'."
