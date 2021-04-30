@@ -258,7 +258,7 @@ determine it."
 (declare-function package-desc-version "package")
 (declare-function package-version-join "package")
 (declare-function project-current "project")
-(declare-function project-roots "project")
+(declare-function project-root "project")
 
 (declare-function color-rgb-to-hex "color")
 (declare-function color-rgb-to-hsl "color")
@@ -686,8 +686,11 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
+  ;; TODO project-find-file can be called from outside all projects in
+  ;; which case it prompts for a project first; we don't support that
+  ;; case yet, since there is no current project.
   (when-let ((project (project-current))
-             (root (car (project-roots project)))
+             (root (project-root project))
              (file (expand-file-name cand root)))
     (marginalia-annotate-file file)))
 
