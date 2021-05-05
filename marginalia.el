@@ -67,61 +67,39 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
-(defcustom marginalia-annotators
-  '(marginalia-annotators-light marginalia-annotators-heavy nil)
-  "Choose an annotator association list for minibuffer completion.
-The first entry in the list is used for annotations.
-You can cycle between the annotators using `marginalia-cycle'.
-Annotations are only shown if `marginalia-mode' is enabled.
-An entry of nil disables marginalia's annotations (leaving you
-only with the annotations that come with Emacs) without disabling
-`marginalia-mode'; this can be convenient for users of
-`marginalia-cycle'."
-  :type '(repeat (choice (const :tag "Light" marginalia-annotators-light)
-                         (const :tag "Heavy" marginalia-annotators-heavy)
-                         (const :tag "None" nil)
-                         (symbol :tag "Other"))))
+(make-obsolete-variable 'marginalia-annotators "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
+(make-obsolete-variable 'marginalia-annotators-light "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
+(make-obsolete-variable 'marginalia-annotators-heavy "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
 
-(defcustom marginalia-annotators-light
-  '((command . marginalia-annotate-binding)
-    (customize-group . marginalia-annotate-customize-group)
-    (variable . marginalia-annotate-variable)
-    (face . marginalia-annotate-face)
-    (color . marginalia-annotate-color)
-    (unicode-name . marginalia-annotate-char)
-    (minor-mode . marginalia-annotate-minor-mode)
-    (symbol . marginalia-annotate-symbol)
-    (variable . marginalia-annotate-variable)
-    (environment-variable . marginalia-annotate-environment-variable)
-    (input-method . marginalia-annotate-input-method)
-    (coding-system . marginalia-annotate-coding-system)
-    (charset . marginalia-annotate-charset)
-    (package . marginalia-annotate-package)
-    (imenu . marginalia-annotate-imenu)
-    (bookmark . marginalia-annotate-bookmark))
-  "Lightweight annotator functions.
+(defcustom marginalia-annotator-registry
+  (mapcar
+   (lambda (x) (append x '(builtin none)))
+   '((command marginalia-annotate-command marginalia-annotate-binding)
+     (embark-keybinding marginalia-annotate-embark-keybinding)
+     (customize-group marginalia-annotate-customize-group)
+     (variable marginalia-annotate-variable)
+     (face marginalia-annotate-face)
+     (color marginalia-annotate-color)
+     (unicode-name marginalia-annotate-char)
+     (minor-mode marginalia-annotate-minor-mode)
+     (symbol marginalia-annotate-symbol)
+     (variable marginalia-annotate-variable)
+     (environment-variable marginalia-annotate-environment-variable)
+     (input-method marginalia-annotate-input-method)
+     (coding-system marginalia-annotate-coding-system)
+     (charset marginalia-annotate-charset)
+     (package marginalia-annotate-package)
+     (imenu marginalia-annotate-imenu)
+     (bookmark marginalia-annotate-bookmark)
+     (file marginalia-annotate-file)
+     (project-file marginalia-annotate-project-file)
+     (buffer marginalia-annotate-buffer)
+     (consult-multi marginalia-annotate-consult-multi)))
+  "Annotator function registry.
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
-which is appended to the completion candidate.
-See also `marginalia-annotators-heavy'."
-  :type '(alist :key-type symbol :value-type function))
-
-(defcustom marginalia-annotators-heavy
-  (append
-   '((file . marginalia-annotate-file)
-     (project-file . marginalia-annotate-project-file)
-     (buffer . marginalia-annotate-buffer)
-     (command . marginalia-annotate-command)
-     (embark-keybinding . marginalia-annotate-embark-keybinding)
-     (consult-multi . marginalia-annotate-consult-multi))
-   marginalia-annotators-light)
-  "Heavy annotator functions.
-
-Associates completion categories with annotation functions.
-Each annotation function must return a string,
-which is appended to the completion candidate.
-See also `marginalia-annotators-light'."
-  :type '(alist :key-type symbol :value-type function))
+which is appended to the completion candidate."
+  :type 'alist)
 
 (defcustom marginalia-classifiers
   '(marginalia-classify-by-command-name
@@ -352,11 +330,18 @@ This hash table is needed to speed up `marginalia-annotate-binding'.")
               (binding (gethash sym marginalia--annotate-binding-hash)))
     (propertize (format " (%s)" (key-description binding)) 'face 'marginalia-key)))
 
+(defun marginalia--annotator (cat)
+  "Return annotation function for category CAT."
+  (pcase (car (alist-get cat marginalia-annotator-registry))
+    ('none (lambda (_) nil))
+    ('builtin nil)
+    (fun fun)))
+
 ;; This annotator is consult-specific, it will annotate commands with `consult-multi' category
 (defun marginalia-annotate-consult-multi (cand)
   "Annotate consult-multi CAND with the buffer class."
   (if-let* ((multi (get-text-property 0 'consult-multi cand))
-            (annotate (alist-get (car multi) (symbol-value (car marginalia-annotators)))))
+            (annotate (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the consult-multi category.
       (funcall annotate (cdr multi))
     ;; Apply the original annotation function on the original candidate, if there is one.
@@ -757,7 +742,7 @@ PROP is the property which is looked up."
     ('annotation-function
      ;; we do want the advice triggered for completion-metadata-get
      (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+                 (annotate (marginalia--annotator cat)))
        (lambda (cand)
          (marginalia--context metadata
            (funcall annotate cand)))))
@@ -765,7 +750,7 @@ PROP is the property which is looked up."
      ;; We do want the advice triggered for `completion-metadata-get'.
      ;; Return wrapper around `annotation-function'.
      (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotate (alist-get cat (symbol-value (car marginalia-annotators)))))
+                 (annotate (marginalia--annotator cat)))
        (lambda (cands)
          (marginalia--context metadata
            (mapcar (lambda (x) (list x "" (or (funcall annotate x) ""))) cands)))))
@@ -808,8 +793,29 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 (defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotators'."
   (interactive)
-  (setq marginalia-annotators (append (cdr marginalia-annotators)
-                                      (list (car marginalia-annotators)))))
+  (if-let* ((win (active-minibuffer-window))
+            (buf (window-buffer win)))
+      (with-current-buffer buf
+        (let* ((pt (max 0 (- (point) (minibuffer-prompt-end))))
+               (metadata (completion-metadata (buffer-substring-no-properties
+                                               (minibuffer-prompt-end)
+                                               (+ (minibuffer-prompt-end) pt))
+                                              minibuffer-completion-table
+                                              minibuffer-completion-predicate))
+               (cat (completion-metadata-get metadata 'category)))
+          (unless cat
+            (user-error "Marginalia: Unknown completion category"))
+          (setq cat (assq cat marginalia-annotator-registry))
+          (unless cat
+            (user-error "Marginalia: No annotators found"))
+          (setcdr cat (append (cddr cat) (list (cadr cat))))
+          ;; When the builtin annotator is selected and no builtin function is available, skip to
+          ;; the next annotator. Note that we cannot use `completion-metadata-get' to access the
+          ;; metadata since we must bypass the `marginalia--completion-metadata-get' advice.
+          (when (and (eq (cadr cat) 'builtin) (not (alist-get 'annotation-function metadata))
+                     (setcdr cat (append (cddr cat) (list (cadr cat))))))
+          (message "Marginalia: Use annotator `%s' for category `%s'" (cadr cat) (car cat))))
+    (user-error "Marginalia: No active minibuffer")))
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
