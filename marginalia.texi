@@ -27,6 +27,7 @@
 @menu
 * Introduction::
 * Configuration::
+* Contributions::
 @end menu
 
 @node Introduction
@@ -89,5 +90,11 @@ commands.
   ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
 )
 @end lisp
+
+@node Contributions
+@chapter Contributions
+
+Since it is planned to submit this package to GNU ELPA, contributions require a
+copyright assignment to the FSF@.
 
 @bye
