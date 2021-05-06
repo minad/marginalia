@@ -77,7 +77,7 @@ command. Replace =builtin= by =none= to disable annotators by default.
     (interactive)
     (mapc
      (lambda (x)
-       (setcdr x (cons 'builtin (delq 'builtin (cdr x)))))
+       (setcdr x (cons 'builtin (remq 'builtin (cdr x)))))
      marginalia-annotator-registry))
 #+end_src
 
@@ -89,8 +89,8 @@ those using this command.
     (interactive)
     (mapc
      (lambda (x)
-       (setcdr x (append (nreverse (delq 'none
-                                         (delq 'builtin (cdr x))))
+       (setcdr x (append (reverse (remq 'none
+                                        (remq 'builtin (cdr x))))
                          '(builtin none))))
      marginalia-annotator-registry))
 #+end_src
