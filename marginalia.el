@@ -102,7 +102,7 @@ It can also be set to an integer value of 1 or larger to force an offset."
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
 which is appended to the completion candidate."
-  :type 'alist)
+  :type '(alist :key-type symbol :value-type (repeat symbol)))
 
 (defcustom marginalia-classifiers
   '(marginalia-classify-by-command-name
