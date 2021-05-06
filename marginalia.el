@@ -142,7 +142,7 @@ determine it."
     ("\\`\\(.*?\\)-bookmark-jump\\(?:-handler\\)?\\'" . "\\1")
     (".*" . ,#'capitalize))
   "List of bookmark type transformers."
-  :type 'alist)
+  :type '(alist :key-type regexp :value-type (choice string function)))
 
 (defgroup marginalia-faces nil
   "Faces used by `marginalia-mode'."
