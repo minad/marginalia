@@ -27,6 +27,7 @@
 @menu
 * Introduction::
 * Configuration::
+* Using builtin or lightweight annotators::
 * Contributions::
 @end menu
 
@@ -45,9 +46,8 @@ the original commands.
 
 The annotations are added based on the completion category. For example
 @samp{find-file} reports the @samp{file} category and @samp{M-x} reports the @samp{command}
-category. You can choose between more or less detailed annotators, by
-setting the variable @samp{marginalia-annotators} or by invoking the command
-@samp{marginalia-cycle}.
+category. You can cycle between more or less detailed annotators with the
+command @samp{marginalia-cycle}.
 
 Since many commands do not report a completion category themselves,
 Marginalia provides a classifier system, which tries to guess the
@@ -80,15 +80,36 @@ commands.
 
   ;; Must be in the :init section of use-package such that the mode gets
   ;; enabled right away. Note that this forces loading the package.
-  (marginalia-mode)
+  (marginalia-mode))
+@end lisp
 
-  ;; Prefer richer, more heavy, annotations over the lighter default variant.
-  ;; E.g. M-x will show the documentation string additional to the keybinding.
-  ;; By default only the keybinding is shown as annotation.
-  ;; Note that there is the command `marginalia-cycle' to
-  ;; switch between the annotators.
-  ;; (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-)
+@node Using builtin or lightweight annotators
+@chapter Using builtin or lightweight annotators
+
+Marginalia activates visually heavy annotators by default. Depending on your
+preference you may want to use the builtin annotators or even no annotators by
+default and only activate the annotators on demand by invoking
+@code{marginalia-cycle}.
+
+In order to use the builtin annotators by default, you can use the following
+snippet. Replace @samp{builtin} by @samp{none} to disable annotators by default.
+
+@lisp
+(mapc
+ (lambda (x) (setcdr x (cons 'builtin (delete 'builtin (cdr x)))))
+ marginalia-annotator-registry)
+@end lisp
+
+After having cycled the annotators you may want to automatically save the
+annotator configuration. This can be achieved using an advice which calls
+@code{customize-save-variable}:
+
+@lisp
+(advice-add #'marginalia-cycle :after
+            (lambda ()
+              (let ((inhibit-message t))
+                (customize-save-variable 'marginalia-annotator-registry
+                                         marginalia-annotator-registry))))
 @end lisp
 
 @node Contributions

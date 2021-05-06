@@ -63,6 +63,34 @@ commands.
   (marginalia-mode))
 #+end_src
 
+* Using builtin or lightweight annotators
+
+Marginalia activates visually heavy annotators by default. Depending on your
+preference you may want to use the builtin annotators or even no annotators by
+default and only activate the annotators on demand by invoking
+~marginalia-cycle~.
+
+In order to use the builtin annotators by default, you can use the following
+snippet. Replace =builtin= by =none= to disable annotators by default.
+
+#+begin_src emacs-lisp
+  (mapc
+   (lambda (x) (setcdr x (cons 'builtin (delete 'builtin (cdr x)))))
+   marginalia-annotator-registry)
+#+end_src
+
+After having cycled the annotators you may want to automatically save the
+annotator configuration. This can be achieved using an advice which calls
+~customize-save-variable~:
+
+#+begin_src emacs-lisp
+  (advice-add #'marginalia-cycle :after
+              (lambda ()
+                (let ((inhibit-message t))
+                  (customize-save-variable 'marginalia-annotator-registry
+                                           marginalia-annotator-registry))))
+#+end_src
+
 * Contributions
 
 Since it is planned to submit this package to GNU ELPA, contributions require a
