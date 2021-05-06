@@ -812,8 +812,10 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
           ;; When the builtin annotator is selected and no builtin function is available, skip to
           ;; the next annotator. Note that we cannot use `completion-metadata-get' to access the
           ;; metadata since we must bypass the `marginalia--completion-metadata-get' advice.
-          (when (and (eq (cadr cat) 'builtin) (not (alist-get 'annotation-function metadata))
-                     (setcdr cat (append (cddr cat) (list (cadr cat))))))
+          (when (and (eq (cadr cat) 'builtin)
+                     (not (assq 'annotation-function metadata))
+                     (not (assq 'affixation-function metadata)))
+            (setcdr cat (append (cddr cat) (list (cadr cat)))))
           (message "Marginalia: Use annotator `%s' for category `%s'" (cadr cat) (car cat))))
     (user-error "Marginalia: No active minibuffer")))
 
