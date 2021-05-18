@@ -240,6 +240,7 @@ determine it."
 (declare-function package-version-join "package")
 (declare-function project-current "project")
 (declare-function project-roots "project")
+(declare-function project-root "project")
 
 (declare-function color-rgb-to-hex "color")
 (declare-function color-rgb-to-hsl "color")
@@ -678,7 +679,10 @@ These annotations are skipped for remote paths."
   ;; which case it prompts for a project first; we don't support that
   ;; case yet, since there is no current project.
   (when-let ((project (project-current))
-             (root (car (project-roots project)))
+             (root (if (functionp 'project-root)
+		       (project-root project)
+		     (with-no-warnings
+		       (car (project-roots project)))))
              (file (expand-file-name cand root)))
     (marginalia-annotate-file file)))
 
