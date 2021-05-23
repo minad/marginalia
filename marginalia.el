@@ -649,7 +649,7 @@ component of a full file path."
 
 (defun marginalia--remote-p (path)
   "Return t if PATH is a remote path."
-  (string-match-p "\\`/[^:]+:" (substitute-in-file-name path)))
+  (string-match-p "\\`/[^/|:]+:" (substitute-in-file-name path)))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
