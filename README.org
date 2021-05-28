@@ -109,5 +109,5 @@ configuration. This can be achieved using an advice which calls
 
 * Contributions
 
-Since it is planned to submit this package to GNU ELPA, contributions require a
-copyright assignment to the FSF.
+Since this package is part of [[http://elpa.gnu.org/packages/marginalia.html][GNU ELPA]] contributions require a copyright
+assignment to the FSF.
