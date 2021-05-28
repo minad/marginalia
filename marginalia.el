@@ -30,8 +30,9 @@
 
 ;;; Code:
 
-(require 'subr-x)
-(eval-when-compile (require 'cl-lib))
+(eval-when-compile
+  (require 'subr-x)
+  (require 'cl-lib))
 
 ;;;; Customization
 
