@@ -446,10 +446,17 @@ keybinding since CAND includes it."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-type)
-     ((let ((print-escape-newlines t)
-            (print-escape-control-characters t)
-            (print-escape-multibyte t))
-        (prin1-to-string (if (boundp sym) (symbol-value sym) 'unbound)))
+     ((let* ((print-escape-newlines t)
+             (print-escape-control-characters t)
+             (print-escape-multibyte t)
+             (str-val (prin1-to-string (if (boundp sym)
+                                           (symbol-value sym)
+                                         'unbound))))
+        ;; Work around Emacs bug#48839 where `string-width' takes infinititely
+        ;; long for very long one-line strings as the prin1-ed value of
+        ;; variables like `load-history'.  So trim the string to a short-enough
+        ;; length of max 500 beforehand.
+        (substring str-val 0 (min 500 (length str-val))))
       :truncate (/ marginalia-truncate-width 3) :face 'marginalia-variable)
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
