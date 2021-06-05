@@ -267,14 +267,16 @@ determine it."
 
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
-  (when-let (pos (string-match-p "\n" str))
-    (setq str (substring str 0 pos)))
   ;; Work around Emacs bug#48839 where `string-width' takes infinititely long
   ;; for very long one-line strings as the prin1-ed value of variables like
   ;; `load-history'. So trim the string to a short-enough length beforehand.
   (when (> (length str) (* 2 width))
     (setq str (substring str 0 (* 2 width))))
-  (truncate-string-to-width str width 0 32 "…"))
+  (truncate-string-to-width
+   (if-let (pos (string-match-p "\n" str))
+       (substring str 0 pos)
+     str)
+   width 0 32 "…"))
 
 (defun marginalia--align (str)
   "Align STR at the right margin."
