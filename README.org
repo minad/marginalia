@@ -30,16 +30,6 @@ The annotations are added based on the completion category. For example
 category. You can cycle between more or less detailed annotators with the
 command =marginalia-cycle=.
 
-Since many commands do not report a completion category themselves,
-Marginalia provides a classifier system, which tries to guess the
-correct category based for example on the prompt (see the variable
-=marginalia-prompt-categories=). Usually these heuristic classifiers
-work well, but if they do not there is always the possibility to
-overwrite categories by command name. This way you can associate a fixed
-category with the completion initiated by the command (see the variable
-=marginalia-command-categories=). The list of available classifiers is
-specified by the variable =marginalia-classifiers=.
-
 #+html: <img src="https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true">
 
 * Configuration
@@ -64,6 +54,63 @@ commands.
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode))
 #+end_src
+
+* Adding custom annotators or classifiers
+
+Minibuffer completion commands can specify the type of the candidates which are
+being completed, called the *completion category*. For example the =M-x= command
+(=execute-extended-command=) specifies the category =command=. However many
+commands do not specify a completion category, this includes many of the Emacs
+built-in completion commands.
+
+In order to repair existing commands, Marginalia provides heuristic classifiers,
+which try to determine the completion category based on the prompt string or
+based on other properties of the completion candidates. You can for example
+define that commands with a prompt containing "face", have the associated =face=
+completion category.
+
+#+begin_src emacs-lisp
+  (add-to-list 'marginalia-prompt-categories '("face" . face))
+#+end_src
+
+Another useful classifier uses the =marginalia-command-categories= variable,
+which allows do define the completion category per command name. This is
+particularily useful if for example the prompt classifier yields a false
+positive. The list of all available classifiers is specified by the variable
+=marginalia-classifiers=. The completion categories are also important for
+[[https://github.com/oantolin/embark][Embark]], which associates its minibuffer actions depending on the completion
+commands.
+
+Marginalia uses the annotators depending on the completion category of the
+current command as registered in =marginalia-annotator-registry=. It is possible
+to specify multiple annotators per completion category (for example with more or
+less information). You can cycle between the different annotators by invoking
+the =marginalia-cycle= command during the current completion.
+
+An annotation function is a function taken a completion candidate string as
+argument and returns the annotation string. For example a basic face annotator
+can be written as follows:
+
+#+begin_src emacs-lisp
+  (defun my-face-annotator (cand)
+    (when-let (sym (intern-soft cand))
+      (concat (propertize " " 'display '(space :align-to center))
+              (propertize "The quick brown fox jumps over the lazy dog" 'face sym))))
+#+end_src
+
+There are a few helper functions available internally which can be used to write
+the annotation functions more conveniently, in particular =marginalia--fields=.
+After defining the annotator, it must be added to the annotator registry.
+
+#+begin_src emacs-lisp
+  (add-to-list 'marginalia-annotator-registry
+               '(face my-face-annotator marginalia-annotate-face builtin none))
+#+end_src
+
+We also add the annotator provided by Marginalia (=marginalia-annotate-face=),
+the =builtin= annotator as defined by Emacs and the =none= annotator, which
+disables the annotations. You can cycle between all of those annotators using
+=marginalia-cycle= after invoking =M-x describe-face RET=.
 
 * Using builtin or lightweight annotators
 
