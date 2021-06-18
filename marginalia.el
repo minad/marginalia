@@ -371,14 +371,14 @@ f function
 c command
 m macro
 ! advised
-o obsolete
+- obsolete
 
 Variable:
 u custom
 v variable
 l local
 * modified
-o obsolete
+- obsolete
 
 Other:
 a face
@@ -388,18 +388,18 @@ t cl-type"
    (concat
     (when (fboundp s)
       (concat
-       (and (get s 'byte-obsolete-info) "o")
        (cond
         ((commandp s) "c")
         ((eq (car-safe (symbol-function s)) 'macro) "m")
         (t "f"))
-       (and (marginalia--advised s) "!")))
+       (and (marginalia--advised s) "!")
+       (and (get s 'byte-obsolete-info) "-")))
     (when (boundp s)
       (concat
-       (and (get s 'byte-obsolete-variable) "o")
        (and (local-variable-if-set-p s) "l")
        (if (custom-variable-p s) "u" "v")
-       (and (ignore-errors (not (equal (symbol-value s) (default-value s)))) "*")))
+       (and (ignore-errors (not (equal (symbol-value s) (default-value s)))) "*")
+       (and (get s 'byte-obsolete-variable) "-")))
     (and (facep s) "a")
     (and (fboundp 'cl-find-class) (cl-find-class s) "t"))))
 
