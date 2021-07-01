@@ -145,7 +145,7 @@ determine it."
 (defcustom marginalia-bookmark-type-transformers
   `(("\\`bookmark-\\(.*?\\)-handler\\'" . "\\1")
     ("default" . "File")
-    ("\\`\\(.*?\\)-bookmark-jump\\(?:-handler\\)?\\'" . "\\1")
+    ("\\`\\(.*?\\)-+bookmark-jump\\(?:-handler\\)?\\'" . "\\1")
     (".*" . ,#'capitalize))
   "List of bookmark type transformers."
   :type '(alist :key-type regexp :value-type (choice string function)))
