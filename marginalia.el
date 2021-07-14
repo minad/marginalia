@@ -416,19 +416,17 @@ t cl-type"
 ;; Derived from elisp-get-fnsym-args-string
 (defun marginalia--function-args (sym)
   "Return function arguments for SYM."
-  (let* ((advertised (gethash (indirect-function sym)
-                              advertised-signature-table t))
-         doc
-	 (args
-	  (cond
-	   ((listp advertised) advertised)
-	   ((setq doc (help-split-fundoc
-		       (condition-case nil (documentation sym t)
-			 (invalid-function nil))
-		       sym))
-	    (substitute-command-keys (car doc)))
-	   (t (help-function-arglist sym)))))
-    (elisp-function-argstring args)))
+  (let ((tmp))
+    (elisp-function-argstring
+      (cond
+       ((listp (setq tmp (gethash (indirect-function sym)
+                                  advertised-signature-table t)))
+        tmp)
+       ((setq tmp (help-split-fundoc
+		   (ignore-errors (documentation sym t))
+		   sym))
+	(substitute-command-keys (car tmp)))
+       (t (help-function-arglist sym))))))
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
