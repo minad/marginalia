@@ -83,6 +83,7 @@ It can also be set to an integer value of 1 or larger to force an offset."
      (embark-keybinding marginalia-annotate-embark-keybinding)
      (customize-group marginalia-annotate-customize-group)
      (variable marginalia-annotate-variable)
+     (function marginalia-annotate-function)
      (face marginalia-annotate-face)
      (color marginalia-annotate-color)
      (unicode-name marginalia-annotate-char)
@@ -124,6 +125,7 @@ determine it."
     ("\\<face\\>" . face)
     ("\\<color\\>" . color)
     ("\\<environment variable\\>" . environment-variable)
+    ("\\<function\\>" . function)
     ("\\<variable\\>" . variable)
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
@@ -411,6 +413,23 @@ t cl-type"
           (substring str (match-end 0))
         str))))
 
+;; Derived from elisp-get-fnsym-args-string
+(defun marginalia--function-args (sym)
+  "Return function arguments for SYM."
+  (let* ((advertised (gethash (indirect-function sym)
+                              advertised-signature-table t))
+         doc
+	 (args
+	  (cond
+	   ((listp advertised) advertised)
+	   ((setq doc (help-split-fundoc
+		       (condition-case nil (documentation sym t)
+			 (invalid-function nil))
+		       sym))
+	    (substitute-command-keys (car doc)))
+	   (t (help-function-arglist sym)))))
+    (elisp-function-argstring args)))
+
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
   (when-let (sym (intern-soft cand))
@@ -445,6 +464,19 @@ keybinding since CAND includes it."
     ;; Strip until the last whitespace in order to support flat imenu
     (marginalia-annotate-symbol (replace-regexp-in-string "^.* " "" cand))))
 
+(defun marginalia-annotate-function (cand)
+  "Annotate function CAND with its documentation string."
+  (when-let (sym (intern-soft cand))
+    (when (functionp sym)
+      (concat
+       (marginalia-annotate-binding cand)
+       (marginalia--fields
+        ((marginalia--symbol-class sym) :face 'marginalia-type)
+        ((marginalia--function-args sym) :face 'marginalia-variable
+         :truncate (/ marginalia-truncate-width 2))
+        ((marginalia--function-doc sym) :truncate marginalia-truncate-width
+         :face 'marginalia-documentation))))))
+
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
   (when-let (sym (intern-soft cand))
@@ -460,7 +492,7 @@ keybinding since CAND includes it."
               (print-level 10)
               (print-length marginalia-truncate-width))
           (prin1-to-string val)))
-      :truncate (/ marginalia-truncate-width 3) :face 'marginalia-variable)
+      :truncate (/ marginalia-truncate-width 2) :face 'marginalia-variable)
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
