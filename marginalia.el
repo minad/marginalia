@@ -821,7 +821,9 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
           ;; metadata since we must bypass the `marginalia--completion-metadata-get' advice.
           (when (and (eq (cadr cat) 'builtin)
                      (not (assq 'annotation-function metadata))
-                     (not (assq 'affixation-function metadata)))
+                     (not (assq 'affixation-function metadata))
+                     (not (plist-get completion-extra-properties :annotation-function))
+                     (not (plist-get completion-extra-properties :affixation-function)))
             (setcdr cat (append (cddr cat) (list (cadr cat)))))
           (message "Marginalia: Use annotator `%s' for category `%s'" (cadr cat) (car cat))))
     (user-error "Marginalia: No active minibuffer")))
