@@ -78,7 +78,7 @@ It can also be set to an integer value of 1 or larger to force an offset."
 
 (defcustom marginalia-annotator-registry
   (mapcar
-   (lambda (x) (append x '(builtin none)))
+   (lambda (x) (append x '(builtin company-docsig none)))
    '((command marginalia-annotate-command marginalia-annotate-binding)
      (embark-keybinding marginalia-annotate-embark-keybinding)
      (customize-group marginalia-annotate-customize-group)
@@ -329,6 +329,8 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
   "Return annotation function for category CAT."
   (pcase (car (alist-get cat marginalia-annotator-registry))
     ('none (lambda (_) nil))
+    ('company-docsig
+     (plist-get completion-extra-properties :company-docsig))
     ('builtin nil)
     (fun fun)))
 
