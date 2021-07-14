@@ -371,7 +371,10 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
 Function:
 f function
 c command
+C interactive-only command
 m macro
+p pure
+s side-effect-free
 ! advised
 - obsolete
 
@@ -391,7 +394,10 @@ t cl-type"
     (when (fboundp s)
       (concat
        (cond
-        ((commandp s) "c")
+        ((get s 'pure) "p")
+        ((get s 'side-effect-free) "s"))
+       (cond
+        ((commandp s) (if (get s 'interactive-only) "C" "c"))
         ((eq (car-safe (symbol-function s)) 'macro) "m")
         (t "f"))
        (and (marginalia--advised s) "!")
