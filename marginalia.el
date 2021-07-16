@@ -375,6 +375,7 @@ C interactive-only command
 m macro
 p pure
 s side-effect-free
+@ autoloaded
 ! advised
 - obsolete
 
@@ -400,6 +401,7 @@ t cl-type"
         ((commandp s) (if (get s 'interactive-only) "C" "c"))
         ((eq (car-safe (symbol-function s)) 'macro) "m")
         (t "f"))
+       (and (autoloadp (symbol-function s)) "@")
        (and (marginalia--advised s) "!")
        (and (get s 'byte-obsolete-info) "-")))
     (when (boundp s)
