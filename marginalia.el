@@ -39,6 +39,7 @@
 (defgroup marginalia nil
   "Enrich existing commands with completion annotations."
   :group 'convenience
+  :group 'minibuffer
   :prefix "marginalia-")
 
 (defcustom marginalia-truncate-width 80
