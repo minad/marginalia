@@ -584,7 +584,6 @@ keybinding since CAND includes it."
                     (cond
                      ((listp val) 'marginalia-list)
                      ((stringp val) 'marginalia-string)
-                     marginalia-string
                      (t 'marginalia-value))))))))
       :truncate (/ marginalia-truncate-width 2))
      ((documentation-property sym 'variable-documentation)
