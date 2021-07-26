@@ -790,7 +790,7 @@ These annotations are skipped for remote paths."
        ((let ((uid (file-attribute-user-id attributes))
               (gid (file-attribute-group-id attributes)))
           (if (or (/= (user-uid) uid) (/= (group-gid) gid))
-              (format "%s:%s" (user-login-name uid) (group-name gid))
+              (format "%s:%s" (or (user-login-name uid) uid) (or (group-name gid) gid))
             ""))
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
