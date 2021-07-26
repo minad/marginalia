@@ -70,6 +70,10 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
+(defcustom marginalia-file-size-formatter #'marginalia--file-size
+  "Function which generates a file size string."
+  :type 'function)
+
 (defcustom marginalia-file-age-formatter #'marginalia--file-age-mixed
   "Function which generates a file age string from the file time."
   :type 'function)
@@ -816,7 +820,7 @@ These annotations are skipped for remote paths."
             ""))
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
-       ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
+       ((funcall marginalia-file-size-formatter (file-attribute-size attributes)) :width 7)
        ((funcall marginalia-file-age-formatter (file-attribute-modification-time attributes)))))))
 
 (defun marginalia--fontify-file-attributes (attrs)
@@ -842,6 +846,10 @@ These annotations are skipped for remote paths."
            attrs))
         (push attrs marginalia--fontified-file-attributes)
         attrs)))
+
+(defun marginalia--file-size (size)
+  "Format SIZE bytes to a short string."
+  (propertize (file-size-human-readable size) 'face 'marginalia-size))
 
 (defun marginalia--relative-age (time)
   "Format TIME as a relative age."
