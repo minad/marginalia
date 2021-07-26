@@ -257,6 +257,14 @@ determine it."
 
 ;;;; Marginalia mode
 
+(defvar-local marginalia--cache nil
+  "The cache, pair of list and hashtable.")
+
+(defvar marginalia--cache-size 100
+  "Size of the cache, set to 0 to disable the cache.
+Disabling the cache is useful on non-incremental UIs like default completion or
+for performance profiling of the annotators.")
+
 (defvar marginalia--separator "    "
   "Field separator.")
 
@@ -784,9 +792,11 @@ looking for a regexp that matches the prompt."
   "Setup annotator context with completion METADATA around BODY."
   (declare (indent 1))
   (let ((w (make-symbol "w"))
+        (c (make-symbol "c"))
         (o (make-symbol "o")))
     ;; Take the window width of the current window (minibuffer window!)
     `(let ((marginalia--metadata ,metadata)
+           (,c marginalia--cache)
            (,w (window-width))
            ;; Compute marginalia-align-offset. If the right-fringe-width is
            ;; zero, use an additional offset of 1 by default! See
@@ -798,12 +808,39 @@ looking for a regexp that matches the prompt."
        ;; Otherwise it would probably suffice to only change the current buffer.
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
-         (let ((marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
+         (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
+               (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
                (marginalia-align-offset (or marginalia-align-offset ,o))
                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
                (marginalia--margin (when (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
                                      (make-string (- ,w marginalia-margin-threshold) 32))))
            ,@body)))))
+
+(defun marginalia--cache-reset ()
+  "Reset the cache."
+  (when marginalia--cache
+    (setq marginalia--cache (and (> marginalia--cache-size 0)
+                                 (cons nil (make-hash-table :test #'equal
+                                                            :size marginalia--cache-size))))))
+
+(defun marginalia--cached (fun key)
+  "Cached application of function FUN with KEY.
+
+The cache keeps around the last `marginalia--cache-size' computed annotations.
+The cache is mainly useful when scrolling in completion UIs like Vertico or
+Selectrum."
+  (if marginalia--cache
+      (let ((ht (cdr marginalia--cache)))
+        (or (gethash key ht)
+            (let ((val (funcall fun key)))
+              (setcar marginalia--cache (cons key (car marginalia--cache)))
+              (puthash key val ht)
+              (when (>= (hash-table-count ht) marginalia--cache-size)
+                (let ((end (last (car marginalia--cache) 2)))
+                  (remhash (cadr end) ht)
+                  (setcdr end nil)))
+              val)))
+    (funcall fun key)))
 
 (defun marginalia--completion-metadata-get (metadata prop)
   "Meant as :before-until advice for `completion-metadata-get'.
@@ -816,7 +853,7 @@ PROP is the property which is looked up."
                  (annotate (marginalia--annotator cat)))
        (lambda (cand)
          (marginalia--context metadata
-           (funcall annotate cand)))))
+           (marginalia--cached annotate cand)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
      ;; Return wrapper around `annotation-function'.
@@ -824,7 +861,7 @@ PROP is the property which is looked up."
                  (annotate (marginalia--annotator cat)))
        (lambda (cands)
          (marginalia--context metadata
-           (mapcar (lambda (x) (list x "" (or (funcall annotate x) ""))) cands)))))
+           (mapcar (lambda (x) (list x "" (or (marginalia--cached annotate x) ""))) cands)))))
     ('category
      ;; Find the completion category by trying each of our classifiers.
      ;; Store the metadata for `marginalia-classify-original-category'.
@@ -834,14 +871,18 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup minibuffer for `marginalia-mode'.
 Remember `this-command' for `marginalia-classify-by-command-name'."
-  (setq marginalia--this-command this-command))
+  (setq marginalia--cache t marginalia--this-command this-command)
+  (marginalia--cache-reset))
 
 (defun marginalia--base-position (completions)
   "Record the base position of COMPLETIONS."
   ;; NOTE: As a small optimization track the base position only for file completions,
   ;; since `marginalia--full-candidate' is only used for files as of now.
   (when minibuffer-completing-file-name
-    (setq marginalia--base-position (or (cdr (last completions)) 0)))
+    (let ((base (or (cdr (last completions)) 0)))
+      (unless (= marginalia--base-position base)
+        (marginalia--cache-reset)
+        (setq marginalia--base-position base))))
   completions)
 
 ;;;###autoload
@@ -879,6 +920,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
           (setq cat (assq cat marginalia-annotator-registry))
           (unless cat
             (user-error "Marginalia: No annotators found"))
+          (marginalia--cache-reset)
           (setcdr cat (append (cddr cat) (list (cadr cat))))
           ;; When the builtin annotator is selected and no builtin function is available, skip to
           ;; the next annotator. Note that we cannot use `completion-metadata-get' to access the
