@@ -160,19 +160,19 @@ determine it."
 
 (defface marginalia-key
   '((t :inherit font-lock-keyword-face))
-  "Face used to highlight keys in `marginalia-mode'.")
+  "Face used to highlight keys.")
 
 (defface marginalia-type
   '((t :inherit marginalia-key))
-  "Face used to highlight types in `marginalia-mode'.")
+  "Face used to highlight types.")
 
 (defface marginalia-char
   '((t :inherit marginalia-key))
-  "Face used to highlight char in `marginalia-mode'.")
+  "Face used to highlight character annotations.")
 
 (defface marginalia-lighter
   '((t :inherit marginalia-size))
-  "Face used to highlight lighters in `marginalia-mode'.")
+  "Face used to highlight minor mode lighters.")
 
 (defface marginalia-on
   '((t :inherit success))
@@ -184,83 +184,107 @@ determine it."
 
 (defface marginalia-documentation
   '((t :inherit completions-annotations))
-  "Face used to highlight documentation string in `marginalia-mode'.")
+  "Face used to highlight documentation strings.")
 
-(defface marginalia-variable
+(defface marginalia-value
   '((t :inherit marginalia-key))
-  "Face used to highlight variable values in `marginalia-mode'.")
+  "Face used to highlight general variable values.")
+
+(defface marginalia-null
+  '((t :inherit font-lock-comment-face))
+  "Face used to highlight null or unbound variable values.")
+
+(defface marginalia-true
+  '((t :inherit font-lock-builtin-face))
+  "Face used to highlight true variable values.")
+
+(defface marginalia-function
+  '((t :inherit font-lock-function-name-face))
+  "Face used to highlight function symbols.")
+
+(defface marginalia-symbol
+  '((t :inherit font-lock-type-face))
+  "Face used to highlight general symbols.")
+
+(defface marginalia-list
+  '((t :inherit font-lock-constant-face))
+  "Face used to highlight list expressions.")
 
 (defface marginalia-mode
   '((t :inherit marginalia-key))
-  "Face used to highlight major modes in `marginalia-mode'.")
+  "Face used to highlight buffer major modes.")
 
 (defface marginalia-date
   '((t :inherit marginalia-key))
-  "Face used to highlight dates in `marginalia-mode'.")
+  "Face used to highlight dates.")
 
 (defface marginalia-version
   '((t :inherit marginalia-number))
-  "Face used to highlight package version in `marginalia-mode'.")
+  "Face used to highlight package versions.")
 
 (defface marginalia-archive
   '((t :inherit warning))
-  "Face used to highlight package archives in `marginalia-mode'.")
+  "Face used to highlight package archives.")
 
 (defface marginalia-installed
   '((t :inherit success))
-  "Face used to highlight package status in `marginalia-mode'.")
+  "Face used to highlight the status of packages.")
 
 (defface marginalia-size
   '((t :inherit marginalia-number))
-  "Face used to highlight sizes in `marginalia-mode'.")
+  "Face used to highlight sizes.")
 
 (defface marginalia-number
   '((t :inherit font-lock-constant-face))
-  "Face used to highlight char in `marginalia-mode'.")
+  "Face used to highlight numeric values.")
+
+(defface marginalia-string
+  '((t :inherit font-lock-string-face))
+  "Face used to highlight string values.")
 
 (defface marginalia-modified
   '((t :inherit font-lock-negation-char-face))
-  "Face used to highlight modification indicators in `marginalia-mode'.")
+  "Face used to highlight buffer modification indicators.")
 
 (defface marginalia-file-name
   '((t :inherit marginalia-documentation))
-  "Face used to highlight file names in `marginalia-mode'.")
+  "Face used to highlight file names.")
 
 (defface marginalia-file-owner
   '((t :inherit font-lock-preprocessor-face))
-  "Face used to highlight file owners in `marginalia-mode'.")
+  "Face used to highlight file owner and group names.")
 
 (defface marginalia-file-priv-no
   '((t :inherit shadow))
-  "Face used to highlight the no privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the no file privilege attribute.")
 
 (defface marginalia-file-priv-dir
   '((t :inherit font-lock-keyword-face))
-  "Face used to highlight the dir privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the dir file privilege attribute.")
 
 (defface marginalia-file-priv-link
   '((t :inherit font-lock-keyword-face))
-  "Face used to highlight the link privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the link file privilege attribute.")
 
 (defface marginalia-file-priv-read
   '((t :inherit font-lock-type-face))
-  "Face used to highlight the read privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the read file privilege attribute.")
 
 (defface marginalia-file-priv-write
   '((t :inherit font-lock-builtin-face))
-  "Face used to highlight the write privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the write file privilege attribute.")
 
 (defface marginalia-file-priv-exec
   '((t :inherit font-lock-function-name-face))
-  "Face used to highlight the exec privilege attribute in `marginalia-mode'.")
+  "Face used to highlight the exec file privilege attribute.")
 
 (defface marginalia-file-priv-other
   '((t :inherit font-lock-constant-face))
-  "Face used to highlight some other privilege attribute in `marginalia-mode'.")
+  "Face used to highlight some other file privilege attribute.")
 
 (defface marginalia-file-priv-rare
   '((t :inherit font-lock-variable-name-face))
-  "Face used to highlight a rare privilege attribute in `marginalia-mode'.")
+  "Face used to highlight a rare file privilege attribute.")
 
 ;;;; Pre-declarations for external packages
 
@@ -518,7 +542,7 @@ keybinding since CAND includes it."
        (marginalia-annotate-binding cand)
        (marginalia--fields
         ((marginalia--symbol-class sym) :face 'marginalia-type)
-        ((marginalia--function-args sym) :face 'marginalia-variable
+        ((marginalia--function-args sym) :face 'marginalia-value
          :truncate (/ marginalia-truncate-width 2))
         ((marginalia--function-doc sym) :truncate marginalia-truncate-width
          :face 'marginalia-documentation))))))
@@ -530,19 +554,19 @@ keybinding since CAND includes it."
      ((marginalia--symbol-class sym) :face 'marginalia-type)
      ((cond
        ((not (boundp sym))
-        (propertize "<unbound>" 'face 'marginalia-variable))
+        (propertize "<unbound>" 'face 'marginalia-null))
        ((and marginalia-censor-variables
              (seq-find (lambda (r) (string-match-p r cand)) marginalia-censor-variables))
         "*****")
        (t (pcase (symbol-value sym)
-            ('nil (propertize "nil" 'face 'font-lock-comment-face))
-            ('t (propertize "t" 'face 'font-lock-builtin-face))
-            ((pred keymapp) (propertize "<keymap>" 'face 'marginalia-variable))
-            ((pred hash-table-p) (propertize "<hash-table>" 'face 'marginalia-variable))
-            ((pred functionp) (propertize (symbol-name sym) 'face 'font-lock-function-name-face))
-            ((pred symbolp) (propertize (symbol-name sym) 'face 'font-lock-type-face))
+            ('nil (propertize "nil" 'face 'marginalia-null))
+            ('t (propertize "t" 'face 'marginalia-true))
+            ((pred keymapp) (propertize "<keymap>" 'face 'marginalia-value))
+            ((pred hash-table-p) (propertize "<hash-table>" 'face 'marginalia-value))
+            ((pred functionp) (propertize (symbol-name sym) 'face 'marginalia-function))
+            ((pred symbolp) (propertize (symbol-name sym) 'face 'marginalia-symbol))
             ((and (pred numberp) val)
-             (propertize (number-to-string val) 'face 'font-lock-variable-name-face))
+             (propertize (number-to-string val) 'face 'marginalia-number))
             (val (let ((print-escape-newlines t)
                        (print-escape-control-characters t)
                        (print-escape-multibyte t)
@@ -558,9 +582,10 @@ keybinding since CAND includes it."
                        val))
                     'face
                     (cond
-                     ((listp val) 'font-lock-constant-face)
-                     ((stringp val) 'font-lock-string-face)
-                     (t 'marginalia-variable))))))))
+                     ((listp val) 'marginalia-list)
+                     ((stringp val) 'marginalia-string)
+                     marginalia-string
+                     (t 'marginalia-value))))))))
       :truncate (/ marginalia-truncate-width 2))
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
@@ -569,7 +594,7 @@ keybinding since CAND includes it."
   "Annotate environment variable CAND with its current value."
   (when-let (val (getenv cand))
     (marginalia--fields
-     (val :truncate marginalia-truncate-width :face 'marginalia-variable))))
+     (val :truncate marginalia-truncate-width :face 'marginalia-value))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with its documentation string and face example."
