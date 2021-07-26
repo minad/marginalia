@@ -764,7 +764,7 @@ These annotations are skipped for remote paths."
       (marginalia--fields
        ((let ((uid (file-attribute-user-id attributes))
               (gid (file-attribute-group-id attributes)))
-          (concat (unless (= (user-id) uid)
+          (concat (unless (= (user-uid) uid)
                     (or (user-login-name uid) (number-to-string uid)))
                   (unless (= (group-gid) gid)
                     (concat ":" (or (group-name gid) (number-to-string gid))))))
@@ -779,7 +779,7 @@ These annotations are skipped for remote paths."
   "Alist of (attrs . fontified-attrs).")
 
 (defun marginalia--color-file-attributes (attrs)
-  "Apply fontification to a file attribute string, e.g. \"drwxrw-r--\"."
+  "Apply fontification to a file ATTRS string, e.g. \"drwxrw-r--\"."
   ;; Without caching this can a be significant portion of the time
   ;; `marginalia-annotate-file' takes to execute. Caching improves performance
   ;; by about a factor of 20.
