@@ -490,16 +490,38 @@ keybinding since CAND includes it."
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-type)
      ((cond
-       ((not (boundp sym)) "<unbound>")
-       ((seq-find (lambda (r) (string-match-p r cand)) marginalia-censor-variables) "*****")
-       (t (let ((val (symbol-value sym))
-                (print-escape-newlines t)
-                (print-escape-control-characters t)
-                (print-escape-multibyte t)
-                (print-level 10)
-                (print-length marginalia-truncate-width))
-            (prin1-to-string val))))
-      :truncate (/ marginalia-truncate-width 2) :face 'marginalia-variable)
+       ((not (boundp sym))
+        (propertize "<unbound>" 'face 'marginalia-variable))
+       ((and marginalia-censor-variables
+             (seq-find (lambda (r) (string-match-p r cand)) marginalia-censor-variables))
+        "*****")
+       (t (let* ((val (symbol-value sym))
+                 (type-repr
+                  (cond
+                   ((null val) '(font-lock-comment-face . "nil"))
+                   ((eq t val) '(font-lock-builtin-face . "t"))
+                   ((numberp val)
+                    (cons 'font-lock-variable-name-face (number-to-string val)))
+                   ((stringp val)
+                    (cons 'font-lock-string-face
+                          (concat "\"" (replace-regexp-in-string "\n" "\\\\n" val) "\"")))
+                   ((functionp val)
+                    (cons 'font-lock-function-name-face (symbol-name sym)))
+                   ((symbolp val)
+                    (cons 'font-lock-type-face (symbol-name sym)))
+                   ((keymapp val)
+                    '(marginalia-variable . "<keymap>"))
+                   (t (cons (if (listp val)
+                                'font-lock-constant-face
+                              'marginalia-variable)
+                            (let ((print-escape-newlines t)
+                                  (print-escape-control-characters t)
+                                  (print-escape-multibyte t)
+                                  (print-level 10)
+                                  (print-length marginalia-truncate-width))
+                              (prin1-to-string val)))))))
+            (propertize (cdr type-repr) 'face (car type-repr)))))
+      :truncate (/ marginalia-truncate-width 2))
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
