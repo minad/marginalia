@@ -289,6 +289,9 @@ determine it."
 
 ;;;; Marginalia mode
 
+(defvar marginalia--fontified-file-attributes nil
+  "List of fontified file attributes.")
+
 (defvar-local marginalia--cache nil
   "The cache, pair of list and hashtable.")
 
@@ -760,46 +763,45 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'integer))
+    (when-let (attributes (file-attributes (substitute-in-file-name
+                                            (marginalia--full-candidate cand))
+                                           'integer))
       (marginalia--fields
        ((let ((uid (file-attribute-user-id attributes))
               (gid (file-attribute-group-id attributes)))
-          (concat (unless (= (user-uid) uid)
-                    (or (user-login-name uid) (number-to-string uid)))
-                  (unless (= (group-gid) gid)
-                    (concat ":" (or (group-name gid) (number-to-string gid))))))
+          (if (or (/= (user-uid) uid) (/= (group-gid) gid))
+              (format "%s:%s" (user-login-name uid) (group-name gid))
+            ""))
         :width 12 :face 'marginalia-file-owner)
-       ((marginalia--color-file-attributes (file-attribute-modes attributes)))
+       ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
        ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
        ((format-time-string
          "%b %d %H:%M"
          (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
 
-(defvar marginalia--color-file-attributes-cache nil
-  "Alist of (attrs . fontified-attrs).")
-
-(defun marginalia--color-file-attributes (attrs)
-  "Apply fontification to a file ATTRS string, e.g. \"drwxrw-r--\"."
+(defun marginalia--fontify-file-attributes (attrs)
+  "Apply fontification to a file ATTRS string, e.g. `drwxrw-r--'."
   ;; Without caching this can a be significant portion of the time
   ;; `marginalia-annotate-file' takes to execute. Caching improves performance
   ;; by about a factor of 20.
-  (or (cdr (assoc attrs marginalia--color-file-attributes-cache))
-      (cdar (push (cons (copy-sequence attrs) ; copy because attrs is about to be modified
-                        (progn
-                          (dotimes (char (length attrs))
-                            (put-text-property char (1+ char)
-                                               'face (pcase (aref attrs char)
-                                                       (?- 'marginalia-file-priv-no)
-                                                       (?d 'marginalia-file-priv-dir)
-                                                       (?l 'marginalia-file-priv-link)
-                                                       (?r 'marginalia-file-priv-read)
-                                                       (?w 'marginalia-file-priv-write)
-                                                       (?x 'marginalia-file-priv-exec)
-                                                       ((or ?s ?S ?t ?T) 'marginalia-file-priv-other)
-                                                       (_ 'marginalia-file-priv-rare))
-                                               attrs))
-                          attrs))
-                  marginalia--color-file-attributes-cache))))
+  (or (car (member attrs marginalia--fontified-file-attributes))
+      (progn
+        (setq attrs (substring attrs)) ;; copy because attrs is about to be modified
+        (dotimes (i (length attrs))
+          (put-text-property
+           i (1+ i) 'face
+           (pcase (aref attrs i)
+             (?- 'marginalia-file-priv-no)
+             (?d 'marginalia-file-priv-dir)
+             (?l 'marginalia-file-priv-link)
+             (?r 'marginalia-file-priv-read)
+             (?w 'marginalia-file-priv-write)
+             (?x 'marginalia-file-priv-exec)
+             ((or ?s ?S ?t ?T) 'marginalia-file-priv-other)
+             (_ 'marginalia-file-priv-rare))
+           attrs))
+        (push attrs marginalia--fontified-file-attributes)
+        attrs)))
 
 (defmacro marginalia--project-root ()
   "Return project root."
