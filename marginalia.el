@@ -226,10 +226,6 @@ determine it."
   '((t :inherit marginalia-documentation))
   "Face used to highlight file names in `marginalia-mode'.")
 
-(defface marginalia-file-modes
-  '((t :inherit font-lock-string-face))
-  "Face used to highlight file modes in `marginalia-mode'.")
-
 (defface marginalia-file-owner
   '((t :inherit font-lock-preprocessor-face))
   "Face used to highlight file owners in `marginalia-mode'.")
