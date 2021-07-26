@@ -495,32 +495,35 @@ keybinding since CAND includes it."
        ((and marginalia-censor-variables
              (seq-find (lambda (r) (string-match-p r cand)) marginalia-censor-variables))
         "*****")
-       (t (let* ((val (symbol-value sym))
-                 (type-repr
-                  (cond
-                   ((null val) '(font-lock-comment-face . "nil"))
-                   ((eq t val) '(font-lock-builtin-face . "t"))
-                   ((numberp val)
-                    (cons 'font-lock-variable-name-face (number-to-string val)))
-                   ((stringp val)
-                    (cons 'font-lock-string-face
-                          (concat "\"" (replace-regexp-in-string "\n" "\\\\n" val) "\"")))
-                   ((functionp val)
-                    (cons 'font-lock-function-name-face (symbol-name sym)))
-                   ((symbolp val)
-                    (cons 'font-lock-type-face (symbol-name sym)))
-                   ((keymapp val)
-                    '(marginalia-variable . "<keymap>"))
-                   (t (cons (if (listp val)
-                                'font-lock-constant-face
-                              'marginalia-variable)
-                            (let ((print-escape-newlines t)
-                                  (print-escape-control-characters t)
-                                  (print-escape-multibyte t)
-                                  (print-level 10)
-                                  (print-length marginalia-truncate-width))
-                              (prin1-to-string val)))))))
-            (propertize (cdr type-repr) 'face (car type-repr)))))
+       (t (pcase (symbol-value sym)
+            ('nil (propertize "nil" 'face 'font-lock-comment-face))
+            ('t (propertize "t" 'face 'font-lock-builtin-face))
+            ((and (pred numberp) val)
+             (propertize (number-to-string val) 'face 'font-lock-variable-name-face))
+            ((pred functionp)
+             (propertize (symbol-name sym) 'face 'font-lock-function-name-face))
+            ((pred symbolp)
+             (propertize (symbol-name sym) 'face 'font-lock-type-face))
+            ((pred keymapp)
+             (propertize "<keymap>" 'face 'marginalia-variable))
+            (val (let ((print-escape-newlines t)
+                       (print-escape-control-characters t)
+                       (print-escape-multibyte t)
+                       (print-level 10)
+                       (print-length marginalia-truncate-width))
+                   (propertize
+                    (prin1-to-string
+                     (if (stringp val)
+                         ;; Get rid of string properties to save some of the precious space
+                         (substring-no-properties
+                          val 0
+                          (min (length val) marginalia-truncate-width))
+                       val))
+                    'face
+                    (cond
+                     ((listp val) 'font-lock-constant-face)
+                     ((stringp val) 'font-lock-string-face)
+                     (t 'marginalia-variable))))))))
       :truncate (/ marginalia-truncate-width 2))
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
