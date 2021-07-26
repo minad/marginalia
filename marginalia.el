@@ -234,6 +234,38 @@ determine it."
   '((t :inherit font-lock-preprocessor-face))
   "Face used to highlight file owners in `marginalia-mode'.")
 
+(defface marginalia-file-priv-no
+  '((t :inherit shadow))
+  "Face used to highlight the no privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-dir
+  '((t :inherit font-lock-keyword-face))
+  "Face used to highlight the dir privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-link
+  '((t :inherit font-lock-keyword-face))
+  "Face used to highlight the link privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-read
+  '((t :inherit font-lock-type-face))
+  "Face used to highlight the read privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-write
+  '((t :inherit font-lock-builtin-face))
+  "Face used to highlight the write privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-exec
+  '((t :inherit font-lock-function-name-face))
+  "Face used to highlight the exec privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-other
+  '((t :inherit font-lock-constant-face))
+  "Face used to highlight some other privilege attribute in `marginalia-mode'.")
+
+(defface marginalia-file-priv-rare
+  '((t :inherit font-lock-variable-name-face))
+  "Face used to highlight a rare privilege attribute in `marginalia-mode'.")
+
 ;;;; Pre-declarations for external packages
 
 (defvar bookmark-alist)
@@ -728,17 +760,46 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'string))
+    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'integer))
       (marginalia--fields
-       ((file-attribute-modes attributes) :face 'marginalia-file-modes)
-       ((format "%s:%s"
-                (file-attribute-user-id attributes)
-                (file-attribute-group-id attributes))
+       ((let ((uid (file-attribute-user-id attributes))
+              (gid (file-attribute-group-id attributes)))
+          (concat (unless (= (user-id) uid)
+                    (or (user-login-name uid) (number-to-string uid)))
+                  (unless (= (group-gid) gid)
+                    (concat ":" (or (group-name gid) (number-to-string gid))))))
         :width 12 :face 'marginalia-file-owner)
+       ((marginalia--color-file-attributes (file-attribute-modes attributes)))
        ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
        ((format-time-string
          "%b %d %H:%M"
          (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
+
+(defvar marginalia--color-file-attributes-cache nil
+  "Alist of (attrs . fontified-attrs).")
+
+(defun marginalia--color-file-attributes (attrs)
+  "Apply fontification to a file attribute string, e.g. \"drwxrw-r--\"."
+  ;; Without caching this can a be significant portion of the time
+  ;; `marginalia-annotate-file' takes to execute. Caching improves performance
+  ;; by about a factor of 20.
+  (or (cdr (assoc attrs marginalia--color-file-attributes-cache))
+      (cdar (push (cons (copy-sequence attrs) ; copy because attrs is about to be modified
+                        (progn
+                          (dotimes (char (length attrs))
+                            (put-text-property char (1+ char)
+                                               'face (pcase (aref attrs char)
+                                                       (?- 'marginalia-file-priv-no)
+                                                       (?d 'marginalia-file-priv-dir)
+                                                       (?l 'marginalia-file-priv-link)
+                                                       (?r 'marginalia-file-priv-read)
+                                                       (?w 'marginalia-file-priv-write)
+                                                       (?x 'marginalia-file-priv-exec)
+                                                       ((or ?s ?S ?t ?T) 'marginalia-file-priv-other)
+                                                       (_ 'marginalia-file-priv-rare))
+                                               attrs))
+                          attrs))
+                  marginalia--color-file-attributes-cache))))
 
 (defmacro marginalia--project-root ()
   "Return project root."
