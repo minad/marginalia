@@ -760,11 +760,14 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'string))
+    (when-let (attributes (file-attributes (substitute-in-file-name (marginalia--full-candidate cand)) 'integer))
       (marginalia--fields
-       ((format "%s:%s"
-                (file-attribute-user-id attributes)
-                (file-attribute-group-id attributes))
+       ((let ((uid (file-attribute-user-id attributes))
+              (gid (file-attribute-group-id attributes)))
+          (concat (unless (= (user-id) uid)
+                    (or (user-login-name uid) (number-to-string uid)))
+                  (unless (= (group-gid) gid)
+                    (concat ":" (or (group-name gid) (number-to-string gid))))))
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--color-file-attributes (file-attribute-modes attributes)))
        ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
