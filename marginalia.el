@@ -70,6 +70,12 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
+(defcustom marginalia-max-relative-age (* 60 60 24 14)
+  "Maximum relative age in seconds displayed by the file annotator.
+
+Set to `most-positive-fixnum' to always use a relative age, or 0 to never show a relative age."
+  :type 'integer)
+
 (defvar marginalia-annotators nil)
 (defvar marginalia-annotators-light nil)
 (defvar marginalia-annotators-heavy nil)
@@ -794,10 +800,10 @@ These annotations are skipped for remote paths."
             ""))
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
-       ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
-       ((format-time-string
-         "%b %d %H:%M"
-         (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
+       ((file-size-human-readable (file-attribute-size attributes))
+        :face 'marginalia-size :width 7)
+       ((marginalia--time (file-attribute-modification-time attributes))
+        :face 'marginalia-date :format "%12s")))))
 
 (defun marginalia--fontify-file-attributes (attrs)
   "Apply fontification to a file ATTRS string, e.g. `drwxrw-r--'."
@@ -822,6 +828,44 @@ These annotations are skipped for remote paths."
            attrs))
         (push attrs marginalia--fontified-file-attributes)
         attrs)))
+
+(defconst marginalia--time-relative-units
+  '((?s . "sec")
+    (?m . "min")
+    (?h . "hour")
+    (?d . "day")
+    (?y . "year"))
+  "Expansions of the short units used by function `seconds-to-string'.
+
+This is used in `marginalia--time-relative'.")
+
+(defun marginalia--time-relative (time)
+  "Format TIME as a relative age."
+  (replace-regexp-in-string
+   "\\`\\([0-9]+\\)\\.[0-9]+\\([a-z]\\)\\'"
+   (lambda (age)
+     (concat (match-string 1 age) " "
+             (or (cdr (assq (aref age (match-beginning 2)) marginalia--time-relative-units))
+                 (match-string 2 age))
+             (unless (string= "1" (match-string 1 age))
+               "s")
+             " ago"))
+   (seconds-to-string (float-time (time-since time)))))
+
+(defun marginalia--time-absolute (time)
+  "Format TIME as an absolute age."
+  (format-time-string
+   (if (> (decoded-time-year (decode-time (current-time)))
+          (decoded-time-year (decode-time time)))
+       " %Y %b %d"
+     "%b %d %H:%M")
+   time))
+
+(defun marginalia--time (time)
+  "Format file age TIME, suitably for use in annotations."
+  (if (< (float-time (time-since time)) marginalia-max-relative-age)
+      (marginalia--time-relative time)
+    (marginalia--time-absolute time)))
 
 (defmacro marginalia--project-root ()
   "Return project root."
