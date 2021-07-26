@@ -70,6 +70,28 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Use whitespace margin for window widths larger than this value."
   :type 'integer)
 
+(defcustom marginalia-file-age-formatter #'marginalia--file-age-mixed
+  "Function which generates a file age string from the file time."
+  :type 'function)
+
+(defcustom margialia-max-relative-age (* 60 60 24 14)
+  "Maximum relative age displayed with `marginalia--file-age-mixed', in seconds.
+
+Set to nil for there to be no maximum (always use a relative age),
+or 0 to never show a relative age."
+  :type '(choice (const nil) integer))
+
+(defcustom marginalia-relative-age-units
+  '(("s" . "sec")
+    ("m" . "min")
+    ("h" . "hour")
+    ("d" . "day")
+    ("y" . "year"))
+  "Expansions of the short units used by `seconds-to-string'.
+
+This is used in `marginalia--relative-age'."
+  :type '(alist :key-type string :value-type string))
+
 (defvar marginalia-annotators nil)
 (defvar marginalia-annotators-light nil)
 (defvar marginalia-annotators-heavy nil)
@@ -795,9 +817,7 @@ These annotations are skipped for remote paths."
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
        ((file-size-human-readable (file-attribute-size attributes)) :width 7 :face 'marginalia-size)
-       ((format-time-string
-         "%b %d %H:%M"
-         (file-attribute-modification-time attributes)) :face 'marginalia-date)))))
+       ((funcall marginalia-file-age-formatter (file-attribute-modification-time attributes)))))))
 
 (defun marginalia--fontify-file-attributes (attrs)
   "Apply fontification to a file ATTRS string, e.g. `drwxrw-r--'."
@@ -822,6 +842,38 @@ These annotations are skipped for remote paths."
            attrs))
         (push attrs marginalia--fontified-file-attributes)
         attrs)))
+
+(defun marginalia--relative-age (time)
+  "Format TIME as a relative age."
+  (string-pad
+   (replace-regexp-in-string
+    "\\([0-9]+\\)\\.[0-9]+\\([a-z]\\)"
+    (lambda (age)
+      (concat (match-string 1 age) " "
+              (or (cdr (assoc (match-string 2 age) marginalia-relative-age-units))
+                  (match-string 2 age))
+              (unless (string= "1" (match-string 1 age))
+                "s")
+              " ago"))
+    (seconds-to-string (float-time (time-since time))))
+   12))
+
+(defun marginalia--absolute-age (time)
+  "Format TIME as an absolute age."
+  (format-time-string
+   (if (> (decoded-time-year (decode-time (current-time)))
+          (decoded-time-year (decode-time time)))
+       "%Y %b %d "
+     "%b %d %H:%M")
+   time))
+
+(defun marginalia--file-age-mixed (time)
+  "Format file age TIME, suitably for use in annotations."
+  (propertize
+   (if (or (null margialia-max-relative-age) (< (float-time (time-since time)) margialia-max-relative-age))
+       (marginalia--relative-age time)
+     (marginalia--absolute-age time))
+   'face 'marginalia-date))
 
 (defmacro marginalia--project-root ()
   "Return project root."
