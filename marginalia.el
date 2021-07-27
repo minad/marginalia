@@ -801,9 +801,9 @@ These annotations are skipped for remote paths."
         :width 12 :face 'marginalia-file-owner)
        ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
        ((file-size-human-readable (file-attribute-size attributes))
-        :face 'marginalia-size :width 7)
+        :face 'marginalia-size :width -7)
        ((marginalia--time (file-attribute-modification-time attributes))
-        :face 'marginalia-date :format "%12s")))))
+        :face 'marginalia-date :width -12)))))
 
 (defun marginalia--fontify-file-attributes (attrs)
   "Apply fontification to a file ATTRS string, e.g. `drwxrw-r--'."
