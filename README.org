@@ -55,6 +55,12 @@ commands.
   (marginalia-mode))
 #+end_src
 
+Marginalia shows a large number of annotations by default. To customize which annotations show, the user can modify the content of the `marginalia-annotator-registry` association list. For instance, if the user does not want file listings annotated with file modes, sizes, and modification times, they can disable the relevant `file` annotator:
+
+#+begin_src emacs-lisp
+  (assq-delete-all 'file marginalia-annotator-registry)
+#+end_src
+
 * Adding custom annotators or classifiers
 
 Minibuffer completion commands can specify the type of the candidates which are
