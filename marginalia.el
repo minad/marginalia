@@ -76,13 +76,6 @@ It can also be set to an integer value of 1 or larger to force an offset."
 Set to `most-positive-fixnum' to always use a relative age, or 0 to never show a relative age."
   :type 'integer)
 
-(defvar marginalia-annotators nil)
-(defvar marginalia-annotators-light nil)
-(defvar marginalia-annotators-heavy nil)
-(make-obsolete-variable 'marginalia-annotators "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
-(make-obsolete-variable 'marginalia-annotators-light "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
-(make-obsolete-variable 'marginalia-annotators-heavy "Deprecated in favor of `marginalia-annotator-registry'." "0.5")
-
 (defcustom marginalia-annotator-registry
   (mapcar
    (lambda (x) (append x '(builtin none)))
