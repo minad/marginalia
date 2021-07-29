@@ -734,20 +734,21 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
   "Annotate coding system CAND with its description."
   (marginalia--documentation (coding-system-doc-string (intern cand))))
 
-(defun marginalia-annotate-buffer (cand)
-  "Annotate buffer CAND with modification status, file name and major mode."
-  (when-let (buffer (get-buffer cand))
-    (marginalia--fields
-     ((format-mode-line '((:propertize "%1*%1+%1@" face marginalia-modified)
-                          marginalia--separator
-                          (7 (:propertize "%I" face marginalia-size))
-                          marginalia--separator
-                          ;; InactiveMinibuffer has 18 letters, but there are longer names.
-                          ;; For example Org-Agenda produces very long mode names.
-                          ;; Therefore we have to truncate.
-                          (20 (-20 (:propertize mode-name face marginalia-mode))))
-                        nil nil buffer))
-     ((if-let (proc (get-buffer-process buffer))
+(defun marginalia--buffer-status (buffer)
+  "Return the status of BUFFER as a string."
+  (format-mode-line '((:propertize "%1*%1+%1@" face marginalia-modified)
+                      marginalia--separator
+                      (7 (:propertize "%I" face marginalia-size))
+                      marginalia--separator
+                      ;; InactiveMinibuffer has 18 letters, but there are longer names.
+                      ;; For example Org-Agenda produces very long mode names.
+                      ;; Therefore we have to truncate.
+                      (20 (-20 (:propertize mode-name face marginalia-mode))))
+                    nil nil buffer))
+
+(defun marginalia--buffer-file (buffer)
+  "Return the file or process name of BUFFER."
+  (if-let (proc (get-buffer-process buffer))
           (format "(%s %s) %s"
                   proc (process-status proc)
                   (abbreviate-file-name (buffer-local-value 'default-directory buffer)))
@@ -761,7 +762,14 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
                                    (buffer-local-value 'default-directory buffer))))
               ((local-variable-p 'list-buffers-directory buffer)
                (buffer-local-value 'list-buffers-directory buffer)))
-             "")))
+             ""))))
+
+(defun marginalia-annotate-buffer (cand)
+  "Annotate buffer CAND with modification status, file name and major mode."
+  (when-let (buffer (get-buffer cand))
+    (marginalia--fields
+     ((marginalia--buffer-status buffer))
+     ((marginalia--buffer-file buffer)
       :truncate (/ marginalia-truncate-width 2)
       :face 'marginalia-file-name))))
 
