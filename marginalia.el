@@ -137,7 +137,7 @@ determine it."
 (defcustom marginalia-censor-variables
   '("pass")
   "The values of variables matching any of these regular expressions is not shown."
-  :type '(repeat regexp))
+  :type '(repeat (choice symbol regexp)))
 
 (defcustom marginalia-command-categories
   '((imenu . imenu))
@@ -546,49 +546,57 @@ keybinding since CAND includes it."
         ((marginalia--function-doc sym) :truncate marginalia-truncate-width
          :face 'marginalia-documentation))))))
 
+(defun marginalia--variable-value (sym)
+  "Return the variable value of SYM as string."
+  (cond
+   ((not (boundp sym))
+    (propertize "<unbound>" 'face 'marginalia-null))
+   ((and marginalia-censor-variables
+         (let ((name (symbol-name sym)))
+           (seq-find (lambda (r)
+                       (if (symbolp r)
+                           (eq r sym)
+                         (string-match-p r name)))
+                     marginalia-censor-variables)))
+    (propertize "*****" 'face 'marginalia-null))
+   (t (let ((val (symbol-value sym)))
+        (pcase (symbol-value sym)
+          ('nil (propertize "nil" 'face 'marginalia-null))
+          ('t (propertize "t" 'face 'marginalia-true))
+          ((pred keymapp) (propertize "<keymap>" 'face 'marginalia-value))
+          ((pred hash-table-p) (propertize "<hash-table>" 'face 'marginalia-value))
+          ((and (pred functionp) (pred symbolp))
+           ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
+           ;; make an exception for function symbols to visually distinguish them from symbols.
+           ;; I am not entirely happy with this, but we should not add quotation to every type.
+           (propertize (format "#'%s" val) 'face 'marginalia-function))
+          ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
+          ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
+          (_ (let ((print-escape-newlines t)
+                   (print-escape-control-characters t)
+                   (print-escape-multibyte t)
+                   (print-level 10)
+                   (print-length marginalia-truncate-width))
+               (propertize
+                (prin1-to-string
+                 (if (stringp val)
+                     ;; Get rid of string properties to save some of the precious space
+                     (substring-no-properties
+                      val 0
+                      (min (length val) marginalia-truncate-width))
+                   val))
+                'face
+                (cond
+                 ((listp val) 'marginalia-list)
+                 ((stringp val) 'marginalia-string)
+                 (t 'marginalia-value))))))))))
+
 (defun marginalia-annotate-variable (cand)
   "Annotate variable CAND with its documentation string."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-type)
-     ((cond
-       ((not (boundp sym))
-        (propertize "<unbound>" 'face 'marginalia-null))
-       ((and marginalia-censor-variables
-             (seq-find (lambda (r) (string-match-p r cand)) marginalia-censor-variables))
-        "*****")
-       (t (let ((val (symbol-value sym)))
-            (pcase (symbol-value sym)
-              ('nil (propertize "nil" 'face 'marginalia-null))
-              ('t (propertize "t" 'face 'marginalia-true))
-              ((pred keymapp) (propertize "<keymap>" 'face 'marginalia-value))
-              ((pred hash-table-p) (propertize "<hash-table>" 'face 'marginalia-value))
-              ((and (pred functionp) (pred symbolp))
-               ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
-               ;; make an exception for function symbols to visually distinguish them from symbols.
-               ;; I am not entirely happy with this, but we should not add quotation to every type.
-               (propertize (format "#'%s" val) 'face 'marginalia-function))
-              ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
-              ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
-              (_ (let ((print-escape-newlines t)
-                       (print-escape-control-characters t)
-                       (print-escape-multibyte t)
-                       (print-level 10)
-                       (print-length marginalia-truncate-width))
-                   (propertize
-                    (prin1-to-string
-                     (if (stringp val)
-                         ;; Get rid of string properties to save some of the precious space
-                         (substring-no-properties
-                          val 0
-                          (min (length val) marginalia-truncate-width))
-                       val))
-                    'face
-                    (cond
-                     ((listp val) 'marginalia-list)
-                     ((stringp val) 'marginalia-string)
-                     (t 'marginalia-value)))))))))
-      :truncate (/ marginalia-truncate-width 2))
+     ((marginalia--variable-value sym) :truncate (/ marginalia-truncate-width 2))
      ((documentation-property sym 'variable-documentation)
       :truncate marginalia-truncate-width :face 'marginalia-documentation))))
 
