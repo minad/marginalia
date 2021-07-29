@@ -308,8 +308,8 @@ determine it."
 
 ;;;; Marginalia mode
 
-(defvar marginalia--fontified-file-attributes nil
-  "List of fontified file attributes.")
+(defvar marginalia--fontified-file-modes nil
+  "List of fontified file modes.")
 
 (defvar-local marginalia--cache nil
   "The cache, pair of list and hashtable.")
@@ -802,28 +802,33 @@ These annotations are skipped for remote paths."
             (with-current-buffer (window-buffer win)
               (marginalia--remote-p (minibuffer-contents-no-properties)))))
       (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attributes (file-attributes (substitute-in-file-name
-                                            (marginalia--full-candidate cand))
-                                           'integer))
+    (when-let (attrs (file-attributes (substitute-in-file-name
+                                       (marginalia--full-candidate cand))
+                                      'integer))
       (marginalia--fields
-       ((let ((uid (file-attribute-user-id attributes))
-              (gid (file-attribute-group-id attributes)))
-          (if (or (/= (user-uid) uid) (/= (group-gid) gid))
-              (format "%s:%s" (or (user-login-name uid) uid) (or (group-name gid) gid))
-            ""))
+       ((marginalia--file-owner attrs)
         :width 12 :face 'marginalia-file-owner)
-       ((marginalia--fontify-file-attributes (file-attribute-modes attributes)))
-       ((file-size-human-readable (file-attribute-size attributes))
+       ((marginalia--file-modes attrs))
+       ((file-size-human-readable (file-attribute-size attrs))
         :face 'marginalia-size :width -7)
-       ((marginalia--time (file-attribute-modification-time attributes))
+       ((marginalia--time (file-attribute-modification-time attrs))
         :face 'marginalia-date :width -12)))))
 
-(defun marginalia--fontify-file-attributes (attrs)
-  "Apply fontification to a file ATTRS string, e.g. `drwxrw-r--'."
+(defun marginalia--file-owner (attrs)
+  "Return file owner given ATTRS."
+  (let ((uid (file-attribute-user-id attrs))
+        (gid (file-attribute-group-id attrs)))
+    (if (or (/= (user-uid) uid) (/= (group-gid) gid))
+        (format "%s:%s" (or (user-login-name uid) uid) (or (group-name gid) gid))
+      "")))
+
+(defun marginalia--file-modes (attrs)
+  "Return fontified file modes given the ATTRS."
   ;; Without caching this can a be significant portion of the time
   ;; `marginalia-annotate-file' takes to execute. Caching improves performance
   ;; by about a factor of 20.
-  (or (car (member attrs marginalia--fontified-file-attributes))
+  (setq attrs (file-attribute-modes attrs))
+  (or (car (member attrs marginalia--fontified-file-modes))
       (progn
         (setq attrs (substring attrs)) ;; copy because attrs is about to be modified
         (dotimes (i (length attrs))
@@ -839,7 +844,7 @@ These annotations are skipped for remote paths."
              ((or ?s ?S ?t ?T) 'marginalia-file-priv-other)
              (_ 'marginalia-file-priv-rare))
            attrs))
-        (push attrs marginalia--fontified-file-attributes)
+        (push attrs marginalia--fontified-file-modes)
         attrs)))
 
 (defconst marginalia--time-relative
