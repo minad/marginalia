@@ -340,7 +340,7 @@ for performance profiling of the annotators.")
    (if-let (pos (string-match-p "\n" str))
        (substring str 0 pos)
      str)
-   width 0 32 "…"))
+   width 0 32 t))
 
 (defun marginalia--align (str)
   "Align STR at the right margin."
