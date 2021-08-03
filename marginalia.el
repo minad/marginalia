@@ -1042,7 +1042,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 
 ;;;###autoload
 (defun marginalia-cycle ()
-  "Cycle between annotators in `marginalia-annotators'."
+  "Cycle between annotators in `marginalia-annotator-registry'."
   (interactive)
   (if-let* ((win (active-minibuffer-window))
             (buf (window-buffer win)))
