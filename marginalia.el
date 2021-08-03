@@ -790,29 +790,36 @@ component of a full file path."
       ;; necessary information (there's not much else we can do)
       cand))
 
-(defun marginalia--remote-p (path)
-  "Return t if PATH is a remote path."
-  (string-match-p "\\`/[^/|:]+:" (substitute-in-file-name path)))
+(defun marginalia--remote-protocol (path)
+  "Return the remote protocol of PATH."
+  (save-match-data
+    (setq path (substitute-in-file-name path))
+    (and (string-match "\\`/\\([^/|:]+\\):" path)
+         (match-string 1 path))))
+
+(defun marginalia--annotate-local-file (cand)
+  "Annotate local file CAND."
+  (when-let (attrs (file-attributes (substitute-in-file-name
+                                     (marginalia--full-candidate cand))
+                                    'integer))
+    (marginalia--fields
+     ((marginalia--file-owner attrs)
+      :width 12 :face 'marginalia-file-owner)
+     ((marginalia--file-modes attrs))
+     ((file-size-human-readable (file-attribute-size attrs))
+      :face 'marginalia-size :width -7)
+     ((marginalia--time (file-attribute-modification-time attrs))
+      :face 'marginalia-date :width -12))))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
 These annotations are skipped for remote paths."
-  (if (or (marginalia--remote-p cand)
-          (when-let (win (active-minibuffer-window))
-            (with-current-buffer (window-buffer win)
-              (marginalia--remote-p (minibuffer-contents-no-properties)))))
-      (marginalia--fields ("*Remote*" :face 'marginalia-documentation))
-    (when-let (attrs (file-attributes (substitute-in-file-name
-                                       (marginalia--full-candidate cand))
-                                      'integer))
-      (marginalia--fields
-       ((marginalia--file-owner attrs)
-        :width 12 :face 'marginalia-file-owner)
-       ((marginalia--file-modes attrs))
-       ((file-size-human-readable (file-attribute-size attrs))
-        :face 'marginalia-size :width -7)
-       ((marginalia--time (file-attribute-modification-time attrs))
-        :face 'marginalia-date :width -12)))))
+  (if-let (remote (or (marginalia--remote-protocol cand)
+                      (when-let (win (active-minibuffer-window))
+                        (with-current-buffer (window-buffer win)
+                          (marginalia--remote-protocol (minibuffer-contents-no-properties))))))
+      (marginalia--fields (remote :format "*%s*" :face 'marginalia-documentation))
+    (marginalia--annotate-local-file cand)))
 
 (defun marginalia--file-owner (attrs)
   "Return file owner given ATTRS."
