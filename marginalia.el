@@ -875,12 +875,13 @@ These annotations are skipped for remote paths."
 
 (defun marginalia--time-absolute (time)
   "Format TIME as an absolute age."
-  (format-time-string
-   (if (> (decoded-time-year (decode-time (current-time)))
-          (decoded-time-year (decode-time time)))
-       " %Y %b %d"
-     "%b %d %H:%M")
-   time))
+  (let ((system-time-locale "C"))
+    (format-time-string
+     (if (> (decoded-time-year (decode-time (current-time)))
+            (decoded-time-year (decode-time time)))
+         " %Y %b %d"
+       "%b %d %H:%M")
+     time)))
 
 (defun marginalia--time (time)
   "Format file age TIME, suitably for use in annotations."
