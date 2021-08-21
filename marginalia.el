@@ -140,7 +140,8 @@ determine it."
   :type '(repeat (choice symbol regexp)))
 
 (defcustom marginalia-command-categories
-  '((imenu . imenu))
+  '((imenu . imenu)
+    (package-delete . versioned-package))
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
