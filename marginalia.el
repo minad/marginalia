@@ -799,9 +799,11 @@ component of a full file path."
 
 (defun marginalia--annotate-local-file (cand)
   "Annotate local file CAND."
-  (when-let (attrs (file-attributes (substitute-in-file-name
-                                     (marginalia--full-candidate cand))
-                                    'integer))
+  (when-let (attrs (ignore-errors
+                     ;; may throw permission denied errors
+                     (file-attributes (substitute-in-file-name
+                                       (marginalia--full-candidate cand))
+                                      'integer)))
     (marginalia--fields
      ((marginalia--file-owner attrs)
       :width 12 :face 'marginalia-file-owner)
