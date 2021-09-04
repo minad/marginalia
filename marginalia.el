@@ -130,7 +130,8 @@ determine it."
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
     ("\\<coding system\\>" . coding-system)
-    ("\\<minor mode\\>" . minor-mode))
+    ("\\<minor mode\\>" . minor-mode)
+    ("\\<[Ll]ibrary\\>" . library))
   "Associates regexps to match against minibuffer prompts with categories."
   :type '(alist :key-type regexp :value-type symbol))
 
