@@ -87,7 +87,7 @@ to specify multiple annotators per completion category (for example with more or
 less information). You can cycle between the different annotators by invoking
 the =marginalia-cycle= command during the current completion.
 
-An annotation function is a function taken a completion candidate string as
+An annotation function is a function that takes a completion candidate string as
 argument and returns the annotation string. For example a basic face annotator
 can be written as follows:
 
