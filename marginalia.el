@@ -691,7 +691,7 @@ keybinding since CAND includes it."
   "Return bookmark type string of BM.
 
 The string is transformed according to `marginalia-bookmark-type-transformers'."
-  (let ((handler (or (alist-get 'handler bm) 'bookmark-default-handler)))
+  (let ((handler (or (bookmark-get-handler bm) 'bookmark-default-handler)))
     ;; Some libraries use lambda handlers instead of symbols. For
     ;; example the function `xwidget-webkit-bookmark-make-record' is
     ;; affected. I consider this bad style since then the lambda is
@@ -706,11 +706,11 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
-  (when-let ((bm (bookmark-get-bookmark-record (assoc cand bookmark-alist))))
-    (let ((front (alist-get 'front-context-string bm)))
+  (when-let ((bm (assoc cand bookmark-alist)))
+    (let ((front (bookmark-get-front-context-string bm)))
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
-       ((alist-get 'filename bm) :truncate 40 :face 'marginalia-file-name)
+       ((bookmark-get-filename bm) :truncate 40 :face 'marginalia-file-name)
        ((if (or (not front) (string= front ""))
             ""
           (concat (string-trim
