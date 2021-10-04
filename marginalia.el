@@ -958,7 +958,7 @@ looking for a regexp that matches the prompt."
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
-               (marginalia-truncate-width (min (/ ,w 3) marginalia-truncate-width))
+               (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
                (marginalia--margin
                 (+ (or marginalia-align-offset ,o)
