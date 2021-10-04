@@ -48,10 +48,6 @@
 This value is adjusted depending on the `window-width'."
   :type 'integer)
 
-(defcustom marginalia-separator-threshold 120
-  "Use wider separator for window widths larger than this value."
-  :type 'integer)
-
 (define-obsolete-variable-alias
   'marginalia-align-offset
   'marginalia-margin-offset
@@ -71,14 +67,19 @@ It can also be set to an integer value of 1 or larger to force an offset."
   :type 'integer)
 
 (defvar marginalia-margin-threshold nil)
+(defvar marginalia-separator-threshold nil)
 (make-obsolete-variable 'marginalia-margin-threshold
                         "Deprecated in favor of `marginalia-align-thresholds'." "0.8")
+(make-obsolete-variable 'marginalia-separator-threshold
+                        "Deprecated in favor of `marginalia-align-thresholds'." "0.8")
 
-(defcustom marginalia-align-thresholds '(120 200)
+(defcustom marginalia-align-thresholds '(140 160 200)
   "Alignment thresholds.
 For window widths larger than the first value align the annotations to the
-right. For window widths even larger than the second value do not align further
-to the right, instead add some whitespace margin to the right."
+right. For widths larger than the second value, additionally use more
+whitespace to separate the columns. For widths even larger than the third value
+do not align further to the right, instead add some whitespace margin to the
+right."
   :type '(list integer integer))
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
@@ -973,16 +974,16 @@ looking for a regexp that matches the prompt."
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let* ((marginalia--cache ,c) ;; Take the cache from the minibuffer
                 (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
-                (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
+                (marginalia--separator (if (>= ,w (cadr marginalia-align-thresholds)) "    " " "))
                 (marginalia--margin
                  ;; Window smaller than first threshold => align to the left
                  (if (< ,w (car marginalia-align-thresholds))
-                     (- (/ ,w 2))
+                     (- (/ ,w 3))
                    ;; Window large enough => align to the right
                    (+ (or marginalia-margin-offset ,o)
                       ;; Window even larger than second threshold => add margin
-                      (if (>= ,w (+ marginalia-margin-min (cadr marginalia-align-thresholds)))
-                          (- ,w (cadr marginalia-align-thresholds))
+                      (if (>= ,w (+ marginalia-margin-min (caddr marginalia-align-thresholds)))
+                          (- ,w (caddr marginalia-align-thresholds))
                         0)))))
            ,@body)))))
 
