@@ -48,15 +48,14 @@
 This value is adjusted depending on the `window-width'."
   :type 'integer)
 
-(define-obsolete-variable-alias
-  'marginalia-align-offset
-  'marginalia-margin-offset
-  "0.8")
+(defcustom marginalia-separator-threshold 160
+  "Use wider separator for window widths larger than this value."
+  :type 'integer)
 
 ;; See https://github.com/minad/marginalia/issues/42 for the discussion
 ;; regarding the alignment.
-(defcustom marginalia-margin-offset nil
-  "Additional offset at the right margin.
+(defcustom marginalia-align-offset nil
+  "Additional offset at the right margin used by `marginalia--align'.
 
 This value should be set to nil to enable auto-configuration.
 It can also be set to an integer value of 1 or larger to force an offset."
@@ -66,21 +65,9 @@ It can also be set to an integer value of 1 or larger to force an offset."
   "Minimum whitespace margin at the right side."
   :type 'integer)
 
-(defvar marginalia-margin-threshold nil)
-(defvar marginalia-separator-threshold nil)
-(make-obsolete-variable 'marginalia-margin-threshold
-                        "Deprecated in favor of `marginalia-align-thresholds'." "0.8")
-(make-obsolete-variable 'marginalia-separator-threshold
-                        "Deprecated in favor of `marginalia-align-thresholds'." "0.8")
-
-(defcustom marginalia-align-thresholds '(140 160 200)
-  "Alignment thresholds.
-For window widths larger than the first value align the annotations to the
-right. For widths larger than the second value, additionally use more
-whitespace to separate the columns. For widths even larger than the third value
-do not align further to the right, instead add some whitespace margin to the
-right."
-  :type '(list integer integer integer))
+(defcustom marginalia-margin-threshold 200
+  "Use whitespace margin for window widths larger than this value."
+  :type 'integer)
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
@@ -338,7 +325,7 @@ for performance profiling of the annotators.")
   "Field separator.")
 
 (defvar marginalia--margin 0
-  "Right margin or left margin for negative values.")
+  "Right margin.")
 
 (defvar-local marginalia--this-command nil
   "Last command symbol saved in order to allow annotations.")
@@ -364,10 +351,8 @@ for performance profiling of the annotators.")
             (propertize
              " "
              'display
-             (if (< marginalia--margin 0)
-                 `(space :align-to (- left ,marginalia--margin))
-               `(space :align-to (- right ,marginalia--margin ,(string-width str)))))
-             str)))
+             `(space :align-to (- right ,marginalia--margin ,(string-width str))))
+            str)))
 
 (cl-defmacro marginalia--field (field &key truncate format face width)
   "Format FIELD as a string according to some options.
@@ -962,7 +947,7 @@ looking for a regexp that matches the prompt."
     `(let ((marginalia--metadata ,metadata)
            (,c marginalia--cache)
            (,w (window-width))
-           ;; Compute marginalia-margin-offset. If the right-fringe-width is
+           ;; Compute marginalia-align-offset. If the right-fringe-width is
            ;; zero, use an additional offset of 1 by default! See
            ;; https://github.com/minad/marginalia/issues/42 for the discussion
            ;; regarding the alignment.
@@ -972,19 +957,14 @@ looking for a regexp that matches the prompt."
        ;; Otherwise it would probably suffice to only change the current buffer.
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
-         (let* ((marginalia--cache ,c) ;; Take the cache from the minibuffer
-                (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
-                (marginalia--separator (if (>= ,w (cadr marginalia-align-thresholds)) "    " " "))
-                (marginalia--margin
-                 ;; Window smaller than first threshold => align to the left
-                 (if (< ,w (car marginalia-align-thresholds))
-                     (- (/ ,w 3))
-                   ;; Window large enough => align to the right
-                   (+ (or marginalia-margin-offset ,o)
-                      ;; Window even larger than second threshold => add margin
-                      (if (>= ,w (+ marginalia-margin-min (caddr marginalia-align-thresholds)))
-                          (- ,w (caddr marginalia-align-thresholds))
-                        0)))))
+         (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
+               (marginalia-truncate-width (min (/ ,w 3) marginalia-truncate-width))
+               (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
+               (marginalia--margin
+                (+ (or marginalia-align-offset ,o)
+                   (if (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
+                       (- ,w marginalia-margin-threshold)
+                     0))))
            ,@body)))))
 
 (defun marginalia--cache-reset ()
