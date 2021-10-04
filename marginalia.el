@@ -1039,7 +1039,7 @@ PROP is the property which is looked up."
        (run-hook-with-args-until-success 'marginalia-classifiers)))))
 
 (defun marginalia--minibuffer-setup ()
-  "Setup minibuffer for `marginalia-mode'.
+  "Setup the minibuffer for Marginalia.
 Remember `this-command' for `marginalia-classify-by-command-name'."
   (setq marginalia--cache t marginalia--this-command this-command)
   ;; Reset cache if window size changes, recompute alignment
