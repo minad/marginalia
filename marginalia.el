@@ -80,7 +80,7 @@ right. For widths larger than the second value, additionally use more
 whitespace to separate the columns. For widths even larger than the third value
 do not align further to the right, instead add some whitespace margin to the
 right."
-  :type '(list integer integer))
+  :type '(list integer integer integer))
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
