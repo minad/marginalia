@@ -879,8 +879,9 @@ These annotations are skipped for remote paths."
   "Format TIME as an absolute age."
   (let ((system-time-locale "C"))
     (format-time-string
-     (if (> (decoded-time-year (decode-time (current-time)))
-            (decoded-time-year (decode-time time)))
+     ;; decoded-time-year is only available on Emacs 27, use nth 5 here.
+     (if (> (nth 5 (decode-time (current-time)))
+            (nth 5 (decode-time time)))
          " %Y %b %d"
        "%b %d %H:%M")
      time)))
