@@ -1023,13 +1023,7 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup the minibuffer for Marginalia.
 Remember `this-command' for `marginalia-classify-by-command-name'."
-  (setq marginalia--cache t
-	;; On Emacs 28, current-minibuffer-command is better than this-command.
-	;; It is consistent if a command prompts multiple times.
-	marginalia--command
-	(if (boundp 'current-minibuffer-command)
-	    current-minibuffer-command
-	  this-command))
+  (setq marginalia--cache t marginalia--command this-command)
   ;; Reset cache if window size changes, recompute alignment
   (add-hook 'window-state-change-hook #'marginalia--cache-reset nil 'local)
   (marginalia--cache-reset))
