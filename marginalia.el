@@ -1042,7 +1042,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 ;;;###autoload
 (define-minor-mode marginalia-mode
   "Annotate completion candidates with richer information."
-  :global t
+  :global t :group 'marginalia
   (if marginalia-mode
       (progn
         ;; Ensure that we remember this-command in order to select the annotation function.
