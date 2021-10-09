@@ -327,7 +327,7 @@ for performance profiling of the annotators.")
 (defvar marginalia--margin 0
   "Right margin.")
 
-(defvar-local marginalia--this-command nil
+(defvar-local marginalia--command nil
   "Last command symbol saved in order to allow annotations.")
 
 (defvar-local marginalia--base-position 0
@@ -910,8 +910,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
-  (and marginalia--this-command
-       (alist-get marginalia--this-command marginalia-command-categories)))
+  (and marginalia--command
+       (alist-get marginalia--command marginalia-command-categories)))
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
@@ -1023,7 +1023,13 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup the minibuffer for Marginalia.
 Remember `this-command' for `marginalia-classify-by-command-name'."
-  (setq marginalia--cache t marginalia--this-command this-command)
+  (setq marginalia--cache t
+	;; On Emacs 28, current-minibuffer-command is better than this-command.
+	;; It is consistent if a command prompts multiple times.
+	marginalia--command
+	(if (boundp 'current-minibuffer-command)
+	    current-minibuffer-command
+	  this-command))
   ;; Reset cache if window size changes, recompute alignment
   (add-hook 'window-state-change-hook #'marginalia--cache-reset nil 'local)
   (marginalia--cache-reset))
