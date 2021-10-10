@@ -443,10 +443,9 @@ s side-effect-free
 - obsolete
 
 Variable:
-u custom
+u custom (U modified compared to global value)
 v variable
-l local
-* modified
+l local (L modified compared to default value)
 - obsolete
 
 Other:
@@ -469,9 +468,18 @@ t cl-type"
        (and (get s 'byte-obsolete-info) "-")))
     (when (boundp s)
       (concat
-       (and (local-variable-if-set-p s) "l")
-       (if (custom-variable-p s) "u" "v")
-       (and (ignore-errors (not (equal (symbol-value s) (default-value s)))) "*")
+       (when (local-variable-if-set-p s)
+         (if (ignore-errors
+               (not (equal (symbol-value s)
+                           (default-value s))))
+             "L" "l"))
+       (if (custom-variable-p s)
+           (if (ignore-errors
+                 (not (equal
+                       (symbol-value s)
+                       (eval (car (get s 'standard-value))))))
+               "U" "u")
+         "v")
        (and (get s 'byte-obsolete-variable) "-")))
     (and (facep s) "a")
     (and (fboundp 'cl-find-class) (cl-find-class s) "t"))))
