@@ -55,14 +55,15 @@ commands.
   (marginalia-mode))
 #+end_src
 
-* Usage
-The annotations for elisp symbols include their symbol class. For more
-information on what the different classifications mean, see the docstring of
-~marginalia--symbol-class~.
+* Information shown by the annotators
 
 In general, to learn more about what different annotations mean, a good starting
 point is to look at ~marginalia-annotator-registry~, and follow up to the
-annotation function of whatever category you are interested in.
+annotation function of the category you are interested in.
+
+For example the annotations for elisp symbols include their symbol class - v for
+variable, f for function, c for command, etc. For more information on what the
+different classifications mean, see the docstring of ~marginalia--symbol-class~.
 
 * Adding custom annotators or classifiers
 
