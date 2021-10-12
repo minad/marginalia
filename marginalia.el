@@ -571,8 +571,11 @@ keybinding since CAND includes it."
         (pcase (symbol-value sym)
           ('nil (propertize "nil" 'face 'marginalia-null))
           ('t (propertize "t" 'face 'marginalia-true))
-          ((pred keymapp) (propertize "<keymap>" 'face 'marginalia-value))
-          ((pred hash-table-p) (propertize "<hash-table>" 'face 'marginalia-value))
+          ((pred keymapp) (propertize "#<keymap>" 'face 'marginalia-value))
+          ((pred hash-table-p) (propertize "#<hash-table>" 'face 'marginalia-value))
+          ((pred syntax-table-p) (propertize "#<syntax-table>" 'face 'marginalia-value))
+          ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
+          ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
           ((and (pred functionp) (pred symbolp))
            ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
            ;; make an exception for function symbols to visually distinguish them from symbols.
