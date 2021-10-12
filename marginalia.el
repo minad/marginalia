@@ -581,6 +581,7 @@ keybinding since CAND includes it."
            ;; make an exception for function symbols to visually distinguish them from symbols.
            ;; I am not entirely happy with this, but we should not add quotation to every type.
            (propertize (format "#'%s" val) 'face 'marginalia-function))
+          ((pred recordp) (propertize (format "#<record %s>" (type-of val)) 'face 'marginalia-value))
           ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
           ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
           (_ (let ((print-escape-newlines t)
