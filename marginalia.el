@@ -145,10 +145,12 @@ determine it."
   :type '(alist :key-type symbol :value-type symbol))
 
 (defcustom marginalia-bookmark-type-transformers
-  `(("\\`bookmark-\\(.*?\\)-handler\\'" . "\\1")
-    ("default" . "File")
-    ("\\`\\(.*?\\)-+bookmark-jump\\(?:-handler\\)?\\'" . "\\1")
-    (".*" . ,#'capitalize))
+  (let ((words (regexp-opt '("handle" "handler" "jump" "bookmark"))))
+    `((,(format "-+%s-+" words) . "-")
+      (,(format "\\`%s-+" words) . "")
+      (,(format "-%s\\'" words) . "")
+      ("\\`default\\'" . "File")
+      (".*" . ,#'capitalize)))
   "List of bookmark type transformers."
   :type '(alist :key-type regexp :value-type (choice string function)))
 
