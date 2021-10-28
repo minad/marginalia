@@ -560,7 +560,7 @@ keybinding since CAND includes it."
   "Return the variable value of SYM as string."
   (cond
    ((not (boundp sym))
-    (propertize "<unbound>" 'face 'marginalia-null))
+    (propertize "#<unbound>" 'face 'marginalia-null))
    ((and marginalia-censor-variables
          (let ((name (symbol-name sym)))
            (seq-find (lambda (r)
