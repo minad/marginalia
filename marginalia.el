@@ -574,6 +574,7 @@ keybinding since CAND includes it."
           ('nil (propertize "nil" 'face 'marginalia-null))
           ('t (propertize "t" 'face 'marginalia-true))
           ((pred keymapp) (propertize "#<keymap>" 'face 'marginalia-value))
+          ((pred bool-vector-p) (propertize "#<bool-vector>" 'face 'marginalia-value))
           ((pred hash-table-p) (propertize "#<hash-table>" 'face 'marginalia-value))
           ((pred syntax-table-p) (propertize "#<syntax-table>" 'face 'marginalia-value))
           ;; Emacs BUG: abbrev-table-p throws an error
