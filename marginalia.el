@@ -391,7 +391,7 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
   "Annotate command CAND with keybinding."
   (when-let* ((sym (intern-soft cand))
               (key (and (commandp sym) (where-is-internal sym nil 'first-only))))
-    (propertize (format " (%s)" (key-description key)) 'face 'marginalia-key)))
+    (format #(" (%s)" 1 5 (face marginalia-key)) (key-description key))))
 
 (defun marginalia--annotator (cat)
   "Return annotation function for category CAT."
@@ -588,8 +588,8 @@ keybinding since CAND includes it."
            ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
            ;; make an exception for function symbols to visually distinguish them from symbols.
            ;; I am not entirely happy with this, but we should not add quotation to every type.
-           (propertize (format "#'%s" val) 'face 'marginalia-function))
-          ((pred recordp) (propertize (format "#<record %s>" (type-of val)) 'face 'marginalia-value))
+           (format (propertize "#'%s" 'face 'marginalia-function) val))
+          ((pred recordp) (format (propertize "#<record %s>" 'face 'marginalia-value) (type-of val)))
           ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
           ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
           (_ (let ((print-escape-newlines t)
@@ -664,7 +664,7 @@ keybinding since CAND includes it."
   "Annotate character CAND with its general character category and character code."
   (when-let (char (char-from-name cand t))
     (concat
-     (propertize (format " (%c)" char) 'face 'marginalia-char)
+     (format #(" (%c)" 1 5 (face marginalia-char)) char)
      (marginalia--fields
       (char :format "%06X" :face 'marginalia-number)
       ((char-code-property-description
