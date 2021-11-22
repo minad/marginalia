@@ -72,7 +72,8 @@ It can also be set to an integer value of 1 or larger to force an offset."
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
 
-Set to `most-positive-fixnum' to always use a relative age, or 0 to never show a relative age."
+Set to `most-positive-fixnum' to always use a relative age, or 0 to never show
+a relative age."
   :type 'integer)
 
 (defcustom marginalia-annotator-registry
