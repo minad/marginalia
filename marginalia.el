@@ -342,11 +342,11 @@ for performance profiling of the annotators.")
 
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
-  (truncate-string-to-width
-   (if-let (pos (string-match-p "\n" str))
-       (substring str 0 pos)
-     str)
-   width 0 32 t))
+  (when-let (pos (string-match-p "\n" str))
+    (setq str (substring str 0 pos)))
+  (if (< width 0)
+      (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s t))
+    (truncate-string-to-width str width 0 ?\s t)))
 
 (defun marginalia--align (str)
   "Align STR at the right margin."
@@ -730,14 +730,15 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
     (let ((front (bookmark-get-front-context-string bm)))
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
-       ((bookmark-get-filename bm) :truncate 40 :face 'marginalia-file-name)
+       ((bookmark-get-filename bm)
+        :truncate (- (/ marginalia-truncate-width 2)) :face 'marginalia-file-name)
        ((if (or (not front) (string= front ""))
             ""
           (concat (string-trim
                    (replace-regexp-in-string
                     "[ \t]+" " "
                     (replace-regexp-in-string "\n" "\\\\n" front))) "…"))
-        :truncate 20 :face 'marginalia-documentation)))))
+        :truncate (/ marginalia-truncate-width 3) :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
@@ -791,7 +792,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
     (marginalia--fields
      ((marginalia--buffer-status buffer))
      ((marginalia--buffer-file buffer)
-      :truncate (/ marginalia-truncate-width 2)
+      :truncate (- (/ marginalia-truncate-width 2))
       :face 'marginalia-file-name))))
 
 (defun marginalia--full-candidate (cand)
