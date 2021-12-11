@@ -156,6 +156,11 @@ determine it."
   "List of bookmark type transformers."
   :type '(alist :key-type regexp :value-type (choice string function)))
 
+(defcustom marginalia-escape-multibyte t
+  "Whether to escape multibyte characters when annotating variables.
+When t, show multibyte characters as backslash sequences."
+  :type 'boolean)
+
 (defgroup marginalia-faces nil
   "Faces used by `marginalia-mode'."
   :group 'marginalia
@@ -595,7 +600,7 @@ keybinding since CAND includes it."
           ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
           (_ (let ((print-escape-newlines t)
                    (print-escape-control-characters t)
-                   (print-escape-multibyte t)
+                   (print-escape-multibyte marginalia-escape-multibyte)
                    (print-level 10)
                    (print-length marginalia-truncate-width))
                (propertize
