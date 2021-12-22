@@ -440,6 +440,7 @@ f function
 c command
 C interactive-only command
 m macro
+M special-form
 p pure
 s side-effect-free
 @ autoloaded
@@ -465,7 +466,8 @@ t cl-type"
         ((get s 'side-effect-free) "s"))
        (cond
         ((commandp s) (if (get s 'interactive-only) "C" "c"))
-        ((eq (car-safe (symbol-function s)) 'macro) "m")
+        ((macrop (symbol-function s)) "m")
+        ((special-form-p (symbol-function s)) "M")
         (t "f"))
        (and (autoloadp (symbol-function s)) "@")
        (and (marginalia--advised s) "!")
@@ -555,7 +557,7 @@ keybinding since CAND includes it."
 (defun marginalia-annotate-function (cand)
   "Annotate function CAND with its documentation string."
   (when-let (sym (intern-soft cand))
-    (when (functionp sym)
+    (when (fboundp sym)
       (concat
        (marginalia-annotate-binding cand)
        (marginalia--fields
