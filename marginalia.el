@@ -509,7 +509,14 @@ t cl-type"
 		   (ignore-errors (documentation sym t))
 		   sym))
 	(substitute-command-keys (car tmp)))
-       (t (help-function-arglist sym))))))
+       ((setq tmp (help-function-arglist sym))
+        (and
+         (if (and (stringp tmp)
+                  (string-match-p "Arg list not available" tmp))
+             ;; A shorter text fits better into the
+             ;; limited Marginalia space.
+             "[autoload]"
+           tmp)))))))
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
