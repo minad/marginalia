@@ -591,8 +591,6 @@ keybinding since CAND includes it."
           ;; Emacs BUG: abbrev-table-p throws an error
           ((guard (ignore-errors (abbrev-table-p val))) (propertize "#<abbrev-table>" 'face 'marginalia-value))
           ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
-          ((guard (and (fboundp 'subr-native-elisp-p) (subr-native-elisp-p val)))
-           (propertize "#<native-code-function>" 'face 'marginalia-function))
           ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
           ((and (pred functionp) (pred symbolp))
            ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
