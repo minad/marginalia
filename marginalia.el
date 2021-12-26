@@ -574,11 +574,10 @@ keybinding since CAND includes it."
     (propertize "#<unbound>" 'face 'marginalia-null))
    ((and marginalia-censor-variables
          (let ((name (symbol-name sym)))
-           (seq-find (lambda (r)
-                       (if (symbolp r)
-                           (eq r sym)
-                         (string-match-p r name)))
-                     marginalia-censor-variables)))
+           (cl-loop for r in marginalia-censor-variables
+                    thereis (if (symbolp r)
+                                (eq r sym)
+                              (string-match-p r name)))))
     (propertize "*****" 'face 'marginalia-null))
    (t (let ((val (symbol-value sym)))
         (pcase val
@@ -979,7 +978,12 @@ looking for a regexp that matches the prompt."
     ;; Take the window width of the current window (minibuffer window!)
     `(let ((marginalia--metadata ,metadata)
            (,c marginalia--cache)
-           (,w (window-width))
+           ;; Compute minimum width of windows, which display the minibuffer.
+           ;; vertico-buffer displays the minibuffer in different windows. We may
+           ;; want to generalize this and detect other types of completion
+           ;; buffers, e.g., Embark Collect or the default completion buffer.
+           (,w (cl-loop for win in (get-buffer-window-list)
+                        minimize (window-width win)))
            ;; Compute marginalia-align-offset. If the right-fringe-width is
            ;; zero, use an additional offset of 1 by default! See
            ;; https://github.com/minad/marginalia/issues/42 for the discussion
