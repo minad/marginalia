@@ -99,7 +99,9 @@ a relative age."
      (file marginalia-annotate-file)
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
-     (consult-multi marginalia-annotate-consult-multi)))
+     (multi-category marginalia-annotate-multi-category)
+     ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
+     (consult-multi marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
@@ -401,12 +403,13 @@ WIDTH is the format width. This can be specified as alternative to FORMAT."
     ('builtin nil)
     (fun fun)))
 
-;; This annotator is consult-specific, it will annotate commands with `consult-multi' category
-(defun marginalia-annotate-consult-multi (cand)
-  "Annotate consult-multi CAND with the buffer class."
-  (if-let* ((multi (get-text-property 0 'consult-multi cand))
+(defun marginalia-annotate-multi-category (cand)
+  "Annotate multi-category CAND with the buffer class."
+  (if-let* ((multi (or (get-text-property 0 'multi-category cand)
+                       ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
+                       (get-text-property 0 'consult-multi cand)))
             (annotate (marginalia--annotator (car multi))))
-      ;; Use the Marginalia annotator corresponding to the consult-multi category.
+      ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall annotate (cdr multi))
     ;; Apply the original annotation function on the original candidate, if there is one.
     ;; NOTE: Use `alist-get' instead of `completion-metadata-get' to bypass our
