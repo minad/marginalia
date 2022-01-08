@@ -859,7 +859,10 @@ These annotations are skipped for remote paths."
   (let ((uid (file-attribute-user-id attrs))
         (gid (file-attribute-group-id attrs)))
     (if (or (/= (user-uid) uid) (/= (group-gid) gid))
-        (format "%s:%s" (or (user-login-name uid) uid) (or (group-name gid) gid))
+        (format "%s:%s"
+                (or (user-login-name uid) uid)
+                ;; group-name was introduced on Emacs 27
+                (or (and (fboundp 'group-name) (group-name gid)) gid))
       "")))
 
 (defun marginalia--file-modes (attrs)
