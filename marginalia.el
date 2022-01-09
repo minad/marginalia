@@ -944,35 +944,6 @@ looking for a regexp that matches the prompt."
              when (string-match-p regexp prompt)
              return category)))
 
-(defmacro marginalia--context (metadata &rest body)
-  "Setup annotator context with completion METADATA around BODY."
-  (declare (indent 1))
-  (let ((w (make-symbol "w"))
-        (c (make-symbol "c"))
-        (o (make-symbol "o")))
-    ;; Take the window width of the current window (minibuffer window!)
-    `(let ((marginalia--metadata ,metadata)
-           (,c marginalia--cache)
-           ;; Compute minimum width of windows, which display the minibuffer.
-           ;; vertico-buffer displays the minibuffer in different windows. We may
-           ;; want to generalize this and detect other types of completion
-           ;; buffers, e.g., Embark Collect or the default completion buffer.
-           (,w (cl-loop for win in (get-buffer-window-list)
-                        minimize (window-width win)))
-           ;; Compute marginalia-align-offset. If the right-fringe-width is
-           ;; zero, use an additional offset of 1 by default! See
-           ;; https://github.com/minad/marginalia/issues/42 for the discussion
-           ;; regarding the alignment.
-           (,o (if (eq 0 (nth 1 (window-fringes))) 1 0)))
-       ;; We generally run the annotators in the original window.
-       ;; `with-selected-window' is necessary because of `lookup-minor-mode-from-indicator'.
-       ;; Otherwise it would probably suffice to only change the current buffer.
-       ;; We need the `selected-window' fallback for Embark Occur.
-       (with-selected-window (or (minibuffer-selected-window) (selected-window))
-         (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
-               (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width)))
-           ,@body)))))
-
 (defun marginalia--cache-reset ()
   "Reset the cache."
   (when marginalia--cache
@@ -1014,8 +985,24 @@ PROP is the property which is looked up."
      (when-let* ((cat (completion-metadata-get metadata 'category))
                  (annotate (marginalia--annotator cat)))
        (lambda (cands)
-         (marginalia--context metadata
-           (mapcar (lambda (x) (list x "" (or (marginalia--cached annotate x) ""))) cands)))))
+         (let ((marginalia--metadata metadata)
+               (cache marginalia--cache)
+               ;; Compute minimum width of windows, which display the
+               ;; minibuffer. vertico-buffer displays the minibuffer in
+               ;; different windows. We may want to generalize this and detect
+               ;; other types of completion buffers, e.g., Embark Collect or
+               ;; the default completion buffer.
+               (width (cl-loop for win in (get-buffer-window-list)
+                               minimize (window-width win))))
+           ;; We run the annotators in the original window.
+           ;; `with-selected-window' is necessary because of
+           ;; `lookup-minor-mode-from-indicator'. Otherwise it would suffice to
+           ;; only change the current buffer. We need the `selected-window'
+           ;; fallback for Embark Occur.
+       (with-selected-window (or (minibuffer-selected-window) (selected-window))
+         (let ((marginalia--cache cache) ;; Take the cache from the minibuffer
+               (marginalia-truncate-width (min (/ width 2) marginalia-truncate-width)))
+           (mapcar (lambda (x) (list x "" (or (marginalia--cached annotate x) ""))) cands)))))))
     ('category
      ;; Find the completion category by trying each of our classifiers.
      ;; Store the metadata for `marginalia-classify-original-category'.
