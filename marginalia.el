@@ -345,14 +345,22 @@ for performance profiling of the annotators.")
 (defvar marginalia--metadata nil
   "Completion metadata from the current completion.")
 
+(defvar truncate-string-ellipsis)
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
   (when (floatp width) (setq width (round (* width marginalia-field-width))))
   (when-let (pos (string-match-p "\n" str))
     (setq str (substring str 0 pos)))
-  (if (< width 0)
-      (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s t))
-    (truncate-string-to-width str width 0 ?\s t)))
+  (let ((truncated (if (< width 0)
+                       (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s t))
+                     (truncate-string-to-width str width 0 ?\s t))))
+    (when (string-suffix-p truncate-string-ellipsis truncated)
+      (let* ((end (length truncated))
+             (beg (- end 1 (length truncate-string-ellipsis)))
+             (face (get-text-property beg 'face truncated)))
+        (when face
+          (put-text-property beg end 'face face truncated))))
+    truncated))
 
 (cl-defmacro marginalia--field (field &key truncate face width)
   "Format FIELD as a string according to some options.
@@ -367,10 +375,12 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
-  `(concat #("  " 1 2 (marginalia--align t))
-           ,@(cdr (mapcan (lambda (field)
-                            (list 'marginalia-separator `(marginalia--field ,@field)))
-                          fields))))
+  `(concat
+    #("  " 0 1 (marginalia--align t))
+    marginalia-separator
+    ,@(cdr (mapcan (lambda (field)
+                     (list 'marginalia-separator `(marginalia--field ,@field)))
+                   fields))))
 
 (defun marginalia--documentation (str)
   "Format documentation string STR."
@@ -728,8 +738,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
        ((bookmark-get-filename bm)
         :truncate -0.5 :face 'marginalia-file-name)
-       ((if (or (not front) (string= front ""))
-            ""
+       ((unless (or (not front) (string= front ""))
           (concat (string-trim
                    (replace-regexp-in-string
                     "[ \t]+" " "
