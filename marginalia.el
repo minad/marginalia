@@ -42,7 +42,10 @@
   :group 'minibuffer
   :prefix "marginalia-")
 
-(defcustom marginalia-truncate-width 80
+(define-obsolete-variable-alias 'marginalia-truncate-width
+  'marginalia-field-width "0.11")
+
+(defcustom marginalia-field-width 80
   "Maximum truncation width of annotation fields.
 
 This value is adjusted depending on the `window-width'."
@@ -372,7 +375,7 @@ FACE is the name of the face, with which the field should be propertized."
   "Format documentation string STR."
   (when str
     (marginalia--fields
-     (str :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+     (str :truncate marginalia-field-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-binding (cand)
   "Annotate command CAND with keybinding."
@@ -518,7 +521,7 @@ t cl-type"
         ((fboundp sym) (marginalia--function-doc sym))
         ((facep sym) (documentation-property sym 'face-documentation))
         (t (documentation-property sym 'variable-documentation)))
-       :truncate marginalia-truncate-width :face 'marginalia-documentation)))))
+       :truncate marginalia-field-width :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-command (cand)
   "Annotate command CAND with its documentation string.
@@ -550,8 +553,8 @@ keybinding since CAND includes it."
        (marginalia--fields
         ((marginalia--symbol-class sym) :face 'marginalia-type)
         ((marginalia--function-args sym) :face 'marginalia-value
-         :truncate (/ marginalia-truncate-width 2))
-        ((marginalia--function-doc sym) :truncate marginalia-truncate-width
+         :truncate (/ marginalia-field-width 2))
+        ((marginalia--function-doc sym) :truncate marginalia-field-width
          :face 'marginalia-documentation))))))
 
 (defun marginalia--variable-value (sym)
@@ -590,14 +593,14 @@ keybinding since CAND includes it."
                    (print-escape-control-characters t)
                    (print-escape-multibyte t)
                    (print-level 10)
-                   (print-length marginalia-truncate-width))
+                   (print-length marginalia-field-width))
                (propertize
                 (prin1-to-string
                  (if (stringp val)
                      ;; Get rid of string properties to save some of the precious space
                      (substring-no-properties
                       val 0
-                      (min (length val) marginalia-truncate-width))
+                      (min (length val) marginalia-field-width))
                    val))
                 'face
                 (cond
@@ -610,15 +613,15 @@ keybinding since CAND includes it."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-type)
-     ((marginalia--variable-value sym) :truncate (/ marginalia-truncate-width 2))
+     ((marginalia--variable-value sym) :truncate (/ marginalia-field-width 2))
      ((documentation-property sym 'variable-documentation)
-      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+      :truncate marginalia-field-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-environment-variable (cand)
   "Annotate environment variable CAND with its current value."
   (when-let (val (getenv cand))
     (marginalia--fields
-     (val :truncate marginalia-truncate-width :face 'marginalia-value))))
+     (val :truncate marginalia-field-width :face 'marginalia-value))))
 
 (defun marginalia-annotate-face (cand)
   "Annotate face CAND with its documentation string and face example."
@@ -626,7 +629,7 @@ keybinding since CAND includes it."
     (marginalia--fields
      ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
      ((documentation-property sym 'face-documentation)
-      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+      :truncate marginalia-field-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-color (cand)
   "Annotate face CAND with its documentation string and face example."
@@ -681,7 +684,7 @@ keybinding since CAND includes it."
      ((if (local-variable-if-set-p mode) "Local" "Global") :width 6 :face 'marginalia-type)
      (lighter-str :width 20 :face 'marginalia-lighter)
      ((marginalia--function-doc mode)
-      :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+      :truncate marginalia-field-width :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
@@ -697,7 +700,7 @@ keybinding since CAND includes it."
      ((cond
        ((package-desc-archive desc) (propertize (package-desc-archive desc) 'face 'marginalia-archive))
        (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
-     ((package-desc-summary desc) :truncate marginalia-truncate-width :face 'marginalia-documentation))))
+     ((package-desc-summary desc) :truncate marginalia-field-width :face 'marginalia-documentation))))
 
 (defun marginalia--bookmark-type (bm)
   "Return bookmark type string of BM.
@@ -723,14 +726,14 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
        ((bookmark-get-filename bm)
-        :truncate (- (/ marginalia-truncate-width 2)) :face 'marginalia-file-name)
+        :truncate (- (/ marginalia-field-width 2)) :face 'marginalia-file-name)
        ((if (or (not front) (string= front ""))
             ""
           (concat (string-trim
                    (replace-regexp-in-string
                     "[ \t]+" " "
                     (replace-regexp-in-string "\n" "\\\\n" front))) "…"))
-        :truncate (/ marginalia-truncate-width 3) :face 'marginalia-documentation)))))
+        :truncate (/ marginalia-field-width 3) :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-customize-group (cand)
   "Annotate customization group CAND with its documentation string."
@@ -784,7 +787,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
     (marginalia--fields
      ((marginalia--buffer-status buffer))
      ((marginalia--buffer-file buffer)
-      :truncate (- (/ marginalia-truncate-width 2))
+      :truncate (- (/ marginalia-field-width 2))
       :face 'marginalia-file-name))))
 
 (defun marginalia--full-candidate (cand)
@@ -1018,7 +1021,7 @@ Selectrum."
   ;; to generalize this and detect other types of completion buffers, e.g.,
   ;; Embark Collect or the default completion buffer.
   (let* ((width (cl-loop for win in (get-buffer-window-list) minimize (window-width win)))
-         (marginalia-truncate-width (min (/ width 2) marginalia-truncate-width))
+         (marginalia-field-width (min (/ width 2) marginalia-field-width))
          (marginalia--metadata metadata)
          (cache marginalia--cache))
     (marginalia--align
