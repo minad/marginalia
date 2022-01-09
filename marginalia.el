@@ -345,22 +345,26 @@ for performance profiling of the annotators.")
 (defvar marginalia--metadata nil
   "Completion metadata from the current completion.")
 
-(defvar truncate-string-ellipsis)
+(defvar marginalia--ellipsis nil)
+(defun marginalia--ellipsis ()
+  "Return ellipsis."
+  (or marginalia--ellipsis
+      (setq marginalia--ellipsis
+            (cond
+             ((boundp 'truncate-string-ellipsis) truncate-string-ellipsis)
+             ((char-displayable-p ?…) "…")
+             ("...")))))
+
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
   (when (floatp width) (setq width (round (* width marginalia-field-width))))
   (when-let (pos (string-match-p "\n" str))
     (setq str (substring str 0 pos)))
-  (let ((truncated (if (< width 0)
-                       (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s t))
-                     (truncate-string-to-width str width 0 ?\s t))))
-    (when (string-suffix-p truncate-string-ellipsis truncated)
-      (let* ((end (length truncated))
-             (beg (- end 1 (length truncate-string-ellipsis)))
-             (face (get-text-property beg 'face truncated)))
-        (when face
-          (put-text-property beg end 'face face truncated))))
-    truncated))
+  (let* ((face (and (not (equal str "")) (get-text-property (1- (length str)) 'face str)))
+         (ell (if face (propertize (marginalia--ellipsis) 'face face) (marginalia--ellipsis))))
+    (if (< width 0)
+        (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s ell))
+      (truncate-string-to-width str width 0 ?\s ell))))
 
 (cl-defmacro marginalia--field (field &key truncate face width)
   "Format FIELD as a string according to some options.
@@ -741,7 +745,8 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
           (concat (string-trim
                    (replace-regexp-in-string
                     "[ \t]+" " "
-                    (replace-regexp-in-string "\n" "\\\\n" front))) "…"))
+                    (replace-regexp-in-string "\n" "\\\\n" front)))
+                  (marginalia--ellipsis)))
         :truncate -0.3 :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-customize-group (cand)
