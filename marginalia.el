@@ -53,24 +53,13 @@ This value is adjusted depending on the `window-width'."
   :type 'string)
 
 (defvar marginalia-separator-threshold nil)
+(defvar marginalia-align-offset nil)
+(defvar marginalia-margin-min nil)
+(defvar marginalia-margin-threshold nil)
 (make-obsolete-variable 'marginalia-separator-threshold "Deprecated in favor of `marginalia-separator'." "0.11")
-
-;; See https://github.com/minad/marginalia/issues/42 for the discussion
-;; regarding the alignment.
-(defcustom marginalia-align-offset nil
-  "Additional offset at the right margin used by `marginalia--align'.
-
-This value should be set to nil to enable auto-configuration.
-It can also be set to an integer value of 1 or larger to force an offset."
-  :type '(choice (const nil) integer))
-
-(defcustom marginalia-margin-min 8
-  "Minimum whitespace margin at the right side."
-  :type 'integer)
-
-(defcustom marginalia-margin-threshold 200
-  "Use whitespace margin for window widths larger than this value."
-  :type 'integer)
+(make-obsolete-variable 'marginalia-align-offset "Deprecated in favor of `marginalia-align'." "0.11")
+(make-obsolete-variable 'marginalia-margin-min "Deprecated in favor of `marginalia-align'." "0.11")
+(make-obsolete-variable 'marginalia-margin-threshold "Deprecated in favor of `marginalia-threshold'." "0.11")
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
@@ -330,9 +319,6 @@ determine it."
 Disabling the cache is useful on non-incremental UIs like default completion or
 for performance profiling of the annotators.")
 
-(defvar marginalia--margin 0
-  "Right margin.")
-
 (defvar-local marginalia--command nil
   "Last command symbol saved in order to allow annotations.")
 
@@ -350,16 +336,6 @@ for performance profiling of the annotators.")
       (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s t))
     (truncate-string-to-width str width 0 ?\s t)))
 
-(defun marginalia--align (str)
-  "Align STR at the right margin."
-  (unless (string-blank-p str)
-    (concat " "
-            (propertize
-             " "
-             'display
-             `(space :align-to (- right ,marginalia--margin ,(string-width str))))
-            str)))
-
 (cl-defmacro marginalia--field (field &key truncate face width)
   "Format FIELD as a string according to some options.
 TRUNCATE is the truncation width.
@@ -373,9 +349,10 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
-  `(marginalia--align (concat ,@(cdr (mapcan (lambda (field)
-                                               (list 'marginalia-separator `(marginalia--field ,@field)))
-                                             fields)))))
+  `(concat #(" " 0 1 (marginalia--align t))
+           ,@(cdr (mapcan (lambda (field)
+                            (list 'marginalia-separator `(marginalia--field ,@field)))
+                          fields))))
 
 (defun marginalia--documentation (str)
   "Format documentation string STR."
@@ -994,12 +971,7 @@ looking for a regexp that matches the prompt."
        ;; We need the `selected-window' fallback for Embark Occur.
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
-               (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
-               (marginalia--margin
-                (+ (or marginalia-align-offset ,o)
-                   (if (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
-                       (- ,w marginalia-margin-threshold)
-                     0))))
+               (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width)))
            ,@body)))))
 
 (defun marginalia--cache-reset ()
