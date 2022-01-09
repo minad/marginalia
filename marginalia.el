@@ -52,12 +52,20 @@ This value is adjusted depending on the `window-width'."
   "Annotation field separator."
   :type 'string)
 
+(defcustom marginalia-align 'left
+  "Alignment of the annotations."
+  :type '(choice (const :tag "Left"   left)
+                 (const :tag "Center" center)
+                 (const :tag "Right"  right)))
+
+(defcustom marginalia-align-offset 0
+  "Additional offset added to the alignment."
+  :type 'integer)
+
 (defvar marginalia-separator-threshold nil)
-(defvar marginalia-align-offset nil)
 (defvar marginalia-margin-min nil)
 (defvar marginalia-margin-threshold nil)
 (make-obsolete-variable 'marginalia-separator-threshold "Deprecated in favor of `marginalia-separator'." "0.11")
-(make-obsolete-variable 'marginalia-align-offset "Deprecated in favor of `marginalia-align'." "0.11")
 (make-obsolete-variable 'marginalia-margin-min "Deprecated in favor of `marginalia-align'." "0.11")
 (make-obsolete-variable 'marginalia-margin-threshold "Deprecated in favor of `marginalia-threshold'." "0.11")
 
@@ -308,6 +316,12 @@ determine it."
 
 ;;;; Marginalia mode
 
+(defvar marginalia--candw-step 10
+  "Round candidate width.")
+
+(defvar-local marginalia--candw-max 20
+  "Maximum width of candidates.")
+
 (defvar marginalia--fontified-file-modes nil
   "List of fontified file modes.")
 
@@ -349,7 +363,7 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
-  `(concat #(" " 0 1 (marginalia--align t))
+  `(concat #("  " 1 2 (marginalia--align t))
            ,@(cdr (mapcan (lambda (field)
                             (list 'marginalia-separator `(marginalia--field ,@field)))
                           fields))))
@@ -968,6 +982,35 @@ Selectrum."
               val)))
     (funcall fun key)))
 
+(defun marginalia--align (cands)
+  "Align annotations of CANDS according to `marginalia-align'."
+  (setq cands
+        (cl-loop for (cand . ann) in cands collect
+                 (let ((annw (1- (string-width ann))))
+                   (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
+                     (let ((pre-width (string-width (substring ann 0 align))))
+                       (cl-decf annw pre-width)
+                       (setq marginalia--candw-max
+                             (max marginalia--candw-max
+                                  (+ (string-width cand) pre-width)))))
+                   `(,cand ,ann . ,annw))))
+  (setq marginalia--candw-max
+        (* (ceiling marginalia--candw-max
+                    marginalia--candw-step)
+           marginalia--candw-step))
+  (cl-loop for (cand ann . annw) in cands collect
+           (progn
+             (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
+               (put-text-property
+                align (1+ align) 'display
+                `(space :align-to ,
+                        (pcase-exhaustive marginalia-align
+                          ('center `(+ center ,marginalia-align-offset))
+                          ('left `(+ left ,marginalia-align-offset ,marginalia--candw-max))
+                          ('right `(+ right ,marginalia-align-offset ,(- annw)))))
+                ann))
+             (list cand "" ann))))
+
 (defun marginalia--affixate (metadata annotator cands)
   "Affixate CANDS given METADATA and Marginalia ANNOTATOR."
   ;; Compute minimum width of windows, which display the minibuffer.
@@ -977,15 +1020,16 @@ Selectrum."
   (let* ((width (cl-loop for win in (get-buffer-window-list) minimize (window-width win)))
          (marginalia-truncate-width (min (/ width 2) marginalia-truncate-width))
          (marginalia--metadata metadata)
-         (cache marginalia--cache)
-         (annotated
-          ;; Run the annotators in the original window. `with-selected-window'
-          ;; is necessary because of `lookup-minor-mode-from-indicator'.
-          ;; Otherwise it would suffice to only change the current buffer. We
-          ;; need the `selected-window' fallback for Embark Occur.
-          (with-selected-window (or (minibuffer-selected-window) (selected-window))
-            (mapcar (lambda (x) (cons x (or (marginalia--cached cache annotator x) ""))) cands))))
-    (mapcar (lambda (x) (list (car x) "" (cdr x))) annotated)))
+         (cache marginalia--cache))
+    (marginalia--align
+     ;; Run the annotators in the original window. `with-selected-window'
+     ;; is necessary because of `lookup-minor-mode-from-indicator'.
+     ;; Otherwise it would suffice to only change the current buffer. We
+     ;; need the `selected-window' fallback for Embark Occur.
+     (with-selected-window (or (minibuffer-selected-window) (selected-window))
+       (cl-loop for cand in cands collect
+                (let ((ann (or (marginalia--cached cache annotator cand) "")))
+                  (cons cand (if (string-blank-p ann) "" ann))))))))
 
 (defun marginalia--completion-metadata-get (metadata prop)
   "Meant as :before-until advice for `completion-metadata-get'.
