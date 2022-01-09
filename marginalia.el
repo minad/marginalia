@@ -476,22 +476,22 @@ t cl-type"
   "Return function arguments for SYM."
   (let ((tmp))
     (elisp-function-argstring
-      (cond
-       ((listp (setq tmp (gethash (indirect-function sym)
-                                  advertised-signature-table t)))
-        tmp)
-       ((setq tmp (help-split-fundoc
-		   (ignore-errors (documentation sym t))
-		   sym))
-	(substitute-command-keys (car tmp)))
-       ((setq tmp (help-function-arglist sym))
-        (and
-         (if (and (stringp tmp)
-                  (string-match-p "Arg list not available" tmp))
-             ;; A shorter text fits better into the
-             ;; limited Marginalia space.
-             "[autoload]"
-           tmp)))))))
+     (cond
+      ((listp (setq tmp (gethash (indirect-function sym)
+                                 advertised-signature-table t)))
+       tmp)
+      ((setq tmp (help-split-fundoc
+		  (ignore-errors (documentation sym t))
+		  sym))
+       (substitute-command-keys (car tmp)))
+      ((setq tmp (help-function-arglist sym))
+       (and
+        (if (and (stringp tmp)
+                 (string-match-p "Arg list not available" tmp))
+            ;; A shorter text fits better into the
+            ;; limited Marginalia space.
+            "[autoload]"
+          tmp)))))))
 
 (defun marginalia-annotate-symbol (cand)
   "Annotate symbol CAND with its documentation string."
@@ -749,20 +749,20 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 (defun marginalia--buffer-file (buffer)
   "Return the file or process name of BUFFER."
   (if-let (proc (get-buffer-process buffer))
-          (format "(%s %s) %s"
-                  proc (process-status proc)
-                  (abbreviate-file-name (buffer-local-value 'default-directory buffer)))
-        (abbreviate-file-name
-         (or (cond
-              ;; see ibuffer-buffer-file-name
-              ((buffer-file-name buffer))
-              ((when-let (dir (and (local-variable-p 'dired-directory buffer)
-                                   (buffer-local-value 'dired-directory buffer)))
-                 (expand-file-name (if (stringp dir) dir (car dir))
-                                   (buffer-local-value 'default-directory buffer))))
-              ((local-variable-p 'list-buffers-directory buffer)
-               (buffer-local-value 'list-buffers-directory buffer)))
-             ""))))
+      (format "(%s %s) %s"
+              proc (process-status proc)
+              (abbreviate-file-name (buffer-local-value 'default-directory buffer)))
+    (abbreviate-file-name
+     (or (cond
+          ;; see ibuffer-buffer-file-name
+          ((buffer-file-name buffer))
+          ((when-let (dir (and (local-variable-p 'dired-directory buffer)
+                               (buffer-local-value 'dired-directory buffer)))
+             (expand-file-name (if (stringp dir) dir (car dir))
+                               (buffer-local-value 'default-directory buffer))))
+          ((local-variable-p 'list-buffers-directory buffer)
+           (buffer-local-value 'list-buffers-directory buffer)))
+         ""))))
 
 (defun marginalia-annotate-buffer (cand)
   "Annotate buffer CAND with modification status, file name and major mode."
@@ -779,16 +779,16 @@ For some completion tables, the completion candidates offered are
 meant to be only a part of the full minibuffer contents. For
 example, during file name completion the candidates are one path
 component of a full file path."
-    (if-let (win (active-minibuffer-window))
-        (with-current-buffer (window-buffer win)
-          (if (bound-and-true-p selectrum-is-active)
-              (selectrum--get-full cand)
-            (concat (substring (minibuffer-contents-no-properties)
-                               0 marginalia--base-position)
-                    cand)))
-      ;; no minibuffer is active, trust that cand already conveys all
-      ;; necessary information (there's not much else we can do)
-      cand))
+  (if-let (win (active-minibuffer-window))
+      (with-current-buffer (window-buffer win)
+        (if (bound-and-true-p selectrum-is-active)
+            (selectrum--get-full cand)
+          (concat (substring (minibuffer-contents-no-properties)
+                             0 marginalia--base-position)
+                  cand)))
+    ;; no minibuffer is active, trust that cand already conveys all
+    ;; necessary information (there's not much else we can do)
+    cand))
 
 (defun marginalia--remote-protocol (path)
   "Return the remote protocol of PATH."
@@ -998,8 +998,8 @@ PROP is the property which is looked up."
            ;; `lookup-minor-mode-from-indicator'. Otherwise it would suffice to
            ;; only change the current buffer. We need the `selected-window'
            ;; fallback for Embark Occur.
-       (with-selected-window (or (minibuffer-selected-window) (selected-window))
-         (mapcar (lambda (x) (list x "" (or (marginalia--cached cache annotate x) ""))) cands))))))
+           (with-selected-window (or (minibuffer-selected-window) (selected-window))
+             (mapcar (lambda (x) (list x "" (or (marginalia--cached cache annotate x) ""))) cands))))))
     ('category
      ;; Find the completion category by trying each of our classifiers.
      ;; Store the metadata for `marginalia-classify-original-category'.
