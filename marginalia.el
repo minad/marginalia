@@ -377,10 +377,9 @@ FACE is the name of the face, with which the field should be propertized."
   "Format annotation FIELDS as a string with separators in between."
   `(concat
     #("  " 0 1 (marginalia--align t))
-    marginalia-separator
-    ,@(cdr (mapcan (lambda (field)
-                     (list 'marginalia-separator `(marginalia--field ,@field)))
-                   fields))))
+    ,@(mapcan (lambda (field)
+                (list 'marginalia-separator `(marginalia--field ,@field)))
+              fields)))
 
 (defun marginalia--documentation (str)
   "Format documentation string STR."
@@ -1012,11 +1011,11 @@ Selectrum."
         (cl-loop for (cand . ann) in cands collect
                  (let ((annw (1- (string-width ann))))
                    (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
-                     (let ((pre-width (string-width (substring ann 0 align))))
-                       (cl-decf annw pre-width)
+                     (let ((suffix-width (string-width (substring ann 0 align))))
+                       (cl-decf annw suffix-width)
                        (setq marginalia--candw-max
                              (max marginalia--candw-max
-                                  (+ (string-width cand) pre-width)))))
+                                  (+ (string-width cand) suffix-width)))))
                    `(,cand ,ann . ,annw))))
   (setq marginalia--candw-max
         (* (ceiling marginalia--candw-max
@@ -1027,8 +1026,8 @@ Selectrum."
              (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
                (put-text-property
                 align (1+ align) 'display
-                `(space :align-to ,
-                        (pcase-exhaustive marginalia-align
+                `(space :align-to
+                        ,(pcase-exhaustive marginalia-align
                           ('center `(+ center ,marginalia-align-offset))
                           ('left `(+ left ,marginalia-align-offset ,marginalia--candw-max))
                           ('right `(+ right ,marginalia-align-offset ,(- annw)))))
