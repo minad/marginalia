@@ -48,9 +48,12 @@
 This value is adjusted depending on the `window-width'."
   :type 'integer)
 
-(defcustom marginalia-separator-threshold 160
-  "Use wider separator for window widths larger than this value."
-  :type 'integer)
+(defcustom marginalia-separator "  "
+  "Annotation field separator."
+  :type 'string)
+
+(defvar marginalia-separator-threshold nil)
+(make-obsolete-variable 'marginalia-separator-threshold "Deprecated in favor of `marginalia-separator'." "0.11")
 
 ;; See https://github.com/minad/marginalia/issues/42 for the discussion
 ;; regarding the alignment.
@@ -327,9 +330,6 @@ determine it."
 Disabling the cache is useful on non-incremental UIs like default completion or
 for performance profiling of the annotators.")
 
-(defvar marginalia--separator "    "
-  "Field separator.")
-
 (defvar marginalia--margin 0
   "Right margin.")
 
@@ -374,7 +374,7 @@ FACE is the name of the face, with which the field should be propertized."
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
   `(marginalia--align (concat ,@(cdr (mapcan (lambda (field)
-                                               (list 'marginalia--separator `(marginalia--field ,@field)))
+                                               (list 'marginalia-separator `(marginalia--field ,@field)))
                                              fields)))))
 
 (defun marginalia--documentation (str)
@@ -761,9 +761,9 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 (defun marginalia--buffer-status (buffer)
   "Return the status of BUFFER as a string."
   (format-mode-line '((:propertize "%1*%1+%1@" face marginalia-modified)
-                      marginalia--separator
+                      marginalia-separator
                       (7 (:propertize "%I" face marginalia-size))
-                      marginalia--separator
+                      marginalia-separator
                       ;; InactiveMinibuffer has 18 letters, but there are longer names.
                       ;; For example Org-Agenda produces very long mode names.
                       ;; Therefore we have to truncate.
@@ -995,7 +995,6 @@ looking for a regexp that matches the prompt."
        (with-selected-window (or (minibuffer-selected-window) (selected-window))
          (let ((marginalia--cache ,c) ;; Take the cache from the minibuffer
                (marginalia-truncate-width (min (/ ,w 2) marginalia-truncate-width))
-               (marginalia--separator (if (>= ,w marginalia-separator-threshold) "    " " "))
                (marginalia--margin
                 (+ (or marginalia-align-offset ,o)
                    (if (>= ,w (+ marginalia-margin-min marginalia-margin-threshold))
