@@ -946,10 +946,9 @@ looking for a regexp that matches the prompt."
 
 (defun marginalia--cache-reset ()
   "Reset the cache."
-  (when marginalia--cache
-    (setq marginalia--cache (and (> marginalia--cache-size 0)
-                                 (cons nil (make-hash-table :test #'equal
-                                                            :size marginalia--cache-size))))))
+  (setq marginalia--cache (and marginalia--cache (> marginalia--cache-size 0)
+                               (cons nil (make-hash-table :test #'equal
+                                                          :size marginalia--cache-size)))))
 
 (defun marginalia--cached (fun key)
   "Cached application of function FUN with KEY.
@@ -961,7 +960,7 @@ Selectrum."
       (let ((ht (cdr marginalia--cache)))
         (or (gethash key ht)
             (let ((val (funcall fun key)))
-              (setcar marginalia--cache (cons key (car marginalia--cache)))
+              (push key (car marginalia--cache))
               (puthash key val ht)
               (when (>= (hash-table-count ht) marginalia--cache-size)
                 (let ((end (last (car marginalia--cache) 2)))
