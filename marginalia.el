@@ -1034,15 +1034,12 @@ METADATA is the metadata.
 PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
-     ;; we do want the advice triggered for completion-metadata-get
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotate (marginalia--annotator cat)))
-       (lambda (cand)
-         (marginalia--context metadata
-           (marginalia--cached annotate cand)))))
+     ;; We do want the advice triggered for `completion-metadata-get'.
+     ;; Return wrapper around the `affixation-function'.
+     (when-let (aff (completion-metadata-get metadata 'affixation-function))
+       (lambda (cand) (caddar (funcall aff (list cand))))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
-     ;; Return wrapper around `annotation-function'.
      (when-let* ((cat (completion-metadata-get metadata 'category))
                  (annotate (marginalia--annotator cat)))
        (lambda (cands)
