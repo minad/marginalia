@@ -360,20 +360,13 @@ for performance profiling of the annotators.")
              `(space :align-to (- right ,marginalia--margin ,(string-width str))))
             str)))
 
-(cl-defmacro marginalia--field (field &key truncate format face width)
+(cl-defmacro marginalia--field (field &key truncate face width)
   "Format FIELD as a string according to some options.
-
 TRUNCATE is the truncation width.
-FORMAT is a format string. This must be used if the field value is not a string.
-FACE is the name of the face, with which the field should be propertized.
-WIDTH is the format width. This can be specified as alternative to FORMAT."
-  (cl-assert (not (and width format)))
-  (when width
-    (setq field `(or ,field "")
-          format (format "%%%ds" (- width))))
-  (setq field (if format
-                  `(format ,format ,field)
-                `(or ,field "")))
+WIDTH is the field width.
+FACE is the name of the face, with which the field should be propertized."
+  (setq field `(or ,field ""))
+  (when width (setq field `(format ,(format "%%%ds" (- width)) ,field)))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
   (when face (setq field `(propertize ,field 'face ,face)))
   field)
@@ -676,7 +669,7 @@ keybinding since CAND includes it."
     (concat
      (format #(" (%c)" 1 5 (face marginalia-char)) char)
      (marginalia--fields
-      (char :format "%06X" :face 'marginalia-number)
+      ((format "%06X" char) :face 'marginalia-number)
       ((char-code-property-description
         'general-category
         (get-char-code-property char 'general-category))
@@ -851,7 +844,7 @@ These annotations are skipped for remote paths."
                       (when-let (win (active-minibuffer-window))
                         (with-current-buffer (window-buffer win)
                           (marginalia--remote-protocol (minibuffer-contents-no-properties))))))
-      (marginalia--fields (remote :format "*%s*" :face 'marginalia-documentation))
+      (marginalia--fields ((format "*%s*" remote) :face 'marginalia-documentation))
     (marginalia--annotate-local-file cand)))
 
 (defun marginalia--file-owner (attrs)
