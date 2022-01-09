@@ -821,14 +821,27 @@ component of a full file path."
                      (file-attributes (substitute-in-file-name
                                        (marginalia--full-candidate cand))
                                       'integer)))
-    (marginalia--fields
-     ((marginalia--file-owner attrs)
-      :width 12 :face 'marginalia-file-owner)
-     ((marginalia--file-modes attrs))
-     ((file-size-human-readable (file-attribute-size attrs))
-      :face 'marginalia-size :width -7)
-     ((marginalia--time (file-attribute-modification-time attrs))
-      :face 'marginalia-date :width -12))))
+    ;; HACK: Format differently accordingly to alignment, since the file owner
+    ;; is usually not displayed. Otherwise we will see an excessive amount of
+    ;; whitespace in front of the file permissions. Furthermore the alignment
+    ;; in `consult-buffer' will look ugly. TODO: Find a better solution!
+    (if (eq marginalia-align 'right)
+        (marginalia--fields
+         ;; File owner at the left
+         ((marginalia--file-owner attrs) :face 'marginalia-file-owner)
+         ((marginalia--file-modes attrs))
+         ((file-size-human-readable (file-attribute-size attrs))
+          :face 'marginalia-size :width -7)
+         ((marginalia--time (file-attribute-modification-time attrs))
+          :face 'marginalia-date :width -12))
+      (marginalia--fields
+       ((marginalia--file-modes attrs))
+       ((file-size-human-readable (file-attribute-size attrs))
+        :face 'marginalia-size :width -7)
+       ((marginalia--time (file-attribute-modification-time attrs))
+        :face 'marginalia-date :width -12)
+         ;; File owner at the right
+       ((marginalia--file-owner attrs) :face 'marginalia-file-owner)))))
 
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
@@ -844,12 +857,11 @@ These annotations are skipped for remote paths."
   "Return file owner given ATTRS."
   (let ((uid (file-attribute-user-id attrs))
         (gid (file-attribute-group-id attrs)))
-    (if (or (/= (user-uid) uid) (/= (group-gid) gid))
-        (format "%s:%s"
-                (or (user-login-name uid) uid)
-                ;; group-name was introduced on Emacs 27
-                (or (and (fboundp 'group-name) (group-name gid)) gid))
-      "")))
+    (when (or (/= (user-uid) uid) (/= (group-gid) gid))
+      (format "%s:%s"
+              (or (user-login-name uid) uid)
+              ;; group-name was introduced on Emacs 27
+              (or (and (fboundp 'group-name) (group-name gid)) gid)))))
 
 (defun marginalia--file-modes (attrs)
   "Return fontified file modes given the ATTRS."
