@@ -1055,28 +1055,27 @@ Selectrum."
                 (let ((ann (or (marginalia--cached cache annotator cand) "")))
                   (cons cand (if (string-blank-p ann) "" ann))))))))
 
-(defun marginalia--completion-metadata-get (metadata prop)
-  "Meant as :before-until advice for `completion-metadata-get'.
+(defun marginalia--completion-metadata-get (orig metadata prop)
+  "Meant as :around advice for `completion-metadata-get'.
 METADATA is the metadata.
 PROP is the property which is looked up."
-  (pcase prop
-    ('annotation-function
-     ;; We do want the advice triggered for `completion-metadata-get'.
-     ;; Return wrapper around the more general `affixation-function'.
-     (when-let (aff (completion-metadata-get metadata 'affixation-function))
-       (lambda (cand)
-         (let ((ann (caddar (funcall aff (list cand)))))
-           (and (not (equal ann "")) ann)))))
-    ('affixation-function
-     ;; We do want the advice triggered for `completion-metadata-get'.
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotator (marginalia--annotator cat)))
-       (apply-partially #'marginalia--affixate metadata annotator)))
-    ('category
-     ;; Find the completion category by trying each of our classifiers.
-     ;; Store the metadata for `marginalia-classify-original-category'.
-     (let ((marginalia--metadata metadata))
-       (run-hook-with-args-until-success 'marginalia-classifiers)))))
+  (or (pcase prop
+        ('annotation-function
+         ;; Return wrapper around the more general `affixation-function'.
+         (when-let (aff (marginalia--completion-metadata-get orig metadata 'affixation-function))
+           (lambda (cand)
+             (let ((ann (caddar (funcall aff (list cand)))))
+               (and (not (equal ann "")) ann)))))
+        ('affixation-function
+         (when-let* ((cat (marginalia--completion-metadata-get orig metadata 'category))
+                     (annotator (marginalia--annotator cat)))
+           (apply-partially #'marginalia--affixate metadata annotator)))
+        ('category
+         ;; Find the completion category by trying each of our classifiers.
+         ;; Store the metadata for `marginalia-classify-original-category'.
+         (let ((marginalia--metadata metadata))
+           (run-hook-with-args-until-success 'marginalia-classifiers))))
+      (funcall orig metadata prop)))
 
 (defun marginalia--minibuffer-setup ()
   "Setup the minibuffer for Marginalia.
@@ -1106,7 +1105,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
         ;; Ensure that we remember this-command in order to select the annotation function.
         (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
         ;; Replace the metadata function.
-        (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)
+        (advice-add #'completion-metadata-get :around #'marginalia--completion-metadata-get)
         ;; Record completion base position, for marginalia--full-candidate
         (advice-add #'completion-all-completions :filter-return #'marginalia--base-position))
     (advice-remove #'completion-all-completions #'marginalia--base-position)
