@@ -1062,10 +1062,10 @@ PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
-     ;; Return wrapper around the more general `affixation-function'.
-     (when-let (aff (completion-metadata-get metadata 'affixation-function))
+     (when-let* ((cat (completion-metadata-get metadata 'category))
+                 (annotator (marginalia--annotator cat)))
        (lambda (cand)
-         (let ((ann (caddar (funcall aff (list cand)))))
+         (let ((ann (caddar (marginalia--affixate metadata annotator (list cand)))))
            (and (not (equal ann "")) ann)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
