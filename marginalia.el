@@ -102,9 +102,7 @@ a relative age."
      (file marginalia-annotate-file)
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
-     (multi-category marginalia-annotate-multi-category)
-     ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
-     (consult-multi marginalia-annotate-multi-category)))
+     (multi-category marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.
 Each annotation function must return a string,
@@ -406,9 +404,7 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defun marginalia-annotate-multi-category (cand)
   "Annotate multi-category CAND with the buffer class."
-  (if-let* ((multi (or (get-text-property 0 'multi-category cand)
-                       ;; TODO: `consult-multi' has been obsoleted by `multi-category'. Remove!
-                       (get-text-property 0 'consult-multi cand)))
+  (if-let* ((multi (get-text-property 0 'multi-category cand))
             (annotate (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall annotate (cdr multi))
