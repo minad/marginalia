@@ -349,7 +349,7 @@ for performance profiling of the annotators.")
   (or marginalia--ellipsis
       (setq marginalia--ellipsis
             (cond
-             ((boundp 'truncate-string-ellipsis) truncate-string-ellipsis)
+             ((bound-and-true-p truncate-string-ellipsis))
              ((char-displayable-p ?…) "…")
              ("...")))))
 
