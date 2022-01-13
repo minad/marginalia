@@ -912,13 +912,11 @@ These annotations are skipped for remote paths."
 ;; Taken from `seconds-to-string'.
 (defun marginalia--time-relative (time)
   "Format TIME as a relative age."
-  (setq time (float-time (time-since time)))
-  (if (<= time 0)
-      "0 secs ago"
-    (let ((sts marginalia--time-relative) here)
-      (while (and (car (setq here (pop sts))) (<= (car here) time)))
-      (setq time (round time (caddr here)))
-      (format "%s %s%s ago" time (cadr here) (if (= time 1) "" "s")))))
+  (setq time (max 0 (float-time (time-since time))))
+  (let ((sts marginalia--time-relative) here)
+    (while (and (car (setq here (pop sts))) (<= (car here) time)))
+    (setq time (round time (caddr here)))
+    (format "%s %s%s ago" time (cadr here) (if (= time 1) "" "s"))))
 
 (defun marginalia--time-absolute (time)
   "Format TIME as an absolute age."
