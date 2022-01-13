@@ -998,11 +998,17 @@ These annotations are skipped for remote paths."
                    (let ((inhibit-message t) (message-log-max nil))
                      (insert-file-contents file nil 0 200))
                    (buffer-substring (point-min) (line-end-position)))))
-        (setq doc "")
-        (when (string-match "\\`;+.*?\\s-+-+\\s-+" str)
+        (cond
+         ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" str)
+          (setq doc (format "Generated package description from %s.el"
+                            (match-string 1 str))))
+         ((string-match "\\`;+\\s-*" str)
           (setq doc (substring str (match-end 0)))
-          (when (string-match "-\\*-" doc)
+          (when (string-match "\\`[^ \t]+\\s-+-+\\s-+" doc)
+            (setq doc (substring doc (match-end 0))))
+          (when (string-match "\\s-*-\\*-" doc)
             (setq doc (substring doc 0 (match-beginning 0)))))
+         (t (setq doc "")))
         ;; Add the documentation string to the cache
         (put-text-property 0 1 'marginalia--library-doc doc file)))
     doc))
