@@ -981,7 +981,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia--library-kill ()
   "Kill temporary buffer."
-  (kill-buffer " *marginalia library*"))
+  (ignore-errors (kill-buffer " *marginalia library*"))
+  (remove-hook 'minibuffer-exit-hook #'marginalia--library-kill))
 
 (defun marginalia--library-doc (file)
   "Return library documentation string for FILE."
