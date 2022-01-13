@@ -964,26 +964,39 @@ These annotations are skipped for remote paths."
     ;; annotator. Therefore we compute all the library paths first.
     (unless marginalia--library-cache
       (setq marginalia--library-cache (make-hash-table :test #'equal))
-      (dolist (dir load-path)
+      ;; Search in reverse because of shadowing
+      (dolist (dir (reverse load-path))
         (dolist (file (ignore-errors
                         (directory-files dir 'full
                                          "\\.el\\(?:\\.gz\\)?\\'")))
-          (let ((name (string-remove-suffix
-                       ".el" (string-remove-suffix
-                              ".gz" (file-name-nondirectory file)))))
-            (unless (gethash name marginalia--library-cache)
-              (puthash name file marginalia--library-cache))))))
+          (puthash (marginalia--library-name file)
+                   file marginalia--library-cache))))
     marginalia--library-cache))
+
+(defun marginalia--library-name (file)
+  "Get name of library FILE."
+  (string-remove-suffix
+   ".el" (string-remove-suffix
+          ".gz" (file-name-nondirectory file))))
+
+(defun marginalia--library-kill ()
+  "Kill temporary buffer."
+  (kill-buffer " *marginalia library*"))
 
 (defun marginalia--library-doc (file)
   "Return library documentation string for FILE."
   (let ((doc (get-text-property 0 'marginalia--library-doc file)))
     (unless doc
-      ;; Extract documentation string
-      (let ((str (with-temp-buffer
+      ;; Extract documentation string. We cannot use `lm-summary' here,
+      ;; since it decompresses the whole file, which is slower.
+      (let ((str (with-current-buffer
+                     (or (get-buffer " *marginalia library*")
+                         (progn
+                           (add-hook 'minibuffer-exit-hook #'marginalia--library-kill)
+                           (get-buffer-create " *marginalia library*")))
+                   (erase-buffer)
                    (let ((inhibit-message t) (message-log-max nil))
                      (insert-file-contents file nil 0 200))
-                   (goto-char (point-min))
                    (buffer-substring (point-min) (line-end-position)))))
         (setq doc "")
         (when (string-match "\\`;+.*?\\s-+-+\\s-+" str)
@@ -996,11 +1009,15 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-library (cand)
   "Annotate library CAND with documentation and path."
-  (when-let (file (gethash (string-remove-suffix
-                            ".el" (string-remove-suffix
-                                   ".gz" (file-name-nondirectory cand)))
-                           (marginalia--library-cache)))
+  (setq cand (marginalia--library-name cand))
+  (when-let (file (gethash cand (marginalia--library-cache)))
     (marginalia--fields
+     ;; Display if the corresponding feature is loaded.
+     ;; feature/=library file, but better than nothing.
+     ((when-let (sym (intern-soft cand))
+        (when (memq sym features)
+          (propertize "Loaded" 'face 'marginalia-on)))
+      :width 8)
      ((marginalia--library-doc file)
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (file-name-directory file))
