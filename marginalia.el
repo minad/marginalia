@@ -102,6 +102,7 @@ a relative age."
      (file marginalia-annotate-file)
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
+     (library marginalia-annotate-library)
      (multi-category marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.
@@ -951,6 +952,59 @@ These annotations are skipped for remote paths."
   ;; case yet, since there is no current project.
   (when-let (root (marginalia--project-root))
     (marginalia-annotate-file (expand-file-name cand root))))
+
+(defvar-local marginalia--library-cache nil)
+(defun marginalia--library-cache ()
+  "Return library cache hash table."
+  (with-current-buffer
+      (if-let (win (active-minibuffer-window))
+          (window-buffer win)
+        (current-buffer))
+    ;; `locate-file' and `locate-library' are bottlenecks for the
+    ;; annotator. Therefore we compute all the library paths first.
+    (unless marginalia--library-cache
+      (setq marginalia--library-cache (make-hash-table :test #'equal))
+      (dolist (dir load-path)
+        (dolist (file (ignore-errors
+                        (directory-files dir 'full
+                                         "\\.el\\(?:\\.gz\\)?\\'")))
+          (let ((name (string-remove-suffix
+                       ".el" (string-remove-suffix
+                              ".gz" (file-name-nondirectory file)))))
+            (unless (gethash name marginalia--library-cache)
+              (puthash name file marginalia--library-cache))))))
+    marginalia--library-cache))
+
+(defun marginalia--library-doc (file)
+  "Return library documentation string for FILE."
+  (let ((doc (get-text-property 0 'marginalia--library-doc file)))
+    (unless doc
+      ;; Extract documentation string
+      (let ((str (with-temp-buffer
+                   (let ((inhibit-message t) (message-log-max nil))
+                     (insert-file-contents file nil 0 200))
+                   (goto-char (point-min))
+                   (buffer-substring (point-min) (line-end-position)))))
+        (setq doc "")
+        (when (string-match "\\`;+.*?\\s-+-+\\s-+" str)
+          (setq doc (substring str (match-end 0)))
+          (when (string-match "-\\*-" doc)
+            (setq doc (substring doc 0 (match-beginning 0)))))
+        ;; Add the documentation string to the cache
+        (put-text-property 0 1 'marginalia--library-doc doc file)))
+    doc))
+
+(defun marginalia-annotate-library (cand)
+  "Annotate library CAND with documentation and path."
+  (when-let (file (gethash (string-remove-suffix
+                            ".el" (string-remove-suffix
+                                   ".gz" (file-name-nondirectory cand)))
+                           (marginalia--library-cache)))
+    (marginalia--fields
+     ((marginalia--library-doc file)
+      :truncate 1.0 :face 'marginalia-documentation)
+     ((abbreviate-file-name (file-name-directory file))
+      :truncate -0.5 :face 'marginalia-file-name))))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
