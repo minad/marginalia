@@ -1087,30 +1087,27 @@ Selectrum."
 
 (defun marginalia--align (cands)
   "Align annotations of CANDS according to `marginalia-align'."
-  (setq cands
-        (cl-loop for (cand . ann) in cands collect
-                 (let ((annw (1- (string-width ann))))
-                   (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
-                     (let ((suffix-width (string-width (substring ann 0 align))))
-                       (cl-decf annw suffix-width)
-                       (setq marginalia--candw-max
-                             (max marginalia--candw-max
-                                  (+ (string-width cand) suffix-width)))))
-                   `(,cand ,ann . ,annw))))
-  (setq marginalia--candw-max
-        (* (ceiling marginalia--candw-max
-                    marginalia--candw-step)
-           marginalia--candw-step))
-  (cl-loop for (cand ann . annw) in cands collect
+  (cl-loop for (cand . ann) in cands do
+           (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
+             (setq marginalia--candw-max
+                   (max marginalia--candw-max
+                        (+ (string-width cand)
+                           (string-width (substring ann 0 align)))))))
+  (setq marginalia--candw-max (* (ceiling marginalia--candw-max
+                                          marginalia--candw-step)
+                                 marginalia--candw-step))
+  (cl-loop for (cand . ann) in cands collect
            (progn
              (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
                (put-text-property
                 align (1+ align) 'display
                 `(space :align-to
                         ,(pcase-exhaustive marginalia-align
-                          ('center `(+ center ,marginalia-align-offset))
-                          ('left `(+ left ,marginalia-align-offset ,marginalia--candw-max))
-                          ('right `(+ right ,marginalia-align-offset ,(- annw)))))
+                           ('center `(+ center ,marginalia-align-offset))
+                           ('left `(+ left ,(+ marginalia-align-offset marginalia--candw-max)))
+                           ('right `(+ right ,(+ marginalia-align-offset 1
+                                                 (- (string-width (substring ann 0 align))
+                                                    (string-width ann)))))))
                 ann))
              (list cand "" ann))))
 
