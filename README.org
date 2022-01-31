@@ -31,7 +31,7 @@ The annotations are added based on the completion category. For example
 can cycle between more or less detailed annotators or even disable the annotator
 with command =marginalia-cycle=.
 
-#+html: <img src="https://github.com/minad/marginalia/blob/main/marginalia-mode.png?raw=true">
+#+html: <img src="https://github.com/minad/marginalia/blob/screenshots/marginalia-mode.png?raw=true">
 
 * Configuration
 
