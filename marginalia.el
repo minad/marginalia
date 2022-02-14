@@ -591,7 +591,7 @@ keybinding since CAND includes it."
           ((pred bool-vector-p) (propertize "#<bool-vector>" 'face 'marginalia-value))
           ((pred hash-table-p) (propertize "#<hash-table>" 'face 'marginalia-value))
           ((pred syntax-table-p) (propertize "#<syntax-table>" 'face 'marginalia-value))
-          ;; Emacs BUG: abbrev-table-p throws an error
+          ;; Emacs bug#53988: abbrev-table-p throws an error
           ((guard (ignore-errors (abbrev-table-p val))) (propertize "#<abbrev-table>" 'face 'marginalia-value))
           ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
           ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
