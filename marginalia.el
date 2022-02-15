@@ -103,6 +103,7 @@ a relative age."
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
      (library marginalia-annotate-library)
+     (tab marginalia-annotate-tab)
      (multi-category marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.
@@ -136,6 +137,7 @@ determine it."
     ("\\<coding system\\>" . coding-system)
     ("\\<minor mode\\>" . minor-mode)
     ("\\<kill-ring\\>" . kill-ring)
+    ("\\<tab by name\\>" . tab)
     ("\\<[Ll]ibrary\\>" . library))
   "Associates regexps to match against minibuffer prompts with categories."
   :type '(alist :key-type regexp :value-type symbol))
@@ -1027,6 +1029,24 @@ These annotations are skipped for remote paths."
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (file-name-directory file))
       :truncate -0.5 :face 'marginalia-file-name))))
+
+(defun marginalia-annotate-tab (cand)
+  (when-let* ((tab (seq-find (lambda (tab)
+                               (equal (alist-get 'name tab) cand))
+                             (frame-parameter nil 'tabs)))
+              (ws (alist-get 'ws tab))
+              ;; window-state-buffers requires Emacs 27
+              (bufs (and (fboundp 'window-state-buffers)
+                         (window-state-buffers ws))))
+    ;; NOTE: When the buffer key is present in the window state
+    ;; it is added in front of the window buffer list and gets duplicated.
+    (when (cadr (assq 'buffer ws)) (pop bufs))
+    (marginalia--fields
+     ((if (cdr bufs)
+          (format "%d windows" (length bufs))
+        "1 window ")
+      :face 'marginalia-size)
+     ((string-join bufs " ") :face 'marginalia-documentation))))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
