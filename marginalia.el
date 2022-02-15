@@ -1033,22 +1033,25 @@ These annotations are skipped for remote paths."
 (defun marginalia-annotate-tab (cand)
   "Annotate named tab CAND with tab index, window and buffer information."
   (when-let* ((tabs (funcall tab-bar-tabs-function))
-              (tab (seq-find (lambda (tab) (equal (alist-get 'name tab) cand)) tabs))
-              (ws (alist-get 'ws tab))
-              ;; window-state-buffers requires Emacs 27
-              (bufs (and (fboundp 'window-state-buffers)
-                         (window-state-buffers ws))))
-    ;; NOTE: When the buffer key is present in the window state
-    ;; it is added in front of the window buffer list and gets duplicated.
-    (when (cadr (assq 'buffer ws)) (pop bufs))
-    (concat
-     (format #(" (%s)" 0 5 (face marginalia-key)) (seq-position tabs tab #'eq))
-     (marginalia--fields
-      ((if (cdr bufs)
-           (format "%d windows" (length bufs))
-         "1 window ")
-       :face 'marginalia-size)
-      ((string-join bufs " ") :face 'marginalia-documentation)))))
+              (tab (seq-find (lambda (tab) (equal (alist-get 'name tab) cand)) tabs)))
+    (let* ((ws (alist-get 'ws tab))
+           ;; window-state-buffers requires Emacs 27
+           (bufs (and (fboundp 'window-state-buffers)
+                      (window-state-buffers ws))))
+      ;; NOTE: When the buffer key is present in the window state
+      ;; it is added in front of the window buffer list and gets duplicated.
+      (when (cadr (assq 'buffer ws)) (pop bufs))
+      (concat
+       (format #(" (%s)" 0 5 (face marginalia-key)) (seq-position tabs tab #'eq))
+       (marginalia--fields
+        ((if (cdr bufs)
+             (format "%d windows" (length bufs))
+           "1 window ")
+         :face 'marginalia-size)
+        ((if (memq 'current-tab tab)
+             "*current tab*"
+           (string-join bufs " "))
+         :face 'marginalia-documentation))))))
 
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
