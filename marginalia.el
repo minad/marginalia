@@ -1033,8 +1033,11 @@ These annotations are skipped for remote paths."
 (defun marginalia-annotate-tab (cand)
   "Annotate named tab CAND with tab index, window and buffer information."
   (when-let* ((tabs (funcall tab-bar-tabs-function))
-              (tab (seq-find (lambda (tab) (equal (alist-get 'name tab) cand)) tabs)))
-    (let* ((ws (alist-get 'ws tab))
+              (index (seq-position
+                      tabs nil
+                      (lambda (tab _) (equal (alist-get 'name tab) cand)))))
+    (let* ((tab (nth index tabs))
+           (ws (alist-get 'ws tab))
            ;; window-state-buffers requires Emacs 27
            (bufs (and (fboundp 'window-state-buffers)
                       (window-state-buffers ws))))
@@ -1042,7 +1045,7 @@ These annotations are skipped for remote paths."
       ;; it is added in front of the window buffer list and gets duplicated.
       (when (cadr (assq 'buffer ws)) (pop bufs))
       (concat
-       (format #(" (%s)" 0 5 (face marginalia-key)) (seq-position tabs tab #'eq))
+       (format #(" (%s)" 0 5 (face marginalia-key)) index)
        (marginalia--fields
         ((if (cdr bufs)
              (format "%d windows" (length bufs))
