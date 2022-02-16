@@ -975,9 +975,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia--library-name (file)
   "Get name of library FILE."
-  (string-remove-suffix
-   ".el" (string-remove-suffix
-          ".gz" (file-name-nondirectory file))))
+  (replace-regexp-in-string "\\(\\.gz\\|\\.elc?\\)+\\'" ""
+                            (file-name-nondirectory file)))
 
 (defun marginalia--library-kill ()
   "Kill temporary buffer."
