@@ -963,7 +963,7 @@ These annotations are skipped for remote paths."
   (if (file-name-absolute-p cand)
       (marginalia-annotate-file cand)
     (when-let (root (marginalia--project-root))
-      (marginalia-annotate-file (expand-file-name cand root)))))o
+      (marginalia-annotate-file (expand-file-name cand root)))))
 
 (defvar-local marginalia--library-cache nil)
 (defun marginalia--library-cache ()
