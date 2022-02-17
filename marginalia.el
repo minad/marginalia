@@ -937,21 +937,33 @@ These annotations are skipped for remote paths."
       (marginalia--time-relative time)
     (marginalia--time-absolute time)))
 
-(defmacro marginalia--project-root ()
+(defvar-local marginalia--project-root 'unset)
+(defun marginalia--project-root ()
   "Return project root."
-  (require 'project)
-  `(when-let (proj (project-current))
-     ,(if (fboundp 'project-root)
-          '(project-root proj)
-        '(car (project-roots proj)))))
+  (with-current-buffer
+      (if-let (win (active-minibuffer-window))
+          (window-buffer win)
+        (current-buffer))
+    (when (eq marginalia--project-root 'unset)
+      (setq marginalia--project-root
+            (or (let ((prompt (minibuffer-prompt)))
+                  (and (string-match
+                        "\\`\\(?:Dired\\|Find file\\) in \\(.*\\): \\'"
+                        prompt)
+                       (match-string 1 prompt)))
+                (when-let (proj (project-current))
+                  (cond
+                   ((fboundp 'project-root) (project-root proj))
+                   ((fboundp 'project-roots) (car (project-roots proj))))))))
+    marginalia--project-root))
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
-  ;; TODO project-find-file can be called from outside all projects in
-  ;; which case it prompts for a project first; we don't support that
-  ;; case yet, since there is no current project.
-  (when-let (root (marginalia--project-root))
-    (marginalia-annotate-file (expand-file-name cand root))))
+  ;; Absolute project directories also report project-file category
+  (if (file-name-absolute-p cand)
+      (marginalia-annotate-file cand)
+    (when-let (root (marginalia--project-root))
+      (marginalia-annotate-file (expand-file-name cand root)))))o
 
 (defvar-local marginalia--library-cache nil)
 (defun marginalia--library-cache ()
