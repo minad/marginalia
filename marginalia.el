@@ -514,8 +514,8 @@ t cl-type"
                                  advertised-signature-table t)))
        tmp)
       ((setq tmp (help-split-fundoc
-		  (ignore-errors (documentation sym t))
-		  sym))
+                  (ignore-errors (documentation sym t))
+                  sym))
        (substitute-command-keys (car tmp)))
       ((setq tmp (help-function-arglist sym))
        (and
@@ -990,39 +990,29 @@ These annotations are skipped for remote paths."
   (replace-regexp-in-string "\\(\\.gz\\|\\.elc?\\)+\\'" ""
                             (file-name-nondirectory file)))
 
-(defun marginalia--library-kill ()
-  "Kill temporary buffer."
-  (ignore-errors (kill-buffer " *marginalia library*"))
-  (remove-hook 'minibuffer-exit-hook #'marginalia--library-kill))
-
 (defun marginalia--library-doc (file)
   "Return library documentation string for FILE."
   (let ((doc (get-text-property 0 'marginalia--library-doc file)))
     (unless doc
       ;; Extract documentation string. We cannot use `lm-summary' here,
       ;; since it decompresses the whole file, which is slower.
-      (let ((str (with-current-buffer
-                     (or (get-buffer " *marginalia library*")
-                         (progn
-                           (add-hook 'minibuffer-exit-hook #'marginalia--library-kill)
-                           (get-buffer-create " *marginalia library*")))
-                   (erase-buffer)
-                   (let ((inhibit-message t) (message-log-max nil))
-                     (insert-file-contents file nil 0 200))
-                   (buffer-substring (point-min) (line-end-position)))))
-        (cond
-         ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" str)
-          (setq doc (format "Generated package description from %s.el"
-                            (match-string 1 str))))
-         ((string-match "\\`;+\\s-*" str)
-          (setq doc (substring str (match-end 0)))
-          (when (string-match "\\`[^ \t]+\\s-+-+\\s-+" doc)
-            (setq doc (substring doc (match-end 0))))
-          (when (string-match "\\s-*-\\*-" doc)
-            (setq doc (substring doc 0 (match-beginning 0)))))
-         (t (setq doc "")))
-        ;; Add the documentation string to the cache
-        (put-text-property 0 1 'marginalia--library-doc doc file)))
+      (setq doc (or (ignore-errors
+                      (shell-command-to-string
+                       (format "zcat -f %s | head -n1" (shell-quote-argument file))))
+                 ""))
+      (cond
+       ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
+        (setq doc (format "Generated package description from %s.el"
+                          (match-string 1 doc))))
+       ((string-match "\\`;+\\s-*" doc)
+        (setq doc (substring doc (match-end 0)))
+        (when (string-match "\\`[^ \t]+\\s-+-+\\s-+" doc)
+          (setq doc (substring doc (match-end 0))))
+        (when (string-match "\\s-*-\\*-" doc)
+          (setq doc (substring doc 0 (match-beginning 0)))))
+       (t (setq doc "")))
+      ;; Add the documentation string to the cache
+      (put-text-property 0 1 'marginalia--library-doc doc file))
     doc))
 
 (defun marginalia-annotate-library (cand)
