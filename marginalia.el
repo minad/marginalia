@@ -704,7 +704,7 @@ keybinding since CAND includes it."
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
-  (when-let* ((pkg-alist (and (bound-and-true-p package-alist) package-alist))
+  (when-let* ((pkg-alist (bound-and-true-p package-alist))
               (pkg (intern-soft (replace-regexp-in-string "-[[:digit:]\\.-]+\\'" "" cand)))
               ;; taken from `describe-package-1'
               (desc (or (car (alist-get pkg pkg-alist))
@@ -737,7 +737,7 @@ The string is transformed according to `marginalia-bookmark-type-transformers'."
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
-  (when-let ((bm (assoc cand bookmark-alist)))
+  (when-let ((bm (assoc cand (bound-and-true-p bookmark-alist))))
     (let ((front (bookmark-get-front-context-string bm)))
       (marginalia--fields
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
