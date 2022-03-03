@@ -35,8 +35,8 @@ with command =marginalia-cycle=.
 
 * Configuration
 
-It is recommended to use Marginalia together with either the [[https://github.com/raxod502/selectrum][Selectrum]], [[https://github.com/minad/vertico][Vertico]]
-or the [[https://github.com/oantolin/icomplete-vertical][Icomplete-vertical]] completion system. Furthermore Marginalia can be
+It is recommended to use Marginalia together with either the [[https://github.com/minad/vertico][Vertico]], [[https://github.com/protesilaos/mct][Mct]],
+[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Icomplete.html][Icomplete]] or the [[https://github.com/raxod502/selectrum][Selectrum]] completion system. Furthermore Marginalia can be
 combined with [[https://github.com/oantolin/embark][Embark]] for action support and [[https://github.com/minad/consult][Consult]], which provides many useful
 commands.
 
