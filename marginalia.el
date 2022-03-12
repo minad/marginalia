@@ -65,13 +65,6 @@ This value is adjusted depending on the `window-width'."
   "Additional offset added to the alignment."
   :type 'integer)
 
-(defvar marginalia-separator-threshold nil)
-(defvar marginalia-margin-min nil)
-(defvar marginalia-margin-threshold nil)
-(make-obsolete-variable 'marginalia-separator-threshold "Deprecated in favor of `marginalia-separator'." "0.11")
-(make-obsolete-variable 'marginalia-margin-min "Deprecated in favor of `marginalia-align'." "0.11")
-(make-obsolete-variable 'marginalia-margin-threshold "Deprecated in favor of `marginalia-threshold'." "0.11")
-
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
 
