@@ -466,7 +466,7 @@ t cl-type"
         ((get s 'side-effect-free) "s"))
        (cond
         ((commandp s) (if (get s 'interactive-only) "C" "c"))
-        ((cl--generic s) "g")
+        ((get s 'cl--generic) "g")
         ((macrop (symbol-function s)) "m")
         ((special-form-p (symbol-function s)) "M")
         (t "f"))
