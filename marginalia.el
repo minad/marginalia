@@ -440,6 +440,7 @@ c command
 C interactive-only command
 m macro
 M special-form
+g cl-generic
 p pure
 s side-effect-free
 @ autoloaded
@@ -465,6 +466,7 @@ t cl-type"
         ((get s 'side-effect-free) "s"))
        (cond
         ((commandp s) (if (get s 'interactive-only) "C" "c"))
+        ((cl--generic s) "g")
         ((macrop (symbol-function s)) "m")
         ((special-form-p (symbol-function s)) "M")
         (t "f"))
