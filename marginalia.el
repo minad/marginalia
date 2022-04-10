@@ -42,9 +42,6 @@
   :group 'minibuffer
   :prefix "marginalia-")
 
-(define-obsolete-variable-alias 'marginalia-truncate-width
-  'marginalia-field-width "0.11")
-
 (defcustom marginalia-field-width 80
   "Maximum truncation width of annotation fields.
 
