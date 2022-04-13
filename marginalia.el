@@ -133,7 +133,7 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-censor-variables
-  '("pass")
+  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce")
   "The values of variables matching any of these regular expressions is not shown."
   :type '(repeat (choice symbol regexp)))
 
