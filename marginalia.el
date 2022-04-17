@@ -90,6 +90,7 @@ a relative age."
      (imenu marginalia-annotate-imenu)
      (bookmark marginalia-annotate-bookmark)
      (file marginalia-annotate-file)
+     (project-root marginalia-annotate-file)
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
      (library marginalia-annotate-library)
@@ -949,11 +950,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-project-file (cand)
   "Annotate file CAND with its size, modification time and other attributes."
-  ;; Absolute project directories also report project-file category
-  (if (file-name-absolute-p cand)
-      (marginalia-annotate-file cand)
-    (when-let (root (marginalia--project-root))
-      (marginalia-annotate-file (expand-file-name cand root)))))
+  (when-let (root (marginalia--project-root))
+    (marginalia-annotate-file (expand-file-name cand root))))
 
 (defvar-local marginalia--library-cache nil)
 (defun marginalia--library-cache ()
@@ -1054,10 +1052,14 @@ These annotations are skipped for remote paths."
   "Return original category reported by completion metadata."
   ;; NOTE: Use `alist-get' instead of `completion-metadata-get' to bypass our
   ;; `marginalia--completion-metadata-get' advice!
-  (when-let (cat (alist-get 'category marginalia--metadata))
+  (pcase (alist-get 'category marginalia--metadata)
     ;; Ignore Emacs 28 symbol-help category in order to ensure that the
     ;; categories are refined to our categories function and variable.
-    (and (not (eq cat 'symbol-help)) cat)))
+    ('symbol-help nil)
+    ;; Refine the project-file category to project-root
+    ((and 'project-file (guard (equal "Select project: " (minibuffer-prompt))))
+     'project-root)
+    (cat cat)))
 
 (defun marginalia-classify-symbol ()
   "Determine if currently completing symbols."
