@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 #+export_file_name: marginalia.texi
-#+texinfo_dir_category: Emacs
+#+texinfo_dir_category: Emacs misc features
 #+texinfo_dir_title: Marginalia: (marginalia).
 #+texinfo_dir_desc: Marginalia in the minibuffer
 
