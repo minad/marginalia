@@ -394,7 +394,7 @@ FACE is the name of the face, with which the field should be propertized."
 (defun marginalia--annotator (cat)
   "Return annotation function for category CAT."
   (pcase (car (alist-get cat marginalia-annotator-registry))
-    ('none (lambda (_) nil))
+    ('none #'ignore)
     ('builtin nil)
     (fun fun)))
 
