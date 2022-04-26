@@ -988,7 +988,10 @@ These annotations are skipped for remote paths."
       ;; since it decompresses the whole file, which is slower.
       (setq doc (or (ignore-errors
                       (shell-command-to-string
-                       (format "zcat -f %s | head -n1" (shell-quote-argument file))))
+                       (format (if (string-suffix-p ".gz" file)
+                                   "gzip -c -q -d %s | head -n1"
+                                 "head -n1 %s")
+                               (shell-quote-argument file))))
                  ""))
       (cond
        ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
