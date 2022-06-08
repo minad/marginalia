@@ -600,7 +600,7 @@ keybinding since CAND includes it."
           (_ (let ((print-escape-newlines t)
                    (print-escape-control-characters t)
                    ;;(print-escape-multibyte t)
-                   (print-level 10)
+                   (print-level 3)
                    (print-length marginalia-field-width))
                (propertize
                 (replace-regexp-in-string
