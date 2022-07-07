@@ -992,11 +992,13 @@ These annotations are skipped for remote paths."
       ;; Extract documentation string. We cannot use `lm-summary' here,
       ;; since it decompresses the whole file, which is slower.
       (setq doc (or (ignore-errors
-                      (shell-command-to-string
-                       (format (if (string-suffix-p ".gz" file)
-                                   "gzip -c -q -d %s | head -n1"
-                                 "head -n1 %s")
-                               (shell-quote-argument file))))
+                      (let ((shell-file-name "sh")
+                            (shell-command-switch "-c"))
+                        (shell-command-to-string
+                         (format (if (string-suffix-p ".gz" file)
+                                     "gzip -c -q -d %s | head -n1"
+                                   "head -n1 %s")
+                                 (shell-quote-argument file)))))
                  ""))
       (cond
        ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
