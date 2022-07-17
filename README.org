@@ -107,7 +107,7 @@ include the word "face".
 
 The =marginalia-classify-by-command-name= classifier uses the alist
 =marginalia-command-categories= to specify the completion category based on the
-command name. This is particularily useful if the prompt classifier yields a
+command name. This is particularly useful if the prompt classifier yields a
 false positive.
 
 Completion categories are also important for [[https://github.com/oantolin/embark][Embark]], which associates actions
@@ -131,7 +131,7 @@ Here's an example of a basic face annotator:
               (propertize "The quick brown fox jumps over the lazy dog" 'face sym))))
 #+end_src
 
-Look at Marginalia's various annotators for examples of formating annotations.
+Look at Marginalia's various annotators for examples of formatting annotations.
 In particular, the helper function =marginalia--fields= can be used to format
 information into columns.
 
