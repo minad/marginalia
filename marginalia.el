@@ -426,8 +426,8 @@ FACE is the name of the face, with which the field should be propertized."
   (let ((flist (indirect-function fun)))
     (advice--p (if (eq 'macro (car-safe flist)) (cdr flist) flist))))
 
-;; Symbol class characters from Emacs 28 `help--symbol-completion-table-affixation'
-;; ! and * are our additions
+;; Symbol class characters from Emacs 28 `help--symbol-class'
+;; ! and & are our additions
 (defun marginalia--symbol-class (s)
   "Return symbol class characters for symbol S.
 
@@ -443,12 +443,14 @@ s side-effect-free
 @ autoloaded
 ! advised
 - obsolete
+& alias
 
 Variable:
 u custom (U modified compared to global value)
 v variable
 l local (L modified compared to default value)
 - obsolete
+& alias
 
 Other:
 a face
@@ -469,7 +471,8 @@ t cl-type"
         (t "f"))
        (and (autoloadp (symbol-function s)) "@")
        (and (marginalia--advised s) "!")
-       (and (get s 'byte-obsolete-info) "-")))
+       (and (get s 'byte-obsolete-info) "-")
+       (and (caddr (help-fns--analyze-function s)) "&")))
     (when (boundp s)
       (concat
        (when (local-variable-if-set-p s)
@@ -484,7 +487,8 @@ t cl-type"
                        (eval (car (get s 'standard-value))))))
                "U" "u")
          "v")
-       (and (get s 'byte-obsolete-variable) "-")))
+       (and (get s 'byte-obsolete-variable) "-")
+       (and (not (eq s (condition-case nil (indirect-variable s) (error s)))) "&")))
     (and (facep s) "a")
     (and (fboundp 'cl-find-class) (cl-find-class s) "t"))))
 
