@@ -709,10 +709,10 @@ keybinding since CAND includes it."
                             (package--from-builtin built-in)
                           (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
-     ((package-version-join (package-desc-version desc)) :width 16 :face 'marginalia-version)
+     ((package-version-join (package-desc-version desc)) :truncate 16 :face 'marginalia-version)
      ((cond
        ((package-desc-archive desc) (propertize (package-desc-archive desc) 'face 'marginalia-archive))
-       (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :width 10)
+       (t (propertize (or (package-desc-status desc) "orphan") 'face 'marginalia-installed))) :truncate 12)
      ((package-desc-summary desc) :truncate 1.0 :face 'marginalia-documentation))))
 
 (defun marginalia--bookmark-type (bm)
