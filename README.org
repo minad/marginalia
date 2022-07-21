@@ -12,19 +12,15 @@
 #+html: <a href="https://melpa.org/#/marginalia"><img alt="MELPA" src="https://melpa.org/packages/marginalia-badge.svg"/></a>
 #+html: <a href="https://stable.melpa.org/#/marginalia"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/marginalia-badge.svg"/></a>
 
-* Introduction
-
 #+html: <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Marginalia_%285095211566%29.jpg" align="right" width="30%">
 
-This package provides =marginalia-mode= which adds marginalia to the
-minibuffer completions.
-[[https://en.wikipedia.org/wiki/Marginalia][Marginalia]] are marks or
-annotations placed at the margin of the page of a book or in this case
-helpful colorful annotations placed at the margin of the minibuffer for
-your completion candidates. Marginalia can only add annotations to be
-displayed with the completion candidates. It cannot modify the
-appearance of the candidates themselves, which are shown as supplied by
-the original commands.
+This package provides =marginalia-mode= which adds marginalia to the minibuffer
+completions. [[https://en.wikipedia.org/wiki/Marginalia][Marginalia]] are marks or annotations placed at the margin of the
+page of a book or in this case helpful colorful annotations placed at the margin
+of the minibuffer for your completion candidates. Marginalia can only add
+annotations to be displayed with the completion candidates. It cannot modify the
+appearance of the candidates themselves, which are shown as supplied by the
+original commands.
 
 The annotations are added based on the completion category. For example
 =find-file= reports the =file= category and =M-x= reports the =command= category. You
@@ -32,6 +28,8 @@ can cycle between more or less detailed annotators or even disable the annotator
 with command =marginalia-cycle=.
 
 #+html: <img src="https://github.com/minad/marginalia/blob/screenshots/marginalia-mode.png?raw=true">
+
+#+toc: headlines 8
 
 * Configuration
 
