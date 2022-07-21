@@ -471,8 +471,8 @@ t cl-type"
         (t "f"))
        (and (autoloadp (symbol-function s)) "@")
        (and (marginalia--advised s) "!")
-       (and (get s 'byte-obsolete-info) "-")
-       (and (caddr (help-fns--analyze-function s)) "&")))
+       (and (symbolp (symbol-function s)) "&")
+       (and (get s 'byte-obsolete-info) "-")))
     (when (boundp s)
       (concat
        (when (local-variable-if-set-p s)
@@ -487,8 +487,8 @@ t cl-type"
                        (eval (car (get s 'standard-value))))))
                "U" "u")
          "v")
-       (and (get s 'byte-obsolete-variable) "-")
-       (and (not (eq s (condition-case nil (indirect-variable s) (error s)))) "&")))
+       (ignore-errors (and (not (eq (indirect-variable s) s)) "&"))
+       (and (get s 'byte-obsolete-variable) "-")))
     (and (facep s) "a")
     (and (fboundp 'cl-find-class) (cl-find-class s) "t"))))
 
