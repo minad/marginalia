@@ -18,9 +18,9 @@ This package provides =marginalia-mode= which adds marginalia to the minibuffer
 completions. [[https://en.wikipedia.org/wiki/Marginalia][Marginalia]] are marks or annotations placed at the margin of the
 page of a book or in this case helpful colorful annotations placed at the margin
 of the minibuffer for your completion candidates. Marginalia can only add
-annotations to be displayed with the completion candidates. It cannot modify the
-appearance of the candidates themselves, which are shown as supplied by the
-original commands.
+annotations to the completion candidates. It cannot modify the appearance of the
+candidates themselves, which are shown unaltered as supplied by the original
+command.
 
 The annotations are added based on the completion category. For example
 =find-file= reports the =file= category and =M-x= reports the =command= category. You
@@ -39,9 +39,9 @@ combined with [[https://github.com/oantolin/embark][Embark]] for action support 
 commands.
 
 #+begin_src emacs-lisp
-;; Enable richer annotations using the Marginalia package
+;; Enable rich annotations using the Marginalia package
 (use-package marginalia
-  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
+  ;; Either bind `marginalia-cycle' globally or only in the minibuffer
   :bind (("M-A" . marginalia-cycle)
          :map minibuffer-local-map
          ("M-A" . marginalia-cycle))
@@ -60,8 +60,8 @@ In general, to learn more about what different annotations mean, a good starting
 point is to look at ~marginalia-annotator-registry~, and follow up to the
 annotation function of the category you are interested in.
 
-For example the annotations for elisp symbols include their symbol class - v for
-variable, f for function, c for command, etc. For more information on what the
+For example the annotations for elisp symbols include their symbol class - =v= for
+variable, =f= for function, =c= for command, etc. For more information on what the
 different classifications mean, see the docstring of ~marginalia--symbol-class~.
 
 * Adding custom annotators or classifiers
@@ -73,13 +73,13 @@ user facing package and is not intended to be used as a library. Therefore
 Marginalia does not expose library functions as part of its public API. If you
 add your own completion commands to your package we recommend to specify an
 =annotation-function= or an =affixation-function=, avoiding the Marginalia
-dependency this way. The =annotation-function= is documented in the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]].
-There is an exception to our recommendation: If you want to implement
-annotations for an existing package =hypothetical.el=, which does not have
-annotations and where annotations cannot be added, then the creation of a
-=marginalia-hypothetical.el= package is a good idea, since Marginalia provides the
-facilities to enhance existing commands from the outside. If you have questions
-feel free to ask on the Marginalia issue tracker!
+dependency this way. The =annotation-function= and =affixation-function= are
+documented in the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]]. There is an exception to our recommendation: If
+you want to implement annotations for an existing package =hypothetic.el=, which
+does not have annotations and where annotations cannot be added, then the
+creation of a =marginalia-hypothetic.el= package is a good idea, since Marginalia
+provides the facilities to enhance existing commands from the outside. If you
+have questions feel free to ask on the Marginalia issue tracker!
 
 Commands that support minibuffer completion use a completion table of all the
 available candidates. Candidates are associated with a *category* such as =command=,
