@@ -1092,7 +1092,7 @@ looking for a regexp that matches the prompt."
              when (string-match-p regexp prompt)
              return category)))
 
-(defun marginalia--cache-reset ()
+(defun marginalia--cache-reset (&rest _)
   "Reset the cache."
   (setq marginalia--cache (and marginalia--cache (> marginalia--cache-size 0)
                                (cons nil (make-hash-table :test #'equal
