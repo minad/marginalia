@@ -1050,13 +1050,16 @@ These annotations are skipped for remote paths."
       (concat
        (format #(" (%s)" 0 5 (face marginalia-key)) index)
        (marginalia--fields
-        ((format "win:%s" (length bufs))
+        ((format "win:%s"
+                 (if (eq (car tab) 'current-tab)
+                     (length (window-list nil 'no-minibuf))
+                   (length bufs)))
          :face 'marginalia-size)
         ((format "group:%s" (or (alist-get 'group tab) 'none))
          :face 'marginalia-type
-         :width 30)
-        ((if (memq 'current-tab tab)
-             "*current tab*"
+         :truncate 20)
+        ((if (eq (car tab) 'current-tab)
+             "(current tab)"
            (string-join bufs " "))
          :face 'marginalia-documentation))))))
 
