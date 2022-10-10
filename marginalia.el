@@ -306,8 +306,6 @@ determine it."
 (declare-function color-rgb-to-hsl "color")
 (declare-function color-hsl-to-rgb "color")
 
-(declare-function selectrum--get-full "ext:selectrum")
-
 ;;;; Marginalia mode
 
 (defvar marginalia--candw-step 10
@@ -814,11 +812,9 @@ example, during file name completion the candidates are one path
 component of a full file path."
   (if-let (win (active-minibuffer-window))
       (with-current-buffer (window-buffer win)
-        (if (bound-and-true-p selectrum-is-active)
-            (selectrum--get-full cand)
-          (concat (substring (minibuffer-contents-no-properties)
-                             0 marginalia--base-position)
-                  cand)))
+        (concat (substring (minibuffer-contents-no-properties)
+                           0 marginalia--base-position)
+                cand))
     ;; no minibuffer is active, trust that cand already conveys all
     ;; necessary information (there's not much else we can do)
     cand))
@@ -1104,9 +1100,9 @@ looking for a regexp that matches the prompt."
 
 (defun marginalia--cached (cache fun key)
   "Cached application of function FUN with KEY.
-The CACHE keeps around the last `marginalia--cache-size' computed annotations.
-The cache is mainly useful when scrolling in completion UIs like Vertico or
-Selectrum."
+The CACHE keeps around the last `marginalia--cache-size' computed
+annotations. The cache is mainly useful when scrolling in
+completion UIs like Vertico or Icomplete."
   (if cache
       (let ((ht (cdr cache)))
         (or (gethash key ht)
