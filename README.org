@@ -7,8 +7,8 @@
 #+texinfo_dir_desc: Marginalia in the minibuffer
 
 #+html: <a href="https://www.gnu.org/software/emacs/"><img alt="GNU Emacs" src="https://github.com/minad/corfu/blob/screenshots/emacs.svg?raw=true"/></a>
-#+html: <a href="http://elpa.gnu.org/packages/marginalia.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/marginalia.svg"/></a>
-#+html: <a href="http://elpa.gnu.org/devel/marginalia.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/marginalia.svg"/></a>
+#+html: <a href="https://elpa.gnu.org/packages/marginalia.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/marginalia.svg"/></a>
+#+html: <a href="https://elpa.gnu.org/devel/marginalia.html"><img alt="GNU-devel ELPA" src="https://elpa.gnu.org/devel/marginalia.svg"/></a>
 #+html: <a href="https://melpa.org/#/marginalia"><img alt="MELPA" src="https://melpa.org/packages/marginalia-badge.svg"/></a>
 #+html: <a href="https://stable.melpa.org/#/marginalia"><img alt="MELPA Stable" src="https://stable.melpa.org/packages/marginalia-badge.svg"/></a>
 
@@ -202,5 +202,5 @@ can delete all file annotators from the registry.
 
 * Contributions
 
-Since this package is part of [[http://elpa.gnu.org/packages/marginalia.html][GNU ELPA]] contributions require a copyright
+Since this package is part of [[https://elpa.gnu.org/packages/marginalia.html][GNU ELPA]] contributions require a copyright
 assignment to the FSF.
