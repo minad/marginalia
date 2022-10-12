@@ -424,10 +424,11 @@ FACE is the name of the face, with which the field should be propertized."
   (let ((flist (indirect-function fun)))
     (advice--p (if (eq 'macro (car-safe flist)) (cdr flist) flist))))
 
-;; Symbol class characters from Emacs 28 `help--symbol-class'
-;; ! and & are our additions
 (defun marginalia--symbol-class (s)
   "Return symbol class characters for symbol S.
+
+This function is an extension of `help--symbol-class'. It returns
+more fine-grained and more detailled symbol information.
 
 Function:
 f function
