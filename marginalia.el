@@ -287,7 +287,6 @@ determine it."
 
 ;;;; Pre-declarations for external packages
 
-(defvar bookmark-alist)
 (declare-function bookmark-get-handler "bookmark")
 (declare-function bookmark-get-filename "bookmark")
 (declare-function bookmark-get-front-context-string "bookmark")
