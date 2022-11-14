@@ -67,18 +67,19 @@ different classifications mean, see the docstring of ~marginalia--symbol-class~.
 
 *IMPORTANT NOTICE FOR PACKAGE AUTHORS*: The intention of the Marginalia package is
 to give the user means to overwrite completion categories and to add custom
-annotators for existing commands in their user configuration. Marginalia is a
-user facing package and is not intended to be used as a library. Therefore
+annotators for existing commands in their user configuration. *Marginalia is a
+user facing package and is not intended to be used as a library*. Therefore
 Marginalia does not expose library functions as part of its public API. If you
 add your own completion commands to your package we recommend to specify an
 =annotation-function= or an =affixation-function=, avoiding the Marginalia
 dependency this way. The =annotation-function= and =affixation-function= are
-documented in the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]]. There is an exception to our recommendation: If
-you want to implement annotations for an existing package =hypothetic.el=, which
-does not have annotations and where annotations cannot be added, then the
-creation of a =marginalia-hypothetic.el= package is a good idea, since Marginalia
-provides the facilities to enhance existing commands from the outside. If you
-have questions feel free to ask on the Marginalia issue tracker!
+documented in the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Completion.html][Elisp manual]]. If you use =consult--read=, you can specify an
+=:annotate= keyword argument. There is an exception to our recommendation: If you
+want to implement annotations for an existing package =hypothetic.el=, which does
+not have annotations and where annotations cannot be added, then the creation of
+a =marginalia-hypothetic.el= package is a good idea, since Marginalia provides the
+facilities to enhance existing commands from the outside. If you have questions
+feel free to ask on the Marginalia issue tracker.
 
 Commands that support minibuffer completion use a completion table of all the
 available candidates. Candidates are associated with a *category* such as =command=,
