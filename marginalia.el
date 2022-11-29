@@ -138,7 +138,8 @@ determine it."
   :type '(repeat (choice symbol regexp)))
 
 (defcustom marginalia-command-categories
-  '((imenu . imenu))
+  '((imenu . imenu)
+    (recentf-open . file))
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
