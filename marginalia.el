@@ -143,16 +143,6 @@ determine it."
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
-(defcustom marginalia-bookmark-type-transformers
-  (let ((words (regexp-opt '("handle" "handler" "jump" "bookmark"))))
-    `((,(format "-+%s-+" words) . "-")
-      (,(format "\\`%s-+" words) . "")
-      (,(format "-%s\\'" words) . "")
-      ("\\`default\\'" . "File")
-      (".*" . ,#'capitalize)))
-  "List of bookmark type transformers."
-  :type '(alist :key-type regexp :value-type (choice string function)))
-
 (defgroup marginalia-faces nil
   "Faces used by `marginalia-mode'."
   :group 'marginalia
@@ -307,6 +297,17 @@ determine it."
 (declare-function color-hsl-to-rgb "color")
 
 ;;;; Marginalia mode
+
+(defvar marginalia--bookmark-type-transforms
+  (let ((words (regexp-opt '("handle" "handler" "jump" "bookmark"))))
+    `((,(format "-+%s-+" words) . "-")
+      (,(format "\\`%s-+" words) . "")
+      (,(format "-%s\\'" words) . "")
+      ("\\`default\\'" . "File")
+      (".*" . ,#'capitalize)))
+  "List of bookmark type transformers.
+Relying on this mechanism is discouraged in favor of the
+`bookmark-handler-type' property.")
 
 (defvar marginalia--candw-step 10
   "Round candidate width.")
@@ -726,20 +727,22 @@ keybinding since CAND includes it."
 
 (defun marginalia--bookmark-type (bm)
   "Return bookmark type string of BM.
-
-The string is transformed according to `marginalia-bookmark-type-transformers'."
+The string is transformed according to `marginalia--bookmark-type-transforms'."
   (let ((handler (or (bookmark-get-handler bm) 'bookmark-default-handler)))
-    ;; Some libraries use lambda handlers instead of symbols. For
-    ;; example the function `xwidget-webkit-bookmark-make-record' is
-    ;; affected. I consider this bad style since then the lambda is
-    ;; persisted.
-    (when-let (str (and (symbolp handler) (symbol-name handler)))
-      (dolist (transformer marginalia-bookmark-type-transformers str)
-        (when (string-match-p (car transformer) str)
-          (setq str
-                (if (stringp (cdr transformer))
-                    (replace-regexp-in-string (car transformer) (cdr transformer) str)
-                  (funcall (cdr transformer) str))))))))
+    (and
+     ;; Some libraries use lambda handlers instead of symbols. For
+     ;; example the function `xwidget-webkit-bookmark-make-record' is
+     ;; affected. I consider this bad style since then the lambda is
+     ;; persisted.
+     (symbolp handler)
+     (or (get handler 'bookmark-handler-type)
+         (let ((str (symbol-name handler)))
+           (dolist (transformer marginalia--bookmark-type-transforms str)
+             (when (string-match-p (car transformer) str)
+               (setq str
+                     (if (stringp (cdr transformer))
+                         (replace-regexp-in-string (car transformer) (cdr transformer) str)
+                       (funcall (cdr transformer) str))))))))))
 
 (defun marginalia-annotate-bookmark (cand)
   "Annotate bookmark CAND with its file name and front context string."
