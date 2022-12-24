@@ -592,6 +592,9 @@ keybinding since CAND includes it."
           ;; Emacs bug#53988: abbrev-table-p throws an error
           ((guard (ignore-errors (abbrev-table-p val))) (propertize "#<abbrev-table>" 'face 'marginalia-value))
           ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
+          ;; Emacs 29 comes with callable objects or object closures (OClosures)
+          ((guard (and (fboundp 'oclosure-type) (oclosure-type val)))
+           (format (propertize "#<oclosure %s>" 'face 'marginalia-function) (oclosure-type val)))
           ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
           ((and (pred functionp) (pred symbolp))
            ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
