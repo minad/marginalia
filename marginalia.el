@@ -6,7 +6,7 @@
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; Version: 1.0
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (compat "29.1.1.1"))
 ;; Homepage: https://github.com/minad/marginalia
 
 ;; This file is part of GNU Emacs.
@@ -30,6 +30,7 @@
 
 ;;; Code:
 
+(require 'compat)
 (eval-when-compile
   (require 'subr-x)
   (require 'cl-lib))
@@ -338,20 +339,18 @@ for performance profiling of the annotators.")
 (defvar marginalia--ellipsis nil)
 (defun marginalia--ellipsis ()
   "Return ellipsis."
-  (or marginalia--ellipsis
-      ;; Emacs 28 offers the function `truncate-string-ellipsis'.
-      ;; Unfortunately we cannot use it here due to backward
-      ;; compatibility. Replicate it instead.
-      (setq marginalia--ellipsis
-            (cond
-             ((bound-and-true-p truncate-string-ellipsis))
-             ((char-displayable-p ?…) "…")
-             ("...")))))
+  (with-memoization marginalia--ellipsis
+    ;; TODO Emacs 28 offers the function `truncate-string-ellipsis'.
+    ;; It must be backported in Compat.
+    (cond
+     ((bound-and-true-p truncate-string-ellipsis))
+     ((char-displayable-p ?…) "…")
+     ("..."))))
 
 (defun marginalia--truncate (str width)
   "Truncate string STR to WIDTH."
   (when (floatp width) (setq width (round (* width marginalia-field-width))))
-  (when-let (pos (string-match-p "\n" str))
+  (when-let (pos (string-search "\n" str))
     (setq str (substring str 0 pos)))
   (let* ((face (and (not (equal str "")) (get-text-property (1- (length str)) 'face str)))
          (ell (if face (propertize (marginalia--ellipsis) 'face face) (marginalia--ellipsis))))
@@ -428,7 +427,7 @@ FACE is the name of the face, with which the field should be propertized."
 (defun marginalia--symbol-class (s)
   "Return symbol class characters for symbol S.
 
-This function is an extension of `help--symbol-class'. It returns
+This function is an extension of `help--symbol-class'.  It returns
 more fine-grained and more detailled symbol information.
 
 Function:
@@ -516,7 +515,7 @@ t cl-type"
       ((setq tmp (help-function-arglist sym))
        (and
         (if (and (stringp tmp)
-                 (string-match-p "Arg list not available" tmp))
+                 (string-search "Arg list not available" tmp))
             ;; A shorter text fits better into the
             ;; limited Marginalia space.
             "[autoload]"
@@ -759,7 +758,7 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
           (concat (string-trim
                    (replace-regexp-in-string
                     "[ \t]+" " "
-                    (replace-regexp-in-string "\n" "\\\\n" front)))
+                    (string-replace "\n" "\\\\n" front)))
                   (marginalia--ellipsis)))
         :truncate -0.3 :face 'marginalia-documentation)))))
 
@@ -820,7 +819,7 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
 (defun marginalia--full-candidate (cand)
   "Return completion candidate CAND in full.
 For some completion tables, the completion candidates offered are
-meant to be only a part of the full minibuffer contents. For
+meant to be only a part of the full minibuffer contents.  For
 example, during file name completion the candidates are one path
 component of a full file path."
   (if-let (win (active-minibuffer-window))
@@ -1114,7 +1113,7 @@ looking for a regexp that matches the prompt."
 (defun marginalia--cached (cache fun key)
   "Cached application of function FUN with KEY.
 The CACHE keeps around the last `marginalia--cache-size' computed
-annotations. The cache is mainly useful when scrolling in
+annotations.  The cache is mainly useful when scrolling in
 completion UIs like Vertico or Icomplete."
   (if cache
       (let ((ht (cdr cache)))
@@ -1136,7 +1135,7 @@ completion UIs like Vertico or Icomplete."
              (setq marginalia--candw-max
                    (max marginalia--candw-max
                         (+ (string-width cand)
-                           (string-width (substring ann 0 align)))))))
+                           (compat-call string-width ann 0 align))))))
   (setq marginalia--candw-max (* (ceiling marginalia--candw-max
                                           marginalia--candw-step)
                                  marginalia--candw-step))
@@ -1150,7 +1149,7 @@ completion UIs like Vertico or Icomplete."
                            ('center `(+ center ,marginalia-align-offset))
                            ('left `(+ left ,(+ marginalia-align-offset marginalia--candw-max)))
                            ('right `(+ right ,(+ marginalia-align-offset 1
-                                                 (- (string-width (substring ann 0 align))
+                                                 (- (compat-call string-width ann 0 align)
                                                     (string-width ann)))))))
                 ann))
              (list cand "" ann))))
