@@ -1211,7 +1211,8 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
     (let ((base (or (cdr (last completions)) 0)))
       (unless (= marginalia--base-position base)
         (marginalia--cache-reset)
-        (setq marginalia--base-position base))))
+        (setq marginalia--base-position base
+              marginalia--candw-max (default-value 'marginalia--candw-max)))))
   completions)
 
 ;;;###autoload
