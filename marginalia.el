@@ -310,10 +310,10 @@ determine it."
 Relying on this mechanism is discouraged in favor of the
 `bookmark-handler-type' property.")
 
-(defvar marginalia--candw-step 10
+(defvar marginalia--cand-width-step 10
   "Round candidate width.")
 
-(defvar-local marginalia--candw-max 20
+(defvar-local marginalia--cand-width-max 20
   "Maximum width of candidates.")
 
 (defvar marginalia--fontified-file-modes nil
@@ -862,7 +862,7 @@ component of a full file path."
         :face 'marginalia-size :width -7)
        ((marginalia--time (file-attribute-modification-time attrs))
         :face 'marginalia-date :width -12)
-         ;; File owner at the right
+       ;; File owner at the right
        ((marginalia--file-owner attrs) :face 'marginalia-file-owner)))))
 
 (defun marginalia-annotate-file (cand)
@@ -1009,7 +1009,7 @@ These annotations are skipped for remote paths."
                                      "gzip -c -q -d %s | head -n1"
                                    "head -n1 %s")
                                  (shell-quote-argument file)))))
-                 ""))
+                    ""))
       (cond
        ((string-match "\\`(define-package\\s-+\"\\([^\"]+\\)\"" doc)
         (setq doc (format "Generated package description from %s.el"
@@ -1130,13 +1130,13 @@ completion UIs like Vertico or Icomplete."
   "Align annotations of CANDS according to `marginalia-align'."
   (cl-loop for (cand . ann) in cands do
            (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
-             (setq marginalia--candw-max
-                   (max marginalia--candw-max
+             (setq marginalia--cand-width-max
+                   (max marginalia--cand-width-max
                         (+ (string-width cand)
                            (compat-call string-width ann 0 align))))))
-  (setq marginalia--candw-max (* (ceiling marginalia--candw-max
-                                          marginalia--candw-step)
-                                 marginalia--candw-step))
+  (setq marginalia--cand-width-max (* (ceiling marginalia--cand-width-max
+                                               marginalia--cand-width-step)
+                                      marginalia--cand-width-step))
   (cl-loop for (cand . ann) in cands collect
            (progn
              (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
@@ -1145,7 +1145,7 @@ completion UIs like Vertico or Icomplete."
                 `(space :align-to
                         ,(pcase-exhaustive marginalia-align
                            ('center `(+ center ,marginalia-align-offset))
-                           ('left `(+ left ,(+ marginalia-align-offset marginalia--candw-max)))
+                           ('left `(+ left ,(+ marginalia-align-offset marginalia--cand-width-max)))
                            ('right `(+ right ,(+ marginalia-align-offset 1
                                                  (- (compat-call string-width ann 0 align)
                                                     (string-width ann)))))))
@@ -1212,7 +1212,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
       (unless (= marginalia--base-position base)
         (marginalia--cache-reset)
         (setq marginalia--base-position base
-              marginalia--candw-max (default-value 'marginalia--candw-max)))))
+              marginalia--cand-width-max (default-value 'marginalia--cand-width-max)))))
   completions)
 
 ;;;###autoload
