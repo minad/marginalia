@@ -385,8 +385,8 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defun marginalia-annotate-binding (cand)
   "Annotate command CAND with keybinding."
-  (when-let* ((sym (intern-soft cand))
-              (key (and (commandp sym) (where-is-internal sym nil 'first-only))))
+  (when-let ((sym (intern-soft cand))
+             (key (and (commandp sym) (where-is-internal sym nil 'first-only))))
     (format #(" (%s)" 1 5 (face marginalia-key)) (key-description key))))
 
 (defun marginalia--annotator (cat)
@@ -398,8 +398,8 @@ FACE is the name of the face, with which the field should be propertized."
 
 (defun marginalia-annotate-multi-category (cand)
   "Annotate multi-category CAND with the buffer class."
-  (if-let* ((multi (get-text-property 0 'multi-category cand))
-            (annotate (marginalia--annotator (car multi))))
+  (if-let ((multi (get-text-property 0 'multi-category cand))
+           (annotate (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall annotate (cdr multi))
     ;; Apply the original annotation function on the original candidate, if there is one.
@@ -707,19 +707,19 @@ keybinding since CAND includes it."
 
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
-  (when-let* ((pkg-alist (bound-and-true-p package-alist))
-              (name (replace-regexp-in-string "-[0-9\\.-]+\\'" "" cand))
-              (pkg (intern-soft name))
-              (desc (or (unless (equal name cand)
-                          (cl-loop with version = (substring cand (1+ (length name)))
-                                   for d in (alist-get pkg pkg-alist)
-                                   if (equal (package-version-join (package-desc-version d)) version)
-                                   return d))
-                        ;; taken from `describe-package-1'
-                        (car (alist-get pkg pkg-alist))
-                        (if-let (built-in (assq pkg package--builtins))
-                            (package--from-builtin built-in)
-                          (car (alist-get pkg package-archive-contents))))))
+  (when-let ((pkg-alist (bound-and-true-p package-alist))
+             (name (replace-regexp-in-string "-[0-9\\.-]+\\'" "" cand))
+             (pkg (intern-soft name))
+             (desc (or (unless (equal name cand)
+                         (cl-loop with version = (substring cand (1+ (length name)))
+                                  for d in (alist-get pkg pkg-alist)
+                                  if (equal (package-version-join (package-desc-version d)) version)
+                                  return d))
+                       ;; taken from `describe-package-1'
+                       (car (alist-get pkg pkg-alist))
+                       (if-let (built-in (assq pkg package--builtins))
+                           (package--from-builtin built-in)
+                         (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
      ((package-version-join (package-desc-version desc)) :truncate 16 :face 'marginalia-version)
      ((cond
@@ -1043,10 +1043,10 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-tab (cand)
   "Annotate named tab CAND with tab index, window and buffer information."
-  (when-let* ((tabs (funcall tab-bar-tabs-function))
-              (index (seq-position
-                      tabs nil
-                      (lambda (tab _) (equal (alist-get 'name tab) cand)))))
+  (when-let ((tabs (funcall tab-bar-tabs-function))
+             (index (seq-position
+                     tabs nil
+                     (lambda (tab _) (equal (alist-get 'name tab) cand)))))
     (let* ((tab (nth index tabs))
            (ws (alist-get 'ws tab))
            (bufs (window-state-buffers ws)))
@@ -1179,15 +1179,15 @@ PROP is the property which is looked up."
   (pcase prop
     ('annotation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotator (marginalia--annotator cat)))
+     (when-let ((cat (completion-metadata-get metadata 'category))
+                (annotator (marginalia--annotator cat)))
        (lambda (cand)
          (let ((ann (caddar (marginalia--affixate metadata annotator (list cand)))))
            (and (not (equal ann "")) ann)))))
     ('affixation-function
      ;; We do want the advice triggered for `completion-metadata-get'.
-     (when-let* ((cat (completion-metadata-get metadata 'category))
-                 (annotator (marginalia--annotator cat)))
+     (when-let ((cat (completion-metadata-get metadata 'category))
+                (annotator (marginalia--annotator cat)))
        (apply-partially #'marginalia--affixate metadata annotator)))
     ('category
      ;; Find the completion category by trying each of our classifiers.
@@ -1234,8 +1234,8 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 (defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotator-registry'."
   (interactive)
-  (if-let* ((win (active-minibuffer-window))
-            (buf (window-buffer win)))
+  (if-let ((win (active-minibuffer-window))
+           (buf (window-buffer win)))
       (with-current-buffer buf
         (let* ((pt (max 0 (- (point) (minibuffer-prompt-end))))
                (metadata (completion-metadata (buffer-substring-no-properties
