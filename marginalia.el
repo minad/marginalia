@@ -39,9 +39,11 @@
 
 (defgroup marginalia nil
   "Enrich existing commands with completion annotations."
-  :link '(url-link "https://github.com/minad/marginalia")
-  :link '(info-link "(marginalia)")
-  :group 'convenience
+  :link '(info-link :tag "Info Manual" "(marginalia)")
+  :link '(url-link :tag "Homepage" "https://github.com/minad/marginalia")
+  :link '(emacs-library-link :tag "Library Source" "marginalia.el")
+  :group 'help
+  :group 'docs
   :group 'minibuffer
   :prefix "marginalia-")
 
