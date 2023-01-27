@@ -758,7 +758,7 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
        ((marginalia--bookmark-type bm) :width 10 :face 'marginalia-type)
        ((bookmark-get-filename bm)
         :truncate -0.5 :face 'marginalia-file-name)
-       ((unless (or (not front) (string= front ""))
+       ((unless (or (not front) (equal front ""))
           (concat (string-clean-whitespace
                    (string-replace "\n" "\\n" front))
                   (marginalia--ellipsis)))
