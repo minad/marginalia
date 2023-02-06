@@ -368,12 +368,13 @@ for performance profiling of the annotators.")
         (nreverse (truncate-string-to-width (reverse str) (- width) 0 ?\s ell))
       (truncate-string-to-width str width 0 ?\s ell))))
 
-(cl-defmacro marginalia--field (field &key truncate face width)
+(cl-defmacro marginalia--field (field &key truncate face width format)
   "Format FIELD as a string according to some options.
 TRUNCATE is the truncation width.
 WIDTH is the field width.
+FORMAT is a format string.
 FACE is the name of the face, with which the field should be propertized."
-  (setq field `(or ,field ""))
+  (setq field (if format `(format ,format ,field) `(or ,field "")))
   (when width (setq field `(format ,(format "%%%ds" (- width)) ,field)))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
   (when face (setq field `(propertize ,field 'face ,face)))
@@ -696,7 +697,7 @@ keybinding since CAND includes it."
     (concat
      (format #(" (%c)" 1 5 (face marginalia-char)) char)
      (marginalia--fields
-      ((format "%06X" char) :face 'marginalia-number)
+      (char :format "%06X" :face 'marginalia-number)
       ((char-code-property-description
         'general-category
         (get-char-code-property char 'general-category))
@@ -887,7 +888,7 @@ These annotations are skipped for remote paths."
                       (when-let (win (active-minibuffer-window))
                         (with-current-buffer (window-buffer win)
                           (marginalia--remote-protocol (minibuffer-contents-no-properties))))))
-      (marginalia--fields ((format "*%s*" remote) :face 'marginalia-documentation))
+      (marginalia--fields (remote :format "*%s*" :face 'marginalia-documentation))
     (marginalia--annotate-local-file cand)))
 
 (defun marginalia--file-owner (attrs)
@@ -1071,14 +1072,12 @@ These annotations are skipped for remote paths."
       (concat
        (format #(" (%s)" 0 5 (face marginalia-key)) index)
        (marginalia--fields
-        ((format "win:%s"
-                 (if (eq (car tab) 'current-tab)
-                     (length (window-list nil 'no-minibuf))
-                   (length bufs)))
-         :face 'marginalia-size)
-        ((format "group:%s" (or (alist-get 'group tab) 'none))
-         :face 'marginalia-type
-         :truncate 20)
+        ((if (eq (car tab) 'current-tab)
+             (length (window-list nil 'no-minibuf))
+           (length bufs))
+         :format "win:%s" :face 'marginalia-size)
+        ((or (alist-get 'group tab) 'none)
+         :format "group:%s" :face 'marginalia-type :truncate 20)
         ((if (eq (car tab) 'current-tab)
              "(current tab)"
            (string-join bufs " "))
