@@ -383,7 +383,7 @@ FACE is the name of the face, with which the field should be propertized."
 (defmacro marginalia--fields (&rest fields)
   "Format annotation FIELDS as a string with separators in between."
   `(concat
-    #("  " 0 1 (marginalia--align t))
+    #(" " 0 1 (marginalia--align t))
     ,@(mapcan (lambda (field)
                 (list 'marginalia-separator `(marginalia--field ,@field)))
               fields)))
@@ -1147,11 +1147,10 @@ completion UIs like Vertico or Icomplete."
    (when-let (align (text-property-any 0 (length ann) 'marginalia--align t ann))
      (setq marginalia--cand-width-max
            (max marginalia--cand-width-max
-                (+ (string-width cand)
-                   (compat-call string-width ann 0 align))))))
-  (setq marginalia--cand-width-max (* (ceiling marginalia--cand-width-max
-                                               marginalia--cand-width-step)
-                                      marginalia--cand-width-step))
+                (* (ceiling (+ (string-width cand)
+                               (compat-call string-width ann 0 align))
+                            marginalia--cand-width-step)
+                   marginalia--cand-width-step)))))
   (cl-loop
    for (cand . ann) in cands collect
    (progn
