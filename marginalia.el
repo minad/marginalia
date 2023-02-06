@@ -385,7 +385,7 @@ FACE is the name of the face, with which the field should be propertized."
   `(concat
     #(" " 0 1 (marginalia--align t))
     ,@(mapcan (lambda (field)
-                (list 'marginalia-separator `(marginalia--field ,@field)))
+                `(marginalia-separator (marginalia--field ,@field)))
               fields)))
 
 (defun marginalia--documentation (str)
