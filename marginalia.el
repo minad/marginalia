@@ -488,7 +488,8 @@ t cl-type"
               (t '("f" . "function")))
              (and (autoloadp (symbol-function s)) '("@" . "autoload"))
              (and (marginalia--advised s) '("!" . "advised"))
-             (and (symbolp (symbol-function s)) '("&" . "alias"))
+             (and (symbolp (symbol-function s))
+                  (cons "&" (format "alias for `%s'" (symbol-function s))))
              (and (get s 'byte-obsolete-info) '("-" . "obsolete"))))
           (when (boundp s)
             (list
@@ -505,7 +506,8 @@ t cl-type"
                      '("U" . "custom, modified from standard")
                    '("u" . "custom, unmodified"))
                '("v" . "variable"))
-             (ignore-errors (and (not (eq (indirect-variable s) s)) '("&" . "alias")))
+             (and (not (eq (ignore-errors (indirect-variable s)) s))
+                  (cons "&" (format "alias for `%s'" (ignore-errors (indirect-variable s)))))
              (and (get s 'byte-obsolete-variable) '("-" . "obsolete"))))
           (list
            (and (facep s) '("a" . "face"))
