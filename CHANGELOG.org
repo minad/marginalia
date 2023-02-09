@@ -1,0 +1,18 @@
+#+title: marginalia.el - Changelog
+#+author: Omar Antolín Camarena, Daniel Mendler
+#+language: en
+
+* Development
+
+- Require the =compat= library.
+- Fix =marginalia-classify-by-prompt= such that it handles multiple brackets in
+  the prompt gracefully.
+- Add =help-echo= properties to truncated annotations. The full string is shown on
+  mouse hover.
+- Add =help-echo= to the symbol classes of =marginalia-annotate-symbol=.
+- Add =help-echo= to file sizes showing the exact size in bytes.
+- Add =help-echo= to file dates showing the exact date.
+
+* Version 1.0 (2022-12-22)
+
+- Start of changelog.
