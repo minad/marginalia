@@ -1132,7 +1132,7 @@ This runs through the `marginalia-prompt-categories' alist
 looking for a regexp that matches the prompt."
   (when-let (prompt (minibuffer-prompt))
     (setq prompt
-          (replace-regexp-in-string "(.*default.*)\\|\\[.*\\]" "" prompt))
+          (replace-regexp-in-string "(.*?default.*?)\\|\\[.*?\\]" "" prompt))
     (cl-loop for (regexp . category) in marginalia-prompt-categories
              when (string-match-p regexp prompt)
              return category)))
