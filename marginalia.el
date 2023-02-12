@@ -306,6 +306,8 @@ hold sensitive data, e.g., passwords."
 
 ;;;; Marginalia mode
 
+(defvar marginalia--pangram "Cwm fjord bank glyphs vext quiz.")
+
 (defvar marginalia--bookmark-type-transforms
   (let ((words (regexp-opt '("handle" "handler" "jump" "bookmark"))))
     `((,(format "-+%s-+" words) . "-")
@@ -677,7 +679,9 @@ keybinding since CAND includes it."
   "Annotate face CAND with its documentation string and face example."
   (when-let (sym (intern-soft cand))
     (marginalia--fields
-     ("abcdefghijklmNOPQRSTUVWXYZ" :face sym)
+     ;; HACK: Manual alignment to fix misalignment due to face
+     ((concat marginalia--pangram #(" " 0 1 (display (space :align-to center))))
+      :face sym)
      ((documentation-property sym 'face-documentation)
       :truncate 1.0 :face 'marginalia-documentation))))
 
