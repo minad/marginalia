@@ -626,7 +626,8 @@ keybinding since CAND includes it."
         ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
         ;; Emacs 29 comes with callable objects or object closures (OClosures)
         ((guard (and (fboundp 'oclosure-type) (oclosure-type val)))
-         (format (propertize "#<oclosure %s>" 'face 'marginalia-function) (oclosure-type val)))
+         (format (propertize "#<oclosure %s>" 'face 'marginalia-function)
+		 (and (fboundp 'oclosure-type) (oclosure-type val))))
         ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
         ((and (pred functionp) (pred symbolp))
          ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
