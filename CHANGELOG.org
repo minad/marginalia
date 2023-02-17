@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 1.1 (2023-02-17)
 
 - Require the =compat= library.
 - Fix =marginalia-classify-by-prompt= such that it handles multiple brackets in
