@@ -6,7 +6,7 @@
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; Version: 1.1
-;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
+;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4") (project "0.3.0"))
 ;; Homepage: https://github.com/minad/marginalia
 
 ;; This file is part of GNU Emacs.
@@ -286,6 +286,7 @@ hold sensitive data, e.g., passwords."
 ;;;; Pre-declarations for external packages
 
 (declare-function project-current "project")
+(declare-function project-root "project")
 
 (declare-function bookmark-get-handler "bookmark")
 (declare-function bookmark-get-filename "bookmark")
@@ -999,10 +1000,8 @@ These annotations are skipped for remote paths."
                         "\\`\\(?:Dired\\|Find file\\) in \\(.*\\): \\'"
                         prompt)
                        (match-string 1 prompt)))
-                (when-let (proj (project-current))
-                  (cond
-                   ((fboundp 'project-root) (project-root proj))
-                   ((fboundp 'project-roots) (car (project-roots proj))))))))
+                (when-let ((proj (project-current)))
+                  (project-root proj)))))
     marginalia--project-root))
 
 (defun marginalia-annotate-project-file (cand)
