@@ -146,7 +146,8 @@ hold sensitive data, e.g., passwords."
 
 (defcustom marginalia-command-categories
   '((imenu . imenu)
-    (recentf-open . file))
+    (recentf-open . file)
+    (where-is . command))
   "Associate commands with a completion category."
   :type '(alist :key-type symbol :value-type symbol))
 
