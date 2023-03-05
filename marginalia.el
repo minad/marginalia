@@ -6,7 +6,7 @@
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; Version: 1.1
-;; Package-Requires: ((emacs "27.1") (compat "29.1.3.4"))
+;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/marginalia
 
 ;; This file is part of GNU Emacs.
@@ -51,7 +51,7 @@
   "Maximum truncation width of annotation fields.
 
 This value is adjusted depending on the `window-width'."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-separator "  "
   "Annotation field separator."
@@ -65,14 +65,14 @@ This value is adjusted depending on the `window-width'."
 
 (defcustom marginalia-align-offset 0
   "Additional offset added to the alignment."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-max-relative-age (* 60 60 24 14)
   "Maximum relative age in seconds displayed by the file annotator.
 
 Set to `most-positive-fixnum' to always use a relative age, or 0 to never show
 a relative age."
-  :type 'integer)
+  :type 'natnum)
 
 (defcustom marginalia-annotator-registry
   (mapcar
