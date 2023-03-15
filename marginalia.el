@@ -1113,7 +1113,10 @@ These annotations are skipped for remote paths."
 (defun marginalia-classify-by-command-name ()
   "Lookup category for current command."
   (and marginalia--command
-       (alist-get marginalia--command marginalia-command-categories)))
+       (or (alist-get marginalia--command marginalia-command-categories)
+           ;; The command can be an alias, e.g., `recentf' -> `recentf-open'.
+           (alist-get (car (last (function-alias-p marginalia--command)))
+                      marginalia-command-categories))))
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
