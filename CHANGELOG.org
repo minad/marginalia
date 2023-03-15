@@ -2,6 +2,11 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- =marginalia-classify-by-command-name=: Resolve function aliases and use the name
+  of the original command to determine the completion category.
+
 * Version 1.1 (2023-02-17)
 
 - Require the =compat= library.
