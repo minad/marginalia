@@ -1115,8 +1115,8 @@ These annotations are skipped for remote paths."
   (and marginalia--command
        (or (alist-get marginalia--command marginalia-command-categories)
            ;; The command can be an alias, e.g., `recentf' -> `recentf-open'.
-           (alist-get (car (last (function-alias-p marginalia--command)))
-                      marginalia-command-categories))))
+           (when-let ((chain (function-alias-p marginalia--command)))
+             (alist-get (car (last chain)) marginalia-command-categories)))))
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
