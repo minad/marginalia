@@ -451,7 +451,7 @@ FACE is the name of the face, with which the field should be propertized."
   "Return symbol class characters for symbol S.
 
 This function is an extension of `help--symbol-class'.  It returns
-more fine-grained and more detailled symbol information.
+more fine-grained and more detailed symbol information.
 
 Function:
 f function
