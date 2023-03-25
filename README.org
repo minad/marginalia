@@ -59,7 +59,7 @@ In general, to learn more about what different annotations mean, a good starting
 point is to look at ~marginalia-annotator-registry~, and follow up to the
 annotation function of the category you are interested in.
 
-For example the annotations for elisp symbols include their symbol class - =v= for
+For example the annotations for Elisp symbols include their symbol class - =v= for
 variable, =f= for function, =c= for command, etc. For more information on what the
 different classifications mean, see the docstring of ~marginalia--symbol-class~.
 
@@ -89,7 +89,7 @@ annotations for display for each candidate.
 
 Unfortunately, not all commands (including Emacs' builtin ones) specify the
 category of their candidates. To compensate for this shortcoming, Marginalia
-hooks into the emacs completion framework and runs the *classifiers* listed in the
+hooks into the Emacs completion framework and runs the *classifiers* listed in the
 variable =marginalia-classifiers=, which use the command's prompt or other
 properties of the candidates to specify the completion category.
 
