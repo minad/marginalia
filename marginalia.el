@@ -148,7 +148,8 @@ hold sensitive data, e.g., passwords."
   '((imenu . imenu)
     (recentf-open . file)
     (where-is . command))
-  "Associate commands with a completion category."
+  "Associate commands with a completion category.
+The value of `this-command' is used as key for the lookup."
   :type '(alist :key-type symbol :value-type symbol))
 
 (defgroup marginalia-faces nil
