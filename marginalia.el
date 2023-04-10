@@ -138,7 +138,7 @@ determine it."
   :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-censor-variables
-  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce")
+  '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce\\|api-?key")
   "The value of variables matching any of these regular expressions is not shown.
 This configuration variable is useful to hide variables which may
 hold sensitive data, e.g., passwords."
