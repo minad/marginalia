@@ -8,6 +8,7 @@
 ;; Version: 1.1
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.0"))
 ;; Homepage: https://github.com/minad/marginalia
+;; Keywords: help, matching
 
 ;; This file is part of GNU Emacs.
 
