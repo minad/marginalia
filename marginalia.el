@@ -1292,25 +1292,23 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                                                (+ (minibuffer-prompt-end) pt))
                                               minibuffer-completion-table
                                               minibuffer-completion-predicate))
-               (cat (completion-metadata-get metadata 'category)))
-          (unless cat
-            (user-error "Marginalia: Unknown completion category"))
-          (setq cat (assq cat marginalia-annotator-registry))
-          (unless cat
-            (user-error "Marginalia: No annotators found"))
+               (cat (or (completion-metadata-get metadata 'category)
+                        (user-error "Marginalia: Unknown completion category")))
+               (ann (or (assq cat marginalia-annotator-registry)
+                        (user-error "Marginalia: No annotators found for category `%s'" cat))))
           (marginalia--cache-reset)
-          (setcdr cat (append (cddr cat) (list (cadr cat))))
+          (setcdr ann (append (cddr ann) (list (cadr ann))))
           ;; When the builtin annotator is selected and no builtin function is
           ;; available, skip to the next annotator. Note that we cannot use
           ;; `completion-metadata-get' to access the metadata since we must
           ;; bypass the `marginalia--completion-metadata-get' advice.
-          (when (and (eq (cadr cat) 'builtin)
+          (when (and (eq (cadr ann) 'builtin)
                      (not (assq 'annotation-function metadata))
                      (not (assq 'affixation-function metadata))
                      (not (plist-get completion-extra-properties :annotation-function))
                      (not (plist-get completion-extra-properties :affixation-function)))
-            (setcdr cat (append (cddr cat) (list (cadr cat)))))
-          (message "Marginalia: Use annotator `%s' for category `%s'" (cadr cat) (car cat))))
+            (setcdr ann (append (cddr ann) (list (cadr ann)))))
+          (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) (car ann))))
     (user-error "Marginalia: No active minibuffer")))
 
 (provide 'marginalia)
