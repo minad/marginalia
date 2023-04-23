@@ -201,6 +201,19 @@ can delete all file annotators from the registry.
         (assq-delete-all 'file marginalia-annotator-registry))
 #+end_src
 
+* Icons in the minibuffer
+
+Icons in the minibuffer completion UI are a commonly requested feature.
+Marginalia focuses on text annotations only. The following packages are
+compatible with Marginalia and use special fonts to add icons in front of
+completion candidates. There also exist related packages to enhance Dired,
+Ibuffer and other modes with icons consistently.
+
+- [[https://github.com/iyefrat/all-the-icons-completion][all-the-icons-completion]]: Relies on the =all-the-icons.el= package which
+  configures multiple icon fonts.
+- [[https://github.com/rainstormstudio/nerd-icons-completion][nerd-icons-completion]]: Relies on patched fonts including icons. This package
+  works even in the terminal where only a single font can be used.
+
 * Contributions
 
 Since this package is part of [[https://elpa.gnu.org/packages/marginalia.html][GNU ELPA]] contributions require a copyright
