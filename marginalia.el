@@ -127,7 +127,7 @@ determine it."
     ("\\<face\\>" . face)
     ("\\<environment variable\\>" . environment-variable)
     ("\\<function\\|hook to remove\\>" . function)
-    ("\\<variable\\>" . variable)
+    ("\\<[Vv]ariable\\>" . variable)
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
     ("\\<coding system\\>" . coding-system)
