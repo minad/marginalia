@@ -135,14 +135,16 @@ determine it."
     ("\\<kill-ring\\>" . kill-ring)
     ("\\<tab by name\\>" . tab)
     ("\\<library\\>" . library))
-  "Associates regexps to match against minibuffer prompts with categories."
+  "Associates regexps to match against minibuffer prompts with categories.
+The prompts are matched case-insensitively."
   :type '(alist :key-type regexp :value-type symbol))
 
 (defcustom marginalia-censor-variables
   '("pass\\|auth-source-netrc-cache\\|auth-source-.*-nonce\\|api-?key")
   "The value of variables matching any of these regular expressions is not shown.
 This configuration variable is useful to hide variables which may
-hold sensitive data, e.g., passwords."
+hold sensitive data, e.g., passwords.  The variable names are
+matched case-sensitively."
   :type '(repeat (choice symbol regexp)))
 
 (defcustom marginalia-command-categories
@@ -320,7 +322,8 @@ The value of `this-command' is used as key for the lookup."
       (".*" . ,#'capitalize)))
   "List of bookmark type transformers.
 Relying on this mechanism is discouraged in favor of the
-`bookmark-handler-type' property.")
+`bookmark-handler-type' property.  The function names are matched
+case-sensitively.")
 
 (defvar marginalia--cand-width-step 10
   "Round candidate width.")
@@ -608,7 +611,8 @@ keybinding since CAND includes it."
    ((not (boundp sym))
     (propertize "#<unbound>" 'face 'marginalia-null))
    ((and marginalia-censor-variables
-         (let ((name (symbol-name sym)))
+         (let ((name (symbol-name sym))
+               case-fold-search)
            (cl-loop for r in marginalia-censor-variables
                     thereis (if (symbolp r)
                                 (eq r sym)
@@ -778,7 +782,8 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
      ;; persisted.
      (symbolp handler)
      (or (get handler 'bookmark-handler-type)
-         (let ((str (symbol-name handler)))
+         (let ((str (symbol-name handler))
+               case-fold-search)
            (dolist (transformer marginalia--bookmark-type-transforms str)
              (when (string-match-p (car transformer) str)
                (setq str
@@ -997,7 +1002,8 @@ These annotations are skipped for remote paths."
         (current-buffer))
     (when (eq marginalia--project-root 'unset)
       (setq marginalia--project-root
-            (or (let ((prompt (minibuffer-prompt)))
+            (or (let ((prompt (minibuffer-prompt))
+                      case-fold-search)
                   (and (string-match
                         "\\`\\(?:Dired\\|Find file\\) in \\(.*\\): \\'"
                         prompt)
@@ -1144,7 +1150,8 @@ looking for a regexp that matches the prompt."
   (when-let (prompt (minibuffer-prompt))
     (setq prompt
           (replace-regexp-in-string "(.*?default.*?)\\|\\[.*?\\]" "" prompt))
-    (cl-loop for (regexp . category) in marginalia-prompt-categories
+    (cl-loop with case-fold-search = t
+             for (regexp . category) in marginalia-prompt-categories
              when (string-match-p regexp prompt)
              return category)))
 
