@@ -2,6 +2,12 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- =marginalia-classify-by-prompt=: Use case-insensitive matching.
+- =marginalia-annotate-symbol=: Additional symbol classes. Use =M= for module
+  functions, =P= for primitives and =S= for special forms.
+
 * Version 1.2 (2023-04-17)
 
 - =marginalia-classify-by-command-name=: Resolve function aliases and use the name

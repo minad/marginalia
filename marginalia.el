@@ -463,7 +463,8 @@ f function
 c command
 C interactive-only command
 m macro
-M special-form
+F special-form
+M module function
 P primitive
 g cl-generic
 p pure
@@ -497,8 +498,9 @@ t cl-type"
                  '("c" . "command")))
               ((cl-generic-p s) '("g" . "cl-generic"))
               ((macrop (symbol-function s)) '("m" . "macro"))
-              ((special-form-p (symbol-function s)) '("M" . "special-form"))
+              ((special-form-p (symbol-function s)) '("F" . "special-form"))
               ((subr-primitive-p (symbol-function s)) '("P" . "primitive"))
+              ((module-function-p (symbol-function s)) '("M" . "module function"))
               (t '("f" . "function")))
              (and (autoloadp (symbol-function s)) '("@" . "autoload"))
              (and (marginalia--advised s) '("!" . "advised"))
