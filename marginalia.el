@@ -464,6 +464,7 @@ c command
 C interactive-only command
 m macro
 M special-form
+P primitive
 g cl-generic
 p pure
 s side-effect-free
@@ -497,6 +498,7 @@ t cl-type"
               ((cl-generic-p s) '("g" . "cl-generic"))
               ((macrop (symbol-function s)) '("m" . "macro"))
               ((special-form-p (symbol-function s)) '("M" . "special-form"))
+              ((subr-primitive-p (symbol-function s)) '("P" . "primitive"))
               (t '("f" . "function")))
              (and (autoloadp (symbol-function s)) '("@" . "autoload"))
              (and (marginalia--advised s) '("!" . "advised"))
