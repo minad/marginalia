@@ -467,6 +467,7 @@ M special-form
 g cl-generic
 p pure
 s side-effect-free
+b built-in
 @ autoloaded
 ! advised
 - obsolete
@@ -498,6 +499,7 @@ t cl-type"
               ((macrop (symbol-function s)) '("m" . "macro"))
               ((special-form-p (symbol-function s)) '("M" . "special-form"))
               (t '("f" . "function")))
+             (and (subrp (symbol-function s)) '("b" . "built-in"))
              (and (autoloadp (symbol-function s)) '("@" . "autoload"))
              (and (marginalia--advised s) '("!" . "advised"))
              (and (symbolp (symbol-function s))
