@@ -1322,5 +1322,9 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
           (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) (car ann))))
     (user-error "Marginalia: No active minibuffer")))
 
+;; Emacs 28: Only show `marginalia-cycle' in M-x in recursive minibuffers
+(put #'marginalia-cycle 'completion-predicate
+     (lambda (&rest _) (> (minibuffer-depth) 1)))
+
 (provide 'marginalia)
 ;;; marginalia.el ends here
