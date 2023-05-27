@@ -574,7 +574,9 @@ t cl-type"
        ((fboundp sym) (marginalia--function-doc sym))
        ((facep sym) (documentation-property sym 'face-documentation))
        (t (documentation-property sym 'variable-documentation)))
-      :truncate 1.0 :face 'marginalia-documentation))))
+      :truncate 1.0 :face 'marginalia-documentation)
+     ((abbreviate-file-name (or (symbol-file sym) ""))
+      :truncate -0.5 :face 'marginalia-file-name))))
 
 (defun marginalia-annotate-command (cand)
   "Annotate command CAND with its documentation string.
