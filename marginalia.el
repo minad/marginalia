@@ -623,7 +623,9 @@ keybinding since CAND includes it."
                     thereis (if (symbolp r)
                                 (eq r sym)
                               (string-match-p r name)))))
-    (propertize "*****" 'face 'marginalia-null))
+    (propertize "*****"
+                'face 'marginalia-null
+                'help-echo "Hidden due to `marginalia-censor-variables'"))
    (t
     (let ((val (symbol-value sym)))
       (pcase val
