@@ -49,7 +49,7 @@ with [[https://github.com/oantolin/embark][Embark]] for action support and [[htt
   ;; The :init section is always executed.
   :init
 
-  ;; Marginalia must be actived in the :init section of use-package such that
+  ;; Marginalia must be activated in the :init section of use-package such that
   ;; the mode gets enabled right away. Note that this forces loading the
   ;; package.
   (marginalia-mode))
