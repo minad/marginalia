@@ -99,6 +99,7 @@ a relative age."
      (project-file marginalia-annotate-project-file)
      (buffer marginalia-annotate-buffer)
      (library marginalia-annotate-library)
+     (theme marginalia-annotate-theme)
      (tab marginalia-annotate-tab)
      (multi-category marginalia-annotate-multi-category)))
   "Annotator function registry.
@@ -134,7 +135,8 @@ determine it."
     ("\\<minor mode\\>" . minor-mode)
     ("\\<kill-ring\\>" . kill-ring)
     ("\\<tab by name\\>" . tab)
-    ("\\<library\\>" . library))
+    ("\\<library\\>" . library)
+    ("\\<theme\\>" . theme))
   "Associates regexps to match against minibuffer prompts with categories.
 The prompts are matched case-insensitively."
   :type '(alist :key-type regexp :value-type symbol))
@@ -1084,6 +1086,10 @@ These annotations are skipped for remote paths."
       ;; Add the documentation string to the cache
       (put-text-property 0 1 'marginalia--library-doc doc file))
     doc))
+
+(defun marginalia-annotate-theme (cand)
+  "Annotate theme CAND with documentation and path."
+  (marginalia-annotate-library (concat cand "-theme")))
 
 (defun marginalia-annotate-library (cand)
   "Annotate library CAND with documentation and path."
