@@ -1089,7 +1089,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-theme (cand)
   "Annotate theme CAND with documentation and path."
-  (marginalia-annotate-library (concat cand "-theme")))
+  (let ((load-path (custom-theme--load-path))) ;; Themes use their own path.
+    (marginalia-annotate-library (concat cand "-theme"))))
 
 (defun marginalia-annotate-library (cand)
   "Annotate library CAND with documentation and path."
