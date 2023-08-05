@@ -1033,9 +1033,8 @@ These annotations are skipped for remote paths."
       (marginalia-annotate-file (expand-file-name cand root)))))
 
 (defvar-local marginalia--library-cache nil)
-(defun marginalia--library-cache (library-path)
-  "Return hash table from library name to library file.
-LIBRARY-PATH is the library search path."
+(defun marginalia--library-cache ()
+  "Return hash table from library name to library file."
   (with-current-buffer
       (if-let (win (active-minibuffer-window))
           (window-buffer win)
@@ -1044,8 +1043,9 @@ LIBRARY-PATH is the library search path."
     ;; annotator. Therefore we compute all the library paths first.
     (unless marginalia--library-cache
       (setq marginalia--library-cache (make-hash-table :test #'equal))
-      ;; Search in reverse because of shadowing
-      (dolist (dir (reverse library-path))
+      (dolist (dir (delete-dups
+                    (reverse ;; Reverse because of shadowing
+                     (append load-path (custom-theme--load-path))))) ;; Include themes
         (dolist (file (ignore-errors
                         (directory-files dir 'full
                                          "\\.el\\(?:\\.gz\\)?\\'")))
@@ -1090,15 +1090,12 @@ LIBRARY-PATH is the library search path."
 
 (defun marginalia-annotate-theme (cand)
   "Annotate theme CAND with documentation and path."
-  (marginalia-annotate-library (concat cand "-theme")
-                               (custom-theme--load-path)))
+  (marginalia-annotate-library (concat cand "-theme")))
 
-(defun marginalia-annotate-library (cand &optional library-path)
-  "Annotate library CAND with documentation and path.
-LIBRARY-PATH is the library search path."
+(defun marginalia-annotate-library (cand)
+  "Annotate library CAND with documentation and path."
   (setq cand (marginalia--library-name cand))
-  (when-let (file (gethash cand (marginalia--library-cache
-                                 (or library-path load-path))))
+  (when-let (file (gethash cand (marginalia--library-cache)))
     (marginalia--fields
      ;; Display if the corresponding feature is loaded.
      ;; feature/=library file, but better than nothing.
