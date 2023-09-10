@@ -433,8 +433,8 @@ FACE is the name of the face, with which the field should be propertized."
       ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall annotate (cdr multi))
     ;; Apply the original annotation function on the original candidate, if
-    ;; there is one.  NOTE: Use `alist-get' instead of `completion-metadata-get'
-    ;; to bypass our `marginalia--completion-metadata-get' advice!
+    ;; there is one.  Use `alist-get' instead of `completion-metadata-get' to
+    ;; bypass our `marginalia--completion-metadata-get' advice!
     (when-let (annotate (alist-get 'annotation-function marginalia--metadata))
       (funcall annotate cand))))
 
@@ -647,9 +647,10 @@ keybinding since CAND includes it."
                  (and (fboundp 'oclosure-type) (oclosure-type val))))
         ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
         ((and (pred functionp) (pred symbolp))
-         ;; NOTE: We are not consistent here, values are generally printed unquoted. But we
-         ;; make an exception for function symbols to visually distinguish them from symbols.
-         ;; I am not entirely happy with this, but we should not add quotation to every type.
+         ;; We are not consistent here, values are generally printed
+         ;; unquoted. But we make an exception for function symbols to visually
+         ;; distinguish them from symbols.  I am not entirely happy with this,
+         ;; but we should not add quotation to every type.
          (format (propertize "#'%s" 'face 'marginalia-function) val))
         ((pred recordp) (format (propertize "#<record %s>" 'face 'marginalia-value) (type-of val)))
         ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
@@ -901,8 +902,8 @@ component of a full file path."
                                       'integer)))
     ;; HACK: Format differently accordingly to alignment, since the file owner
     ;; is usually not displayed. Otherwise we will see an excessive amount of
-    ;; whitespace in front of the file permissions. Furthermore the alignment
-    ;; in `consult-buffer' will look ugly. TODO: Find a better solution!
+    ;; whitespace in front of the file permissions. Furthermore the alignment in
+    ;; `consult-buffer' will look ugly. Find a better solution!
     (if (eq marginalia-align 'right)
         (marginalia--fields
          ;; File owner at the left
@@ -1117,8 +1118,8 @@ These annotations are skipped for remote paths."
     (let* ((tab (nth index tabs))
            (ws (alist-get 'ws tab))
            (bufs (window-state-buffers ws)))
-      ;; NOTE: When the buffer key is present in the window state
-      ;; it is added in front of the window buffer list and gets duplicated.
+      ;; When the buffer key is present in the window state it is added in front
+      ;; of the window buffer list and gets duplicated.
       (when (cadr (assq 'buffer ws)) (pop bufs))
       (marginalia--fields
        (:left index :format " (%s)" :face 'marginalia-key)
@@ -1143,7 +1144,7 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
-  ;; NOTE: Use `alist-get' instead of `completion-metadata-get' to bypass our
+  ;; Use `alist-get' instead of `completion-metadata-get' to bypass our
   ;; `marginalia--completion-metadata-get' advice!
   (when-let (cat (alist-get 'category marginalia--metadata))
     ;; Ignore Emacs 28 symbol-help category in order to ensure that the
@@ -1274,7 +1275,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 
 (defun marginalia--base-position (completions)
   "Record the base position of COMPLETIONS."
-  ;; NOTE: As a small optimization we track the base position only for file
+  ;; As a small optimization we track the base position only for file
   ;; completions, since `marginalia--full-candidate' is currently used only by
   ;; the file annotation function.
   (when minibuffer-completing-file-name
