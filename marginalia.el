@@ -357,8 +357,6 @@ for performance profiling of the annotators.")
 (defun marginalia--ellipsis ()
   "Return ellipsis."
   (with-memoization marginalia--ellipsis
-    ;; TODO Emacs 28 offers the function `truncate-string-ellipsis'.
-    ;; It must be backported in Compat.
     (cond
      ((bound-and-true-p truncate-string-ellipsis))
      ((char-displayable-p ?…) "…")
