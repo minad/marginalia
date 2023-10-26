@@ -75,6 +75,15 @@ Set to `most-positive-fixnum' to always use a relative age, or 0 to never show
 a relative age."
   :type 'natnum)
 
+(defcustom marginalia-remote-file-regexps
+  '("\\`/\\([^/|:]+\\):") ;; Tramp path
+  "List of remote file regexps where the files should not be annotated.
+
+The first match group is displayed instead of the detailed file
+attribute information.  For Tramp paths, the protocol is
+displayed instead."
+  :type '(repeat regexp))
+
 (defcustom marginalia-annotator-registry
   (mapcar
    (lambda (x) (append x '(builtin none)))
@@ -884,12 +893,15 @@ component of a full file path."
     ;; necessary information (there's not much else we can do)
     cand))
 
-(defun marginalia--remote-protocol (path)
-  "Return the remote protocol of PATH."
+(defun marginalia--remote-file-p (file)
+  "Return non-nil if FILE is remote.
+The return value is a string describing the remote location,
+e.g., the protocol."
   (save-match-data
-    (setq path (substitute-in-file-name path))
-    (and (string-match "\\`/\\([^/|:]+\\):" path)
-         (match-string 1 path))))
+    (setq file (substitute-in-file-name file))
+    (cl-loop for r in marginalia-remote-file-regexps
+             if (string-match r file)
+             return (or (match-string 1 file) "remote"))))
 
 (defun marginalia--annotate-local-file (cand)
   "Annotate local file CAND."
@@ -921,10 +933,10 @@ component of a full file path."
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
 These annotations are skipped for remote paths."
-  (if-let (remote (or (marginalia--remote-protocol cand)
+  (if-let (remote (or (marginalia--remote-file-p cand)
                       (when-let (win (active-minibuffer-window))
                         (with-current-buffer (window-buffer win)
-                          (marginalia--remote-protocol (minibuffer-contents-no-properties))))))
+                          (marginalia--remote-file-p (minibuffer-contents-no-properties))))))
       (marginalia--fields (remote :format "*%s*" :face 'marginalia-documentation))
     (marginalia--annotate-local-file cand)))
 

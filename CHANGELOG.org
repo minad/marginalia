@@ -4,7 +4,9 @@
 
 * Development
 
-- Add =marginalia-annotate-theme= based on =marginalia-annotate-library=.
+- =marginalia-annotate-theme=: New annotator based on =marginalia-annotate-library=.
+- =marginalia-remote-file-regexps=: New customization variable set to a list of
+  regexps matching remote paths, which should be excluded from file annotations.
 
 * Version 1.3 (2023-07-02)
 
