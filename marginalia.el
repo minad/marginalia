@@ -615,7 +615,7 @@ keybinding since CAND includes it."
   "Annotate imenu CAND with its documentation string."
   (when (derived-mode-p 'emacs-lisp-mode)
     ;; Strip until the last whitespace in order to support flat imenu
-    (marginalia-annotate-symbol (replace-regexp-in-string "^.* " "" cand))))
+    (marginalia-annotate-symbol (replace-regexp-in-string "\\`.* " "" cand))))
 
 (defun marginalia-annotate-function (cand)
   "Annotate function CAND with its documentation string."
