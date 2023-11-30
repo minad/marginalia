@@ -762,6 +762,7 @@ keybinding since CAND includes it."
 (defun marginalia-annotate-minor-mode (cand)
   "Annotate minor-mode CAND with status and documentation string."
   (let* ((sym (intern-soft cand))
+         (message-log-max nil)
          (mode (if (and sym (boundp sym))
                    sym
                  (lookup-minor-mode-from-indicator cand)))
