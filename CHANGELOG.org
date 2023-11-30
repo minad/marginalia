@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 1.4 (2023-12-01)
 
 - =marginalia-annotate-theme=: New annotator based on =marginalia-annotate-library=.
 - =marginalia-remote-file-regexps=: New customization variable set to a list of
