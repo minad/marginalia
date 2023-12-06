@@ -1137,7 +1137,7 @@ These annotations are skipped for remote paths."
       ;; of the window buffer list and gets duplicated.
       (when (cadr (assq 'buffer ws)) (pop bufs))
       (marginalia--fields
-       (:left index :format " (%s)" :face 'marginalia-key)
+       (:left (1+ index) :format " (%s)" :face 'marginalia-key)
        ((if (eq (car tab) 'current-tab)
             (length (window-list nil 'no-minibuf))
           (length bufs))
