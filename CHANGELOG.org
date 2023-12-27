@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 1.5 (2023-12-27)
 
 - ~marginalia-annotate-bookmark~: Show location and more context.
 - ~marginalia-annotate-tab~: Show tab index starting from one.
