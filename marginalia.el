@@ -1239,10 +1239,12 @@ completion UIs like Vertico or Icomplete."
 
 (defun marginalia--affixate (metadata annotator cands)
   "Affixate CANDS given METADATA and Marginalia ANNOTATOR."
-  ;; Compute minimum width of windows, which display the minibuffer.
-  ;; vertico-buffer displays the minibuffer in different windows. We may want
-  ;; to generalize this and detect other types of completion buffers, e.g.,
-  ;; Embark Collect or the default completion buffer.
+  ;; Compute minimum width of windows, which display the minibuffer, including
+  ;; the miniwindow.  In general the computed width corresponds to the full
+  ;; frame width, since the miniwindow spans the full frame.  For example
+  ;; `vertico-buffer' displays the minibuffer in a separate window.  Similarly,
+  ;; we could detect other types of completion buffers, e.g., Embark Collect or
+  ;; the default completion buffer, and compute smaller widths.
   (let* ((width (cl-loop for win in (get-buffer-window-list) minimize (window-width win)))
          (marginalia-field-width (min (/ width 2) marginalia-field-width))
          (marginalia--metadata metadata)
