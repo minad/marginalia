@@ -586,10 +586,12 @@ t cl-type"
     (marginalia--fields
      (:left (marginalia-annotate-binding cand))
      ((marginalia--symbol-class sym) :face 'marginalia-type)
-     ((cond
-       ((fboundp sym) (marginalia--function-doc sym))
-       ((facep sym) (documentation-property sym 'face-documentation))
-       (t (documentation-property sym 'variable-documentation)))
+     ((if (fboundp sym) (marginalia--function-doc sym)
+        (cl-loop
+         for doc in '(variable-documentation
+                      face-documentation
+                      group-documentation)
+         thereis (ignore-errors (documentation-property sym doc))))
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (or (symbol-file sym) ""))
       :truncate -0.5 :face 'marginalia-file-name))))
