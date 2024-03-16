@@ -1328,10 +1328,9 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   (with-current-buffer (window-buffer
                         (or (active-minibuffer-window)
                             (user-error "Marginalia: No active minibuffer")))
-    (let* ((pt (max 0 (- (point) (minibuffer-prompt-end))))
-           (metadata (completion-metadata (buffer-substring-no-properties
-                                           (minibuffer-prompt-end)
-                                           (+ (minibuffer-prompt-end) pt))
+    (let* ((end (minibuffer-prompt-end))
+           (pt (max 0 (- (point) end)))
+           (metadata (completion-metadata (buffer-substring-no-properties end (+ end pt))
                                           minibuffer-completion-table
                                           minibuffer-completion-predicate))
            (cat (or (completion-metadata-get metadata 'category)
