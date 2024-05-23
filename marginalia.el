@@ -654,7 +654,9 @@ keybinding since CAND includes it."
         ((pred hash-table-p) (propertize "#<hash-table>" 'face 'marginalia-value))
         ((pred syntax-table-p) (propertize "#<syntax-table>" 'face 'marginalia-value))
         ;; Emacs bug#53988: abbrev-table-p throws an error
-        ((and (pred vectorp) (guard (ignore-errors (abbrev-table-p val))))
+        ((guard (or (and (eval-when-compile (< emacs-major-version 30))
+                         (vectorp val) (ignore-errors (abbrev-table-p val)))
+                    (abbrev-table-p val)))
          (propertize "#<abbrev-table>" 'face 'marginalia-value))
         ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
         ;; Emacs 29 comes with callable objects or object closures (OClosures)
