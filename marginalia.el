@@ -1318,10 +1318,12 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
         ;; Remember `this-command' in order to select the annotation function.
         (add-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)
         ;; Replace the metadata function.
+        (advice-add (compat-function completion-metadata-get) :before-until #'marginalia--completion-metadata-get)
         (advice-add #'completion-metadata-get :before-until #'marginalia--completion-metadata-get)
         ;; Record completion base position, for `marginalia--full-candidate'
         (advice-add #'completion-all-completions :filter-return #'marginalia--base-position))
     (advice-remove #'completion-all-completions #'marginalia--base-position)
+    (advice-remove (compat-function completion-metadata-get) #'marginalia--completion-metadata-get)
     (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
     (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)))
 
