@@ -441,7 +441,7 @@ Otherwise stay within current buffer."
     (fun fun)))
 
 (defun marginalia-annotate-multi-category (cand)
-  "Annotate multi-category CAND with the buffer class."
+  "Annotate multi-category CAND, dispatching to the appropriate annotator."
   (if-let ((multi (get-text-property 0 'multi-category cand))
            (annotate (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the multi category.
