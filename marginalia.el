@@ -320,6 +320,10 @@ The value of `this-command' is used as key for the lookup."
 
 ;;;; Marginalia mode
 
+(defalias 'marginalia--orig-completion-metadata-get
+  (symbol-function (compat-function completion-metadata-get))
+  "Original `completion-metadata-get' function.")
+
 (defvar marginalia--pangram "Cwm fjord bank glyphs vext quiz.")
 
 (defvar marginalia--bookmark-type-transforms
@@ -446,10 +450,10 @@ Otherwise stay within current buffer."
            (annotate (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall annotate (cdr multi))
-    ;; Apply the original annotation function on the original candidate, if
-    ;; there is one.  Use `alist-get' instead of `completion-metadata-get' to
-    ;; bypass our `marginalia--completion-metadata-get' advice!
-    (when-let (annotate (alist-get 'annotation-function marginalia--metadata))
+    ;; Apply the original annotation function on the original candidate. Bypass
+    ;; our `marginalia--completion-metadata-get' advice.
+    (when-let (annotate (marginalia--orig-completion-metadata-get
+                         marginalia--metadata 'annotation-function))
       (funcall annotate cand))))
 
 (defconst marginalia--advice-regexp
@@ -1165,9 +1169,8 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-classify-original-category ()
   "Return original category reported by completion metadata."
-  ;; Use `alist-get' instead of `completion-metadata-get' to bypass our
-  ;; `marginalia--completion-metadata-get' advice!
-  (when-let (cat (alist-get 'category marginalia--metadata))
+  ;; Bypass our `marginalia--completion-metadata-get' advice.
+  (when-let (cat (marginalia--orig-completion-metadata-get marginalia--metadata 'category))
     ;; Ignore Emacs 28 symbol-help category in order to ensure that the
     ;; categories are refined to our categories function and variable.
     (and (not (eq cat 'symbol-help)) cat)))
@@ -1336,24 +1339,21 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                             (user-error "Marginalia: No active minibuffer")))
     (let* ((end (minibuffer-prompt-end))
            (pt (max 0 (- (point) end)))
-           (metadata (completion-metadata (buffer-substring-no-properties end (+ end pt))
-                                          minibuffer-completion-table
-                                          minibuffer-completion-predicate))
-           (cat (or (completion-metadata-get metadata 'category)
+           (md (completion-metadata (buffer-substring-no-properties end (+ end pt))
+                                    minibuffer-completion-table
+                                    minibuffer-completion-predicate))
+           (cat (or (completion-metadata-get md 'category)
                     (user-error "Marginalia: Unknown completion category")))
            (ann (or (assq cat marginalia-annotator-registry)
                     (user-error "Marginalia: No annotators found for category `%s'" cat))))
       (marginalia--cache-reset)
       (setcdr ann (append (cddr ann) (list (cadr ann))))
       ;; When the builtin annotator is selected and no builtin function is
-      ;; available, skip to the next annotator. Note that we cannot use
-      ;; `completion-metadata-get' to access the metadata since we must
-      ;; bypass the `marginalia--completion-metadata-get' advice.
+      ;; available, skip to the next annotator. Bypass the
+      ;; `marginalia--completion-metadata-get' advice.
       (when (and (eq (cadr ann) 'builtin)
-                 (not (assq 'annotation-function metadata))
-                 (not (assq 'affixation-function metadata))
-                 (not (plist-get completion-extra-properties :annotation-function))
-                 (not (plist-get completion-extra-properties :affixation-function)))
+                 (not (marginalia--orig-completion-metadata-get md 'annotation-function))
+                 (not (marginalia--orig-completion-metadata-get md 'affixation-function)))
         (setcdr ann (append (cddr ann) (list (cadr ann)))))
       (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) (car ann)))))
 
