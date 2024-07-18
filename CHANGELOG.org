@@ -2,6 +2,13 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- Bump Compat dependency to Compat 30.
+- Advise both ~completion-metadata-get~ and ~(compat-function
+  completion-metadata-get)~ in order to provide completion categories and
+  annotation functions.
+
 * Version 1.6 (2024-04-04)
 
 - ~marginalia-annotate-buffer~: Handle dead buffers, which can occur when
