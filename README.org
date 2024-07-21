@@ -156,20 +156,26 @@ Marginalia activates rich annotators by default. Depending on your preference
 you may want to use the builtin annotators or even no annotators by default and
 only activate the annotators on demand by invoking ~marginalia-cycle~.
 
-In order to use the builtin annotators by default, you can use the following
-command. Replace =builtin= by =none= to disable annotators by default.
+In order to disable an annotator permanently, the ~marginalia-annotator-registry~
+can be modified. For example if you prefer to never see file annotations, you
+can delete all file annotators from the registry.
 
 #+begin_src emacs-lisp
-  (defun marginalia-use-builtin ()
-    (interactive)
-    (mapc
-     (lambda (x)
-       (setcdr x (cons 'builtin (remq 'builtin (cdr x)))))
-     marginalia-annotator-registry))
+  (setq marginalia-annotator-registry
+        (assq-delete-all 'file marginalia-annotator-registry))
 #+end_src
 
-If a completion category supports two annotators, you can toggle between
-those using this command.
+To use the builtin annotators by default, you can run the following code.
+Replace =builtin= by =none= to disable annotators by default.
+
+#+begin_src emacs-lisp
+(mapc (lambda (x)
+        (setcdr x (cons 'builtin (remq 'builtin (cdr x)))))
+      marginalia-annotator-registry)
+#+end_src
+
+As an alternative to ~marginalia-cycle~, if a completion category supports two
+annotators, you can toggle between them using the following command.
 
 #+begin_src emacs-lisp
   (defun marginalia-toggle ()
@@ -194,27 +200,17 @@ configuration. This can be achieved using an advice which calls
                                            marginalia-annotator-registry))))
 #+end_src
 
-In order to disable an annotator permanently, the ~marginalia-annotator-registry~
-can be modified. For example if you prefer to never see file annotations, you
-can delete all file annotators from the registry.
-
-#+begin_src emacs-lisp
-  (setq marginalia-annotator-registry
-        (assq-delete-all 'file marginalia-annotator-registry))
-#+end_src
-
 * Icons in the minibuffer
 
-Icons in the minibuffer completion UI are a commonly requested feature.
-Marginalia focuses on text annotations only. The following packages are
-compatible with Marginalia and use special fonts to add icons in front of
-completion candidates. There also exist related packages to enhance Dired,
-Ibuffer and other modes with icons consistently.
+Marginalia focuses on text annotations. The following packages are compatible
+with Marginalia and use special fonts to add icons in front of completion
+candidates. There also exist related packages to enhance Dired, Ibuffer, Corfu
+and other modes with icons consistently.
 
-- [[https://github.com/iyefrat/all-the-icons-completion][all-the-icons-completion]]: Relies on the =all-the-icons.el= package which
-  configures multiple icon fonts.
-- [[https://github.com/rainstormstudio/nerd-icons-completion][nerd-icons-completion]]: Relies on patched fonts including icons. This package
-  works even in the terminal where only a single font can be used.
+- [[https://github.com/rainstormstudio/nerd-icons-completion][nerd-icons-completion]]: Uses the NerdFonts. It can even work even in the
+  terminal where only a single font can be used.
+- [[https://github.com/iyefrat/all-the-icons-completion][all-the-icons-completion]]: Uses the =all-the-icons.el= package which configures
+  multiple icon fonts.
 
 * Contributions
 
