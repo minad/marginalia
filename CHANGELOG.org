@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 1.7 (2024-07-26)
 
 - Bump Compat dependency to Compat 30.
 - Advise both ~completion-metadata-get~ and ~(compat-function
