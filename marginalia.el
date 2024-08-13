@@ -136,7 +136,7 @@ determine it."
     ("\\<color\\>" . color)
     ("\\<face\\>" . face)
     ("\\<environment variable\\>" . environment-variable)
-    ("\\<function\\|hook to remove\\>" . function)
+    ("\\<function\\|\\(?:hook\\|advice\\) to remove\\>" . function)
     ("\\<variable\\>" . variable)
     ("\\<input method\\>" . input-method)
     ("\\<charset\\>" . charset)
