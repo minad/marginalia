@@ -199,15 +199,10 @@ configuration. This can be achieved using an advice which calls
 
 * Icons in the minibuffer
 
-Marginalia focuses on text annotations. The following packages are compatible
-with Marginalia and use special fonts to add icons in front of completion
-candidates. There also exist related packages to enhance Dired, Ibuffer, Corfu
-and other modes with icons consistently.
-
-- [[https://github.com/rainstormstudio/nerd-icons-completion][nerd-icons-completion]]: Uses the NerdFonts. It can even work even in the
-  terminal where only a single font can be used.
-- [[https://github.com/iyefrat/all-the-icons-completion][all-the-icons-completion]]: Uses the =all-the-icons.el= package which configures
-  multiple icon fonts.
+Marginalia focuses on text annotations. The [[https://github.com/rainstormstudio/nerd-icons-completion][nerd-icons-completion]] package is
+compatible with Marginalia and uses the special NerdFonts to add icons in front
+of minibuffer completion candidates. There exist related packages to enhance
+Dired, Ibuffer, Corfu and other modes with icons consistently.
 
 * Contributions
 
