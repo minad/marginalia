@@ -7,7 +7,7 @@
 ;; Created: 2020
 ;; Version: 1.7
 ;; Package-Requires: ((emacs "28.1") (compat "30"))
-;; Homepage: https://github.com/minad/marginalia
+;; URL: https://github.com/minad/marginalia
 ;; Keywords: docs, help, matching, completion
 
 ;; This file is part of GNU Emacs.
@@ -41,7 +41,7 @@
 (defgroup marginalia nil
   "Enrich existing commands with completion annotations."
   :link '(info-link :tag "Info Manual" "(marginalia)")
-  :link '(url-link :tag "Homepage" "https://github.com/minad/marginalia")
+  :link '(url-link :tag "Website" "https://github.com/minad/marginalia")
   :link '(emacs-library-link :tag "Library Source" "marginalia.el")
   :group 'help
   :group 'docs
