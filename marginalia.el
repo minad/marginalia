@@ -503,6 +503,7 @@ l local (L modified compared to default value)
 & alias
 
 Other:
+G custom group
 a face
 t cl-type"
   (let ((class
@@ -536,7 +537,7 @@ t cl-type"
                                  (default-value s))))
                    '("L" . "local, modified from global")
                  '("l" . "local, unmodified")))
-             (if (custom-variable-p s)
+             (if (get s 'standard-value)
                  (if (ignore-errors
                        (not (equal (symbol-value s)
                                    (eval (car (get s 'standard-value))))))
@@ -547,6 +548,7 @@ t cl-type"
                   (cons "&" (format "alias for `%s'" (ignore-errors (indirect-variable s)))))
              (and (get s 'byte-obsolete-variable) '("-" . "obsolete"))))
           (list
+           (and (get s 'group-documentation) '("G" . "custom group"))
            (and (facep s) '("a" . "face"))
            (and (get s 'cl--class) '("t" . "cl-type")))))) ;; cl-find-class, cl--find-class
     (setq class (delq nil class))
