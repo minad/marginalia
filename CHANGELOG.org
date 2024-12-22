@@ -2,9 +2,10 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 1.8 (2024-12-22)
 
 - Require Emacs 28.1.
+- Add G symbol class for customization groups.
 
 * Version 1.7 (2024-07-26)
 
