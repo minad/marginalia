@@ -1304,6 +1304,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   ;; As a small optimization we track the base position only for file
   ;; completions, since `marginalia--full-candidate' is currently used only by
   ;; the file annotation function.
+  ;; bug#75910: category instead of `minibuffer-completing-file-name'
   (when minibuffer-completing-file-name
     (let ((base (or (cdr (last completions)) 0)))
       (unless (= marginalia--base-position base)
