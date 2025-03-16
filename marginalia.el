@@ -322,7 +322,10 @@ The value of `this-command' is used as key for the lookup."
 ;;;; Marginalia mode
 
 (defalias 'marginalia--orig-completion-metadata-get
-  (symbol-function (compat-function completion-metadata-get))
+  (symbol-function
+   (if (fboundp 'marginalia--orig-completion-metadata-get)
+       'marginalia--orig-completion-metadata-get
+     (compat-function completion-metadata-get)))
   "Original `completion-metadata-get' function.")
 
 (defvar marginalia--pangram "Cwm fjord bank glyphs vext quiz.")
