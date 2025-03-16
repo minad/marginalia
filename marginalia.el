@@ -685,7 +685,12 @@ keybinding since CAND includes it."
          (format (propertize "#'%s" 'face 'marginalia-function) val))
         ((pred recordp) (format (propertize "#<record %s>" 'face 'marginalia-value) (type-of val)))
         ((pred symbolp) (propertize (symbol-name val) 'face 'marginalia-symbol))
-        ((pred numberp) (propertize (number-to-string val) 'face 'marginalia-number))
+        ((pred numberp)
+         (propertize (number-to-string val)
+                     'face 'marginalia-number
+                     'help-echo (and (integerp val)
+                                     (format "%d, #o%o, #x%x%s" val val val
+                                             (if (characterp val) (format ", ?%c" val) "")))))
         (_ (let ((print-escape-newlines t)
                  (print-escape-control-characters t)
                  ;;(print-escape-multibyte t)
