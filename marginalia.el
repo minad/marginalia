@@ -404,7 +404,13 @@ FACE is the name of the face, with which the field should be propertized."
   (setq field (if format `(format ,format ,field) `(or ,field "")))
   (when width (setq field `(format ,(format "%%%ds" (- width)) ,field)))
   (when truncate (setq field `(marginalia--truncate ,field ,truncate)))
-  (when face (setq field `(propertize ,field 'face ,face)))
+  (when face
+    (setq field (if (or format width truncate)
+                    (cl-with-gensyms (f)
+                      `(let ((,f ,field))
+                         (put-text-property 0 (length ,f) 'face ,face ,f)
+                         ,f))
+                  `(propertize ,field 'face ,face))))
   field)
 
 (defmacro marginalia--fields (&rest fields)
