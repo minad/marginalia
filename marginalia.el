@@ -172,7 +172,7 @@ The value of `this-command' is used as key for the lookup."
   :group 'faces)
 
 (defface marginalia-key
-  '((t :inherit font-lock-keyword-face))
+  '((t :inherit help-key-binding))
   "Face used to highlight keys.")
 
 (defface marginalia-type
