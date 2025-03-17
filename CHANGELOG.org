@@ -4,7 +4,6 @@
 
 * Development
 
-- =marginalia-key=: Inherit from =help-key-binding= face.
 - =marginalia--variable-value=: Add tool tip for integers with hexadecimal, octal
   and character representation.
 
