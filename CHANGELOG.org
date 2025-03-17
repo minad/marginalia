@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.0 (2025-03-17)
 
 - =marginalia--variable-value=: Add tool tip for integers with hexadecimal, octal
   and character representation.
