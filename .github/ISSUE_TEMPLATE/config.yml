@@ -6,9 +6,6 @@ contact_links:
   - name: "🙏 Please support @oantolin"
     url: https://github.com/sponsors/oantolin
     about: Thanks! Your support helps dedicating time to project maintenance and development.
-  - name: "🙏 Please support our on our Emacs projects"
-    url: https://github.com/sponsors/minad
-    about: Thanks! Your support helps dedicating time to project maintenance and development.
   - name: "💡 Suggest a feature ➞ Please create a discussion"
     url: https://github.com/minad/marginalia/discussions/categories/ideas
     about: Start a new discussion suggesting an improvement or a feature.
