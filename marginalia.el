@@ -84,7 +84,10 @@ attribute information.  For Tramp paths, the protocol is
 displayed instead."
   :type '(repeat regexp))
 
-(defcustom marginalia-annotator-registry
+(define-obsolete-variable-alias 'marginalia-annotator-registry
+  'marginalia-annotators "2.0")
+
+(defcustom marginalia-annotators
   (mapcar
    (lambda (x) (append x '(builtin none)))
    `((command ,#'marginalia-annotate-command ,#'marginalia-annotate-binding)
@@ -159,9 +162,9 @@ matched case-sensitively."
   :type '(repeat (choice symbol regexp)))
 
 (defcustom marginalia-command-categories
-  '((imenu . imenu)
-    (recentf-open . file)
-    (where-is . command))
+  `((,#'imenu . imenu)
+    (,'recentf-open . file) ;; Available only on Emacs 29.
+    (,#'where-is . command))
   "Associate commands with a completion category.
 The value of `this-command' is used as key for the lookup."
   :type '(alist :key-type symbol :value-type symbol))
@@ -449,7 +452,7 @@ Otherwise stay within current buffer."
 
 (defun marginalia--annotator (cat)
   "Return annotation function for category CAT."
-  (pcase (car (alist-get cat marginalia-annotator-registry))
+  (pcase (car (alist-get cat marginalia-annotators))
     ('none #'ignore)
     ('builtin nil)
     (fun fun)))
@@ -1344,7 +1347,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
 
 ;;;###autoload
 (defun marginalia-cycle ()
-  "Cycle between annotators in `marginalia-annotator-registry'."
+  "Cycle between annotators in `marginalia-annotators'."
   ;; Only show `marginalia-cycle' in M-x in recursive minibuffers
   (declare (completion (lambda (&rest _) (> (minibuffer-depth) 1))))
   (interactive)
@@ -1358,7 +1361,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                                     minibuffer-completion-predicate))
            (cat (or (completion-metadata-get md 'category)
                     (user-error "Marginalia: Unknown completion category")))
-           (ann (or (assq cat marginalia-annotator-registry)
+           (ann (or (assq cat marginalia-annotators)
                     (user-error "Marginalia: No annotators found for category `%s'" cat))))
       (marginalia--cache-reset)
       (setcdr ann (append (cddr ann) (list (cadr ann))))
