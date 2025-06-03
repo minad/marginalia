@@ -89,7 +89,7 @@ displayed instead."
 
 (defcustom marginalia-annotators
   (mapcar
-   (lambda (x) (append x '(builtin none)))
+   (lambda (x) (append x (list 'builtin 'none)))
    `((command ,#'marginalia-annotate-command ,#'marginalia-annotate-binding)
      (embark-keybinding ,#'marginalia-annotate-embark-keybinding)
      (customize-group ,#'marginalia-annotate-customize-group)
