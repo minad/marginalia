@@ -1401,7 +1401,9 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                           (marginalia--cache-reset)
                           (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) cat)))
                       :style 'radio :selected (eq fun (cadr ann))))))
-    (define-key menu [marginalia] `("Marginalia" . ,(easy-menu-create-menu "" items))))
+    (define-key menu [marginalia]
+                `("Marginalia" . ,(easy-menu-create-menu
+                                   "" `(["Cycle" marginalia-cycle] "---" ,@items)))))
   menu)
 
 (provide 'marginalia)
