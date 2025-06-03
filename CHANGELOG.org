@@ -6,6 +6,7 @@
 
 - Rename =marginalia-annotator-registry= to =marginalia-annotators= for consistency
   with =marginalia-classifiers=.
+- Add context menu in minibuffer. Enable =context-menu-mode= to try.
 
 * Version 2.0 (2025-03-17)
 

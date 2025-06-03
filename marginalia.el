@@ -1311,6 +1311,7 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   (setq marginalia--cache t marginalia--command this-command)
   ;; Reset cache if window size changes, recompute alignment
   (add-hook 'window-state-change-hook #'marginalia--cache-reset nil 'local)
+  (add-hook 'context-menu-functions #'marginalia--context-menu nil t)
   (marginalia--cache-reset))
 
 (defun marginalia--base-position (completions)
@@ -1345,6 +1346,19 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
     (advice-remove #'completion-metadata-get #'marginalia--completion-metadata-get)
     (remove-hook 'minibuffer-setup-hook #'marginalia--minibuffer-setup)))
 
+(defun marginalia--completion-metadata ()
+  "Get completion metadata."
+  (let* ((end (minibuffer-prompt-end))
+         (pt (max 0 (- (point) end))))
+    (completion-metadata (buffer-substring-no-properties end (+ end pt))
+                         minibuffer-completion-table
+                         minibuffer-completion-predicate)))
+
+(defun marginalia--builtin-annotator-p (md)
+  "Builtin annotator available in metadata MD?"
+  (or (marginalia--orig-completion-metadata-get md 'annotation-function)
+      (marginalia--orig-completion-metadata-get md 'affixation-function)))
+
 ;;;###autoload
 (defun marginalia-cycle ()
   "Cycle between annotators in `marginalia-annotators'."
@@ -1354,25 +1368,42 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   (with-current-buffer (window-buffer
                         (or (active-minibuffer-window)
                             (user-error "Marginalia: No active minibuffer")))
-    (let* ((end (minibuffer-prompt-end))
-           (pt (max 0 (- (point) end)))
-           (md (completion-metadata (buffer-substring-no-properties end (+ end pt))
-                                    minibuffer-completion-table
-                                    minibuffer-completion-predicate))
+    (let* ((md (marginalia--completion-metadata))
            (cat (or (completion-metadata-get md 'category)
                     (user-error "Marginalia: Unknown completion category")))
            (ann (or (assq cat marginalia-annotators)
                     (user-error "Marginalia: No annotators found for category `%s'" cat))))
-      (marginalia--cache-reset)
       (setcdr ann (append (cddr ann) (list (cadr ann))))
       ;; When the builtin annotator is selected and no builtin function is
       ;; available, skip to the next annotator. Bypass the
       ;; `marginalia--completion-metadata-get' advice.
-      (when (and (eq (cadr ann) 'builtin)
-                 (not (marginalia--orig-completion-metadata-get md 'annotation-function))
-                 (not (marginalia--orig-completion-metadata-get md 'affixation-function)))
+      (when (and (eq (cadr ann) 'builtin) (not (marginalia--builtin-annotator-p md)))
         (setcdr ann (append (cddr ann) (list (cadr ann)))))
-      (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) (car ann)))))
+      (marginalia--cache-reset)
+      (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) cat))))
+
+(defun marginalia--context-menu (menu _event)
+  "Add Marginalia commands to context MENU."
+  (when-let ((md (marginalia--completion-metadata))
+             (cat (completion-metadata-get md 'category))
+             (ann (assq cat marginalia-annotators)))
+    (let (items)
+      (dolist (fun (cdr ann))
+        (when (or (not (eq fun 'builtin)) (marginalia--builtin-annotator-p md))
+          (push (vector
+                 (capitalize (replace-regexp-in-string
+                              ".*?-annotate-" "" (symbol-name fun)))
+                 (lambda ()
+                   (interactive)
+                   (let ((n (seq-position (cdr ann) fun)))
+                     (setcdr ann (append (drop n (cdr ann)) (take n (cdr ann))))
+                     (marginalia--cache-reset)
+                     (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) cat)))
+                 :style 'radio :selected (eq fun (cadr ann)))
+                items)))
+      (define-key menu [marginalia--context-menu]
+                  (cons "Marginalia" (easy-menu-create-menu "Marginalia" (nreverse items))))))
+  menu)
 
 (provide 'marginalia)
 ;;; marginalia.el ends here
