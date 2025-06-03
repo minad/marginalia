@@ -1386,23 +1386,22 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   "Add Marginalia commands to context MENU."
   (when-let ((md (marginalia--completion-metadata))
              (cat (completion-metadata-get md 'category))
-             (ann (assq cat marginalia-annotators)))
-    (let (items)
-      (dolist (fun (cdr ann))
-        (when (or (not (eq fun 'builtin)) (marginalia--builtin-annotator-p md))
-          (push (vector
-                 (capitalize (replace-regexp-in-string
-                              ".*?-annotate-" "" (symbol-name fun)))
-                 (lambda ()
-                   (interactive)
-                   (let ((n (seq-position (cdr ann) fun)))
-                     (setcdr ann (append (drop n (cdr ann)) (take n (cdr ann))))
-                     (marginalia--cache-reset)
-                     (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) cat)))
-                 :style 'radio :selected (eq fun (cadr ann)))
-                items)))
-      (define-key menu [marginalia--context-menu]
-                  (cons "Marginalia" (easy-menu-create-menu "Marginalia" (nreverse items))))))
+             (ann (assq cat marginalia-annotators))
+             (items (cl-loop
+                     for fun in (cdr ann) for i from 0
+                     if (or (not (eq fun 'builtin)) (marginalia--builtin-annotator-p md))
+                     collect
+                     (vector
+                      (capitalize (replace-regexp-in-string
+                                   ".*?-+annotate-+" "" (symbol-name fun)))
+                      (let ((i i))
+                        (lambda ()
+                          (interactive)
+                          (setcdr ann (append (drop i (cdr ann)) (take i (cdr ann))))
+                          (marginalia--cache-reset)
+                          (message "Marginalia: Use annotator `%s' for category `%s'" (cadr ann) cat)))
+                      :style 'radio :selected (eq fun (cadr ann))))))
+    (define-key menu [marginalia] `("Marginalia" . ,(easy-menu-create-menu "" items))))
   menu)
 
 (provide 'marginalia)
