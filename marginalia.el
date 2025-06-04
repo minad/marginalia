@@ -1350,10 +1350,9 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
   "Get completion metadata."
   (let* ((end (minibuffer-prompt-end))
          (pt (max 0 (- (point) end))))
-    (and (minibufferp)
-         (completion-metadata (buffer-substring-no-properties end (+ end pt))
-                              minibuffer-completion-table
-                              minibuffer-completion-predicate))))
+    (completion-metadata (buffer-substring-no-properties end (+ end pt))
+                         minibuffer-completion-table
+                         minibuffer-completion-predicate)))
 
 (defun marginalia--builtin-annotator-p (md)
   "Builtin annotator available in metadata MD?"
