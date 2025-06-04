@@ -1392,8 +1392,10 @@ Remember `this-command' for `marginalia-classify-by-command-name'."
                      if (or (not (eq fun 'builtin)) (marginalia--builtin-annotator-p md))
                      collect
                      (vector
-                      (capitalize (replace-regexp-in-string
-                                   ".*?-+annotate-+" "" (symbol-name fun)))
+                      (thread-last (symbol-name fun)
+                                   (replace-regexp-in-string ".*?-+annotate-+" "")
+                                   (replace-regexp-in-string "-+" " ")
+                                   capitalize)
                       (let ((i i))
                         (lambda ()
                           (interactive)
