@@ -907,7 +907,8 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
 (defun marginalia-annotate-buffer (cand)
   "Annotate buffer CAND with modification status, file name and major mode."
   ;; Emacs 31: `project--read-project-buffer' uses `uniquify-get-unique-names'
-  (when-let ((buffer (or (get-text-property 0 'uniquify-orig-buffer cand)
+  (when-let ((buffer (or (and (stringp cand)
+                              (get-text-property 0 'uniquify-orig-buffer cand))
                          (get-buffer cand))))
     (if (buffer-live-p buffer)
         (marginalia--fields
