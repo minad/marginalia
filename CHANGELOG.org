@@ -2,6 +2,11 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- Support ~uniquify-get-unique-names~ used by ~project-switch-to-buffer~ in
+  Emacs 31.
+
 * Version 2.1 (2025-06-04)
 
 - Rename =marginalia-annotator-registry= to =marginalia-annotators= for consistency
