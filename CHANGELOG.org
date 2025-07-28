@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.2 (2025-07-28)
 
 - Support ~uniquify-get-unique-names~ used by ~project-switch-to-buffer~ in
   Emacs 31.
