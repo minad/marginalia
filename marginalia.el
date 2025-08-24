@@ -109,6 +109,7 @@ displayed instead."
      (bookmark ,#'marginalia-annotate-bookmark)
      (file ,#'marginalia-annotate-file)
      (project-file ,#'marginalia-annotate-project-file)
+     (project-buffer ,#'marginalia-annotate-buffer)
      (buffer ,#'marginalia-annotate-buffer)
      (library ,#'marginalia-annotate-library)
      (theme ,#'marginalia-annotate-theme)
