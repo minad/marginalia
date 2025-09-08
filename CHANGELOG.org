@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.3 (2025-09-08)
 
 - Support new ~project-buffer~ category.
 - Improve remote file detection to avoid calling Tramp.
