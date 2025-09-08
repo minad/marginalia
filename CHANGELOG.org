@@ -2,6 +2,11 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- Support new ~project-buffer~ category.
+- Improve remote file detection to avoid calling Tramp.
+
 * Version 2.2 (2025-07-28)
 
 - Support ~uniquify-get-unique-names~ used by ~project-switch-to-buffer~ in
