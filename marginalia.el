@@ -939,7 +939,8 @@ component of a full file path."
 The return value is a string describing the remote location,
 e.g., the protocol."
   (save-match-data
-    (setq file (substitute-in-file-name file))
+    (setq file (let (file-name-handler-alist)
+                 (substitute-in-file-name file)))
     (cl-loop for r in marginalia-remote-file-regexps
              if (string-match r file)
              return (or (match-string 1 file) "remote"))))
