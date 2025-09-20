@@ -6,7 +6,7 @@
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; Version: 2.3
-;; Package-Requires: ((emacs "28.1") (compat "30"))
+;; Package-Requires: ((emacs "29.1") (compat "30"))
 ;; URL: https://github.com/minad/marginalia
 ;; Keywords: docs, help, matching, completion
 
@@ -164,7 +164,7 @@ matched case-sensitively."
 
 (defcustom marginalia-command-categories
   `((,#'imenu . imenu)
-    (,'recentf-open . file) ;; Available only on Emacs 29.
+    (,#'recentf-open . file)
     (,#'where-is . command))
   "Associate commands with a completion category.
 The value of `this-command' is used as key for the lookup."
@@ -676,10 +676,9 @@ keybinding since CAND includes it."
                   (abbrev-table-p val)))
          (propertize "#<abbrev-table>" 'face 'marginalia-value))
         ((pred char-table-p) (propertize "#<char-table>" 'face 'marginalia-value))
-        ;; Emacs 29 comes with callable objects or object closures (OClosures)
-        ((guard (and (fboundp 'oclosure-type) (oclosure-type val)))
-         (format (propertize "#<oclosure %s>" 'face 'marginalia-function)
-                 (and (fboundp 'oclosure-type) (oclosure-type val))))
+        ;; Callable objects or object closures (OClosures)
+        ((guard (oclosure-type val))
+         (format (propertize "#<oclosure %s>" 'face 'marginalia-function) (oclosure-type val)))
         ((pred byte-code-function-p) (propertize "#<byte-code-function>" 'face 'marginalia-function))
         ((and (pred functionp) (pred symbolp))
          ;; We are not consistent here, values are generally printed
