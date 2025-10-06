@@ -1133,15 +1133,6 @@ These annotations are skipped for remote paths."
       (put-text-property 0 1 'marginalia--library-doc doc file))
     doc))
 
-(defun marginalia-annotate-theme (cand)
-  "Annotate theme CAND with documentation and path."
-  (when-let (file (gethash (concat cand "-theme") (marginalia--library-cache)))
-    (marginalia--fields
-     ((marginalia--library-doc file)
-      :truncate 1.0 :face 'marginalia-documentation)
-     ((abbreviate-file-name (file-name-directory file))
-      :truncate -1.0 :face 'marginalia-file-name))))
-
 (defun marginalia-annotate-library (cand)
   "Annotate library CAND with documentation and path."
   (setq cand (marginalia--library-name cand))
@@ -1157,6 +1148,15 @@ These annotations are skipped for remote paths."
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (file-name-directory file))
       :truncate -0.5 :face 'marginalia-file-name))))
+
+(defun marginalia-annotate-theme (cand)
+  "Annotate theme CAND with documentation and path."
+  (when-let (file (gethash (concat cand "-theme") (marginalia--library-cache)))
+    (marginalia--fields
+     ((marginalia--library-doc file)
+      :truncate 1.0 :face 'marginalia-documentation)
+     ((abbreviate-file-name (file-name-directory file))
+      :truncate -1.0 :face 'marginalia-file-name))))
 
 (defun marginalia-annotate-tab (cand)
   "Annotate named tab CAND with tab index, window and buffer information."
