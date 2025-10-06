@@ -84,9 +84,6 @@ attribute information.  For Tramp paths, the protocol is
 displayed instead."
   :type '(repeat regexp))
 
-(define-obsolete-variable-alias 'marginalia-annotator-registry
-  'marginalia-annotators "2.0")
-
 (defcustom marginalia-annotators
   (mapcar
    (lambda (x) (append x (list 'builtin 'none)))
