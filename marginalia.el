@@ -1135,7 +1135,12 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-theme (cand)
   "Annotate theme CAND with documentation and path."
-  (marginalia-annotate-library (concat cand "-theme")))
+  (when-let (file (gethash (concat cand "-theme") (marginalia--library-cache)))
+    (marginalia--fields
+     ((marginalia--library-doc file)
+      :truncate 1.0 :face 'marginalia-documentation)
+     ((abbreviate-file-name (file-name-directory file))
+      :truncate -1.0 :face 'marginalia-file-name))))
 
 (defun marginalia-annotate-library (cand)
   "Annotate library CAND with documentation and path."
