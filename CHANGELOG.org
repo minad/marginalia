@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.4 (2025-10-13)
 
 - Require Emacs 29.
 - Drop loaded indicator from theme annotator.
