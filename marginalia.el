@@ -800,7 +800,9 @@ keybinding since CAND includes it."
 (defun marginalia-annotate-package (cand)
   "Annotate package CAND with its description summary."
   (when-let ((pkg-alist (bound-and-true-p package-alist))
-             (name (replace-regexp-in-string "-[0-9\\.-]+\\'" "" cand))
+             ;; See `package-get-version'.
+             (name (replace-regexp-in-string
+                    "-[0-9]\\(?:[0-9.]\\|pre\\|beta\\|alpha\\|snapshot\\)+\\'" "" cand))
              (pkg (intern-soft name))
              (desc (or (unless (equal name cand)
                          (cl-loop with version = (substring cand (1+ (length name)))
