@@ -567,13 +567,24 @@ t cl-type"
      'help-echo
      (mapconcat (pcase-lambda (`(,x . ,y)) (concat x " " y)) class "\n"))))
 
+(defun marginalia--definition-prefix (sym)
+  "Return annotation string if SYM is a definition prefix.
+Sometimes symbols which are not yet loaded appear in completion tables
+if `help-enable-completion-autoload' is enabled.  These symbols
+originate from the `definition-prefixes' hash table."
+  (when-let (((bound-and-true-p help-enable-completion-autoload))
+             (files (gethash (symbol-name sym) definition-prefixes)))
+    (format "[Not yet loaded from %s. See `help-enable-completion-autoload'.]"
+            (string-join files ", "))))
+
 (defun marginalia--function-doc (sym)
   "Documentation string of function SYM."
-  (when-let (str (ignore-errors (documentation sym)))
-    (save-match-data
-      (if (string-match marginalia--advice-regexp str)
-          (substring str (match-end 0))
-        str))))
+  (if-let (str (ignore-errors (documentation sym)))
+      (save-match-data
+        (if (string-match marginalia--advice-regexp str)
+            (substring str (match-end 0))
+          str))
+    (marginalia--definition-prefix sym)))
 
 ;; Derived from elisp-get-fnsym-args-string
 (defun marginalia--function-args (sym)
@@ -600,12 +611,14 @@ t cl-type"
     (marginalia--fields
      (:left (marginalia-annotate-binding cand))
      ((marginalia--symbol-class sym) :face 'marginalia-type)
-     ((if (fboundp sym) (marginalia--function-doc sym)
-        (cl-loop
-         for doc in '(variable-documentation
-                      face-documentation
-                      group-documentation)
-         thereis (ignore-errors (documentation-property sym doc))))
+     ((if (fboundp sym)
+          (marginalia--function-doc sym)
+        (or (cl-loop
+             for doc in '(variable-documentation
+                          face-documentation
+                          group-documentation)
+             thereis (ignore-errors (documentation-property sym doc)))
+            (marginalia--definition-prefix sym)))
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (or (symbol-file sym) ""))
       :truncate -0.5 :face 'marginalia-file-name))))
@@ -634,14 +647,13 @@ keybinding since CAND includes it."
 (defun marginalia-annotate-function (cand)
   "Annotate function CAND with its documentation string."
   (when-let (sym (intern-soft cand))
-    (when (fboundp sym)
-      (marginalia--fields
-       (:left (marginalia-annotate-binding cand))
-       ((marginalia--symbol-class sym) :face 'marginalia-type)
-       ((marginalia--function-args sym) :face 'marginalia-value
-        :truncate 0.5)
-       ((marginalia--function-doc sym) :truncate 1.0
-        :face 'marginalia-documentation)))))
+    (marginalia--fields
+     (:left (marginalia-annotate-binding cand))
+     ((marginalia--symbol-class sym) :face 'marginalia-type)
+     ((marginalia--function-args sym) :face 'marginalia-value
+      :truncate 0.5)
+     ((marginalia--function-doc sym)
+      :truncate 1.0 :face 'marginalia-documentation))))
 
 (defun marginalia--variable-value (sym)
   "Return the variable value of SYM as string."
@@ -721,7 +733,8 @@ keybinding since CAND includes it."
     (marginalia--fields
      ((marginalia--symbol-class sym) :face 'marginalia-type)
      ((marginalia--variable-value sym) :truncate 0.5)
-     ((documentation-property sym 'variable-documentation)
+     ((or (documentation-property sym 'variable-documentation)
+          (marginalia--definition-prefix sym))
       :truncate 1.0 :face 'marginalia-documentation))))
 
 (defun marginalia-annotate-environment-variable (cand)

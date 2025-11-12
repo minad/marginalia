@@ -2,6 +2,11 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- Annotate definition prefix symbols which appear in =describe-function=,
+  =describe-variable= etc if =help-enable-completion-autoload= is enabled.
+
 * Version 2.4 (2025-10-13)
 
 - Require Emacs 29.
