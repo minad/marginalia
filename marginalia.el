@@ -563,7 +563,7 @@ t cl-type"
            (and (get s 'cl--class) '("t" . "cl-type")))))) ;; cl-find-class, cl--find-class
     (setq class (delq nil class))
     (propertize
-     (format " %-6s" (mapconcat #'car class ""))
+     (format "%-6s" (mapconcat #'car class ""))
      'help-echo
      (mapconcat (pcase-lambda (`(,x . ,y)) (concat x " " y)) class "\n"))))
 
