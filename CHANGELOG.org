@@ -2,6 +2,11 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
+* Development
+
+- Stop providing an =annotation-function=. The =affixation-function= has been
+  supported since Emacs 28.1 and Marginalia requires Emacs 29.1.
+
 * Version 2.5 (2025-11-15)
 
 - Annotate definition prefix symbols which appear in =describe-function=,
