@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.6 (2025-12-19)
 
 - Stop providing an =annotation-function=. The =affixation-function= has been
   supported since Emacs 28.1 and Marginalia requires Emacs 29.1.
