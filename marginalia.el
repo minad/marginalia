@@ -117,9 +117,10 @@ displayed instead."
      (tab ,#'marginalia-annotate-tab)
      (multi-category ,#'marginalia-annotate-multi-category)))
   "Annotator function registry.
-Associates completion categories with annotation functions.
-Each annotation function must return a string,
-which is appended to the completion candidate."
+Associates completion categories with annotation functions.  Each
+annotation function must return a string, which is appended to the
+completion candidate.  The annotation functions are executed in the
+original window and the original buffer, if still alive."
   :type '(alist :key-type symbol :value-type (repeat symbol)))
 
 (defcustom marginalia-classifiers
@@ -1299,16 +1300,18 @@ completion UIs like Vertico or Icomplete."
   (let* ((width (cl-loop for win in (get-buffer-window-list) minimize (window-width win)))
          (marginalia-field-width (min (/ width 2) marginalia-field-width))
          (marginalia--metadata metadata)
-         (cache marginalia--cache))
+         (cache marginalia--cache)
+         (orig-buf minibuffer--original-buffer))
     (marginalia--align
      ;; Run the annotators in the original window. `with-selected-window'
      ;; is necessary because of `lookup-minor-mode-from-indicator'.
      ;; Otherwise it would suffice to only change the current buffer. We
      ;; need the `selected-window' fallback for Embark Occur.
      (with-selected-window (or (minibuffer-selected-window) (selected-window))
-       (cl-loop for cand in cands collect
-                (let ((ann (or (marginalia--cached cache annotator cand) "")))
-                  (cons cand (if (string-blank-p ann) "" ann))))))))
+       (with-current-buffer (if (buffer-live-p orig-buf) orig-buf (current-buffer))
+         (cl-loop for cand in cands collect
+                  (let ((ann (or (marginalia--cached cache annotator cand) "")))
+                    (cons cand (if (string-blank-p ann) "" ann)))))))))
 
 (defun marginalia--completion-metadata-get (metadata prop)
   "Meant as :before-until advice for `completion-metadata-get'.
