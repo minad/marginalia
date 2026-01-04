@@ -436,7 +436,7 @@ FACE is the name of the face, with which the field should be propertized."
   "Run BODY inside minibuffer if minibuffer is active.
 Otherwise stay within current buffer."
   (declare (indent 0))
-  `(with-current-buffer (if-let (win (active-minibuffer-window))
+  `(with-current-buffer (if-let* ((win (active-minibuffer-window)))
                             (window-buffer win)
                           (current-buffer))
      ,@body))
@@ -462,14 +462,14 @@ Otherwise stay within current buffer."
 
 (defun marginalia-annotate-multi-category (cand)
   "Annotate multi-category CAND, dispatching to the appropriate annotator."
-  (if-let ((multi (get-text-property 0 'multi-category cand))
-           (fun (marginalia--annotator (car multi))))
+  (if-let* ((multi (get-text-property 0 'multi-category cand))
+            (fun (marginalia--annotator (car multi))))
       ;; Use the Marginalia annotator corresponding to the multi category.
       (funcall fun (cdr multi))
     ;; Apply the original annotation function on the original candidate. Bypass
     ;; our `marginalia--completion-metadata-get' advice.
-    (if-let ((fun (marginalia--orig-completion-metadata-get
-                   marginalia--metadata 'affixation-function)))
+    (if-let* ((fun (marginalia--orig-completion-metadata-get
+                    marginalia--metadata 'affixation-function)))
         (caddar (funcall fun (list cand)))
       (when-let ((fun (marginalia--orig-completion-metadata-get
                        marginalia--metadata 'annotation-function)))
@@ -587,7 +587,7 @@ originate from the `definition-prefixes' hash table."
 
 (defun marginalia--function-doc (sym)
   "Documentation string of function SYM."
-  (if-let (str (ignore-errors (documentation sym)))
+  (if-let* ((str (ignore-errors (documentation sym))))
       (save-match-data
         (if (string-match marginalia--advice-regexp str)
             (substring str (match-end 0))
@@ -832,7 +832,7 @@ keybinding since CAND includes it."
                                   return d))
                        ;; taken from `describe-package-1'
                        (car (alist-get pkg pkg-alist))
-                       (if-let (built-in (assq pkg package--builtins))
+                       (if-let* ((built-in (assq pkg package--builtins)))
                            (package--from-builtin built-in)
                          (car (alist-get pkg package-archive-contents))))))
     (marginalia--fields
@@ -908,7 +908,7 @@ The string is transformed according to `marginalia--bookmark-type-transforms'."
 
 (defun marginalia--buffer-file (buffer)
   "Return the file or process name of BUFFER."
-  (if-let (proc (get-buffer-process buffer))
+  (if-let* ((proc (get-buffer-process buffer)))
       (format "(%s %s) %s"
               proc (process-status proc)
               (abbreviate-file-name (buffer-local-value 'default-directory buffer)))
@@ -943,7 +943,7 @@ For some completion tables, the completion candidates offered are
 meant to be only a part of the full minibuffer contents.  For
 example, during file name completion the candidates are one path
 component of a full file path."
-  (if-let (win (active-minibuffer-window))
+  (if-let* ((win (active-minibuffer-window)))
       (with-current-buffer (window-buffer win)
         (concat (let ((end (minibuffer-prompt-end)))
                   (buffer-substring-no-properties
@@ -995,10 +995,10 @@ e.g., the protocol."
 (defun marginalia-annotate-file (cand)
   "Annotate file CAND with its size, modification time and other attributes.
 These annotations are skipped for remote paths."
-  (if-let (remote (or (marginalia--remote-file-p cand)
-                      (when-let (win (active-minibuffer-window))
-                        (with-current-buffer (window-buffer win)
-                          (marginalia--remote-file-p (minibuffer-contents-no-properties))))))
+  (if-let* ((remote (or (marginalia--remote-file-p cand)
+                        (when-let (win (active-minibuffer-window))
+                          (with-current-buffer (window-buffer win)
+                            (marginalia--remote-file-p (minibuffer-contents-no-properties)))))))
       (marginalia--fields (remote :format "*%s*" :face 'marginalia-documentation))
     (marginalia--annotate-local-file cand)))
 

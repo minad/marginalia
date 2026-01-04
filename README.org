@@ -126,7 +126,7 @@ Here's an example of a basic face annotator:
 
 #+begin_src emacs-lisp
   (defun my-face-annotator (cand)
-    (when-let (sym (intern-soft cand))
+    (when-let* ((sym (intern-soft cand)))
       (concat (propertize " " 'display '(space :align-to center))
               (propertize "The quick brown fox jumps over the lazy dog" 'face sym))))
 #+end_src
