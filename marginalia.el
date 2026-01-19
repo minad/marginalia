@@ -581,6 +581,7 @@ Sometimes symbols which are not yet loaded appear in completion tables
 if `help-enable-completion-autoload' is enabled.  These symbols
 originate from the `definition-prefixes' hash table."
   (when-let* (((bound-and-true-p help-enable-completion-autoload))
+              (symbolp sym)             ;ensure that SYM has a name.
               (files (gethash (symbol-name sym) definition-prefixes)))
     (format "[Not yet loaded from %s. See `help-enable-completion-autoload'.]"
             (string-join files ", "))))
