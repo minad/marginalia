@@ -643,7 +643,8 @@ Similar to `marginalia-annotate-symbol', but does not show symbol class."
   "Annotate Embark keybinding CAND with its documentation string.
 Similar to `marginalia-annotate-command', but does not show the
 keybinding since CAND includes it."
-  (when-let* ((cmd (get-text-property 0 'embark-command cand)))
+  (when-let* ((cmd (get-text-property 0 'embark-command cand))
+              ((symbolp cmd)))
     (marginalia--documentation (marginalia--function-doc cmd))))
 
 (defun marginalia-annotate-imenu (cand)
