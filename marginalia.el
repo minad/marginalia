@@ -115,6 +115,7 @@ displayed instead."
      (library ,#'marginalia-annotate-library)
      (theme ,#'marginalia-annotate-theme)
      (tab ,#'marginalia-annotate-tab)
+     (frame ,#'marginalia-annotate-frame)
      (multi-category ,#'marginalia-annotate-multi-category)))
   "Annotator function registry.
 Associates completion categories with annotation functions.  Each
@@ -150,6 +151,7 @@ determine it."
     ("\\<minor mode\\>" . minor-mode)
     ("\\<kill-ring\\>" . kill-ring)
     ("\\<tab by name\\>" . tab)
+    ("\\<frame\\>" . frame)
     ("\\<library\\>" . library)
     ("\\<theme\\>" . theme))
   "Associates regexps to match against minibuffer prompts with categories.
@@ -1178,6 +1180,19 @@ These annotations are skipped for remote paths."
       :truncate 1.0 :face 'marginalia-documentation)
      ((abbreviate-file-name (file-name-directory file))
       :truncate -1.0 :face 'marginalia-file-name))))
+
+(defun marginalia-annotate-frame (cand)
+  "Annotate frame named CAND with window and buffer information."
+  (when-let* ((frame (cl-loop for f in (frame-list)
+                              if (equal cand (frame-parameter f 'name))
+                              return f)))
+    (let ((wins (window-list frame)))
+      (marginalia--fields
+       ((length wins) :format "win:%s" :face 'marginalia-size)
+       ((if (eq frame (selected-frame))
+            "(current frame)"
+          (mapconcat (lambda (w) (buffer-name (window-buffer w))) wins " "))
+        :face 'marginalia-documentation)))))
 
 (defun marginalia-annotate-tab (cand)
   "Annotate named tab CAND with tab index, window and buffer information."
