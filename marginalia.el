@@ -1183,9 +1183,13 @@ These annotations are skipped for remote paths."
 
 (defun marginalia-annotate-frame (cand)
   "Annotate frame named CAND with window and buffer information."
-  (when-let* ((frame (cl-loop for f in (frame-list)
-                              if (equal cand (frame-parameter f 'name))
-                              return f)))
+  (when-let* ((frame (cl-loop
+                      for f in (frame-list)
+                      if (or (equal cand (frame-parameter f 'name))
+                             ;; `frame-id' is an Emacs 31 addition
+                             (when (fboundp 'frame-id)
+                               (equal cand (number-to-string (frame-id f)))))
+                      return f)))
     (let ((wins (window-list frame)))
       (marginalia--fields
        ((length wins) :format "win:%s" :face 'marginalia-size)

@@ -4,7 +4,7 @@
 
 * Development
 
-- Add ~marginalia-annotate-frame~ for ~select-by-frame-name~.
+- Add ~marginalia-annotate-frame~ for ~select-by-frame-name~ and ~select-frame-by-id~.
 - Fix ~marginalia-annotate-embark-keybinding~.
 
 * Version 2.8 (2026-01-17)
