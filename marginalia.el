@@ -1054,7 +1054,7 @@ These annotations are skipped for remote paths."
   (setq time (max 0 (float-time (time-since time))))
   ;; TODO Use seconds-to-string ported from Emacs 31 via Compat
   (static-if (>= emacs-major-version 31)
-      (concat (seconds-to-string 90 'expanded 'abbrev) " ago")
+      (concat (seconds-to-string time 'expanded 'abbrev) " ago")
     (let ((sts '((100 "sec" 1)
                 (6000 "min" 60.0)
                 (108000 "hour" 3600.0)
