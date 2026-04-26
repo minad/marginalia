@@ -1049,22 +1049,21 @@ These annotations are skipped for remote paths."
         (push attrs marginalia--fontified-file-modes)
         attrs)))
 
-(defconst marginalia--time-relative
-  `((100 "sec" 1)
-    (,(* 60 100) "min" 60.0)
-    (,(* 3600 30) "hour" 3600.0)
-    (,(* 3600 24 400) "day" ,(* 3600.0 24.0))
-    (nil "year" ,(* 365.25 24 3600)))
-  "Formatting used by the function `marginalia--time-relative'.")
-
-;; Taken from `seconds-to-string'.
 (defun marginalia--time-relative (time)
   "Format TIME as a relative age."
   (setq time (max 0 (float-time (time-since time))))
-  (let ((sts marginalia--time-relative) here)
-    (while (and (car (setq here (pop sts))) (<= (car here) time)))
-    (setq time (round time (caddr here)))
-    (format "%s %s%s ago" time (cadr here) (if (= time 1) "" "s"))))
+  ;; TODO Use seconds-to-string ported from Emacs 31 via Compat
+  (static-if (>= emacs-major-version 31)
+      (concat (seconds-to-string 90 'expanded 'abbrev) " ago")
+    (let ((sts '((100 "sec" 1)
+                (6000 "min" 60.0)
+                (108000 "hour" 3600.0)
+                (34560000 "day" 86400.0)
+                (nil "year" 31557600.0)))
+          here)
+      (while (and (car (setq here (pop sts))) (<= (car here) time)))
+      (setq time (round time (caddr here)))
+      (format "%s %s%s ago" time (cadr here) (if (= time 1) "" "s")))))
 
 (defun marginalia--time-absolute (time)
   "Format TIME as an absolute age."
