@@ -6,7 +6,7 @@
 ;; Maintainer: Omar Antolín Camarena <omar@matem.unam.mx>, Daniel Mendler <mail@daniel-mendler.de>
 ;; Created: 2020
 ;; Version: 2.10
-;; Package-Requires: ((emacs "29.1") (compat "30"))
+;; Package-Requires: ((emacs "29.1") (compat "31"))
 ;; URL: https://github.com/minad/marginalia
 ;; Keywords: docs, help, matching, completion
 
@@ -1052,18 +1052,7 @@ These annotations are skipped for remote paths."
 (defun marginalia--time-relative (time)
   "Format TIME as a relative age."
   (setq time (max 0 (float-time (time-since time))))
-  ;; TODO Use seconds-to-string ported from Emacs 31 via Compat
-  (static-if (>= emacs-major-version 31)
-      (concat (seconds-to-string time 'expanded 'abbrev) " ago")
-    (let ((sts '((100 "sec" 1)
-                (6000 "min" 60.0)
-                (108000 "hour" 3600.0)
-                (34560000 "day" 86400.0)
-                (nil "year" 31557600.0)))
-          here)
-      (while (and (car (setq here (pop sts))) (<= (car here) time)))
-      (setq time (round time (caddr here)))
-      (format "%s %s%s ago" time (cadr here) (if (= time 1) "" "s")))))
+  (concat (compat-call seconds-to-string time 'expanded 'abbrev) " ago"))
 
 (defun marginalia--time-absolute (time)
   "Format TIME as an absolute age."
