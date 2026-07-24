@@ -1058,7 +1058,7 @@ These annotations are skipped for remote paths."
   "Format TIME as an absolute age."
   (let ((system-time-locale "C"))
     (format-time-string
-     (if (> (decoded-time-year (decode-time (current-time)))
+     (if (> (decoded-time-year (decode-time))
             (decoded-time-year (decode-time time)))
          " %Y %b %d"
        "%b %d %H:%M")
