@@ -1,4 +1,4 @@
-#+title: marginalia.el - Changelog
+#+title: marginalia.el - News
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
