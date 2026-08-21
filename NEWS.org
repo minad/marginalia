@@ -2,7 +2,7 @@
 #+author: Omar Antolín Camarena, Daniel Mendler
 #+language: en
 
-* Development
+* Version 2.12 (2026-08-21)
 
 - Documentation updates only and minor code cleanup.
 
