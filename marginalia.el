@@ -1100,19 +1100,18 @@ These annotations are skipped for remote paths."
 (defun marginalia--library-cache ()
   "Return hash table from library name to library file."
   (marginalia--in-minibuffer
-    ;; `locate-file' and `locate-library' are bottlenecks for the
-    ;; annotator. Therefore we compute all the library paths first.
-    (unless marginalia--library-cache
-      (setq marginalia--library-cache (make-hash-table :test #'equal))
-      (dolist (dir (delete-dups
-                    (reverse ;; Reverse because of shadowing
-                     (append load-path (custom-theme--load-path))))) ;; Include themes
-        (dolist (file (ignore-errors
-                        (directory-files dir 'full
-                                         "\\.el\\(?:\\.gz\\)?\\'")))
-          (puthash (marginalia--library-name file)
-                   file marginalia--library-cache))))
-    marginalia--library-cache))
+    (with-memoization marginalia--library-cache
+      ;; `locate-file' and `locate-library' are bottlenecks for the
+      ;; annotator. Therefore we compute all the library paths first.
+      (let ((cache (make-hash-table :test #'equal)))
+        (dolist (dir (delete-dups
+                      (reverse ;; Reverse because of shadowing
+                       (append load-path (custom-theme--load-path))))) ;; Include themes
+          (dolist (file (ignore-errors
+                          (directory-files dir 'full
+                                           "\\.el\\(?:\\.gz\\)?\\'")))
+            (puthash (marginalia--library-name file) file cache)))
+        cache))))
 
 (defun marginalia--library-name (file)
   "Get name of library FILE."
