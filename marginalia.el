@@ -1344,6 +1344,8 @@ PROP is the property which is looked up."
 (defun marginalia--minibuffer-setup ()
   "Setup the minibuffer for Marginalia.
 Remember `this-command' for `marginalia-classify-by-command-name'."
+  ;; TODO: On Emacs 32 we can use `current-minibuffer-command'. See Emacs
+  ;; bug#80815 and also `embark--record-this-command'.
   (setq marginalia--cache t marginalia--command this-command)
   ;; Reset cache if window size changes, recompute alignment
   (add-hook 'window-state-change-hook #'marginalia--cache-reset nil 'local)
